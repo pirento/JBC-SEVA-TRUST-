@@ -30,52 +30,6 @@
 
 
 // ========================================
-// MODALS (membership + donation)
-// ========================================
-
-(() => {
-  let lastFocus = null;
-
-  const show = (modal) => {
-    lastFocus = document.activeElement;
-    modal.hidden = false;
-    document.body.classList.add("modal-open");
-    modal.querySelector("input, select, textarea")?.focus();
-  };
-
-  const hide = (modal) => {
-    if (modal.hidden) return;
-    modal.hidden = true;
-    document.body.classList.remove("modal-open");
-    lastFocus?.focus();
-  };
-
-  const bind = (buttonId, modalId) => {
-    const button = document.getElementById(buttonId);
-    const modal = document.getElementById(modalId);
-
-    if (!button || !modal) return;
-
-    button.addEventListener("click", () => show(modal));
-
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal || e.target.closest("[data-close-modal]")) {
-        hide(modal);
-      }
-    });
-  };
-
-  bind("donateNowBtn", "donationModal");
-  bind("donateBtn", "donationPaymentModal");
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape") return;
-    document.querySelectorAll(".modal-backdrop:not([hidden])").forEach(hide);
-  });
-})();
-
-
-// ========================================
 // QUICK AMOUNT BUTTONS
 // ========================================
 

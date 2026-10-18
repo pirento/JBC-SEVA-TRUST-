@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: 'Contact Us' }) %>
+</head>
+<body class="page-bg">
+  <%- include('../partials/header') %>
+  <% const user = currentUser || {}; %>
+
+  <main id="main" class="form-page">
+    <div class="contact-grid">
+      <aside class="contact-info">
+        <h1>Contact us</h1>
+        <p>For questions, CSR partnerships, large donations or support for an event, write to us and a trustee will reply.</p>
+        <ul class="contact-list">
+          <li><%- include('../partials/icon', { name: 'pin' }) %> <span><%= trust.name %><br><%= trust.location %></span></li>
+          <% if (trustEmail) { %>
+            <li><%- include('../partials/icon', { name: 'mail' }) %> <a href="mailto:<%= trustEmail %>"><%= trustEmail %></a></li>
+          <% } %>
+        </ul>
+        <h2>Trustees</h2>
+        <ul class="plain-list">
+          <% trust.trustees.forEach((t) => { %>
+            <li><strong><%= t.name %></strong>, <%= t.role %></li>
+          <% }) %>
+        </ul>
+      </aside>
+
+      <section class="form-card">
+        <h2 class="form-title left">Send a message</h2>
+
+        <% if (done) { %>
+          <div class="alert success" role="status">Thank you! Your message has been sent. We will reply soon.</div>
+        <% } %>
+        <% if (error) { %>
+          <div class="alert error" role="alert"><%= error %></div>
+        <% } %>
+
+        <form action="/contact" method="POST" class="form-body js-once">
+          <div class="field">
+            <label for="cType">Your message is about *</label>
+            <select id="cType" name="enquiryType" required>
+              <% trust.enquiryTypes.forEach((type) => { %>
+                <option value="<%= type %>" <%= values.enquiryType === type ? 'selected' : '' %>><%= type %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="form-grid">
+            <div class="field">
+              <label for="cName">Full Name *</label>
+              <input id="cName" name="name" type="text" autocomplete="name" maxlength="100" required
+                value="<%= values.name || user.name || '' %>" />
+            </div>
+            <div class="field">
+              <label for="cOrg">Organisation <span class="muted">(optional)</span></label>
+              <input id="cOrg" name="organisation" type="text" autocomplete="organization" maxlength="150"
+                value="<%= values.organisation || '' %>" />
+            </div>
+            <div class="field">
+              <label for="cPhone">Mobile Number *</label>
+              <input id="cPhone" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national"
+                maxlength="10" pattern="[6-9][0-9]{9}" title="10 digit mobile number" required
+                value="<%= values.phone || user.phone || '' %>" />
+            </div>
+            <div class="field">
+              <label for="cEmail">Email *</label>
+              <input id="cEmail" name="email" type="email" autocomplete="email" required
+                value="<%= values.email || user.email || '' %>" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="cMessage">Message *</label>
+            <textarea id="cMessage" name="message" rows="5" maxlength="2000" required><%= values.message || '' %></textarea>
+          </div>
+
+          <%- include('../partials/consent') %>
+
+          <div class="actions">
+            <button type="submit" class="btn orange">Send Message</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

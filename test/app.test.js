@@ -84,7 +84,7 @@ const user = {
 test("public pages render with navbar, footer and legal links", async () => {
   const get = client();
 
-  for (const url of ["/", "/medical", "/donate", "/donation", "/login", "/register", "/admin/login"]) {
+  for (const url of ["/", "/medical", "/donate", "/donation", "/login", "/register", "/admin/login", "/volunteer", "/contact"]) {
     const res = await get(url);
     assert.equal(res.status, 200, url);
     assert.match(res.text, /class="site-nav"/, `${url} navbar`);
@@ -135,6 +135,86 @@ test("donate page preselects the cause from the link", async () => {
 
   const bad = await client()("/donate?amount=%22%3E%3Cscript%3E");
   assert.doesNotMatch(bad.text, /<script>/);
+});
+
+test("every programme has its own page, unknown ones 404", async () => {
+  const get = client();
+  const trust = require("../config/trustConfig");
+
+  for (const p of trust.programmes) {
+    const res = await get(`/work/${p.slug}`);
+    assert.equal(res.status, 200, p.slug);
+    assert.match(res.text, new RegExp(`<h1>${p.title}</h1>`));
+    assert.match(res.text, new RegExp(`/donate\\?cause=${encodeURIComponent(p.title)}`));
+  }
+
+  assert.equal((await get("/work/unknown")).status, 404);
+});
+
+// ------------------------------------------------------------
+// Volunteer + contact
+// ------------------------------------------------------------
+
+const volunteer = {
+  name: "Ravi Kumar",
+  phone: "9812345678",
+  email: "ravi@example.com",
+  city: "Basti",
+  areas: "Tree plantation",
+  availability: "Weekends",
+  consent: "on",
+};
+
+const message = {
+  enquiryType: "CSR or major donation",
+  name: "Meena Gupta",
+  organisation: "Example Industries",
+  phone: "9898989898",
+  email: "meena@example.com",
+  message: "We would like to fund a plantation drive.",
+  consent: "on",
+};
+
+test("volunteer form validates and saves", async () => {
+  const req = client();
+  const cases = [
+    [{ areas: "" }, /at least one area/],
+    [{ areas: "Hacking" }, /at least one area/],
+    [{ availability: "Never" }, /when you are available/],
+    [{ city: "" }, /Village \/ city is required/],
+    [{ phone: "123" }, /10 digit mobile/],
+    [{ consent: "" }, /accept the Terms/],
+  ];
+
+  for (const [change, msg] of cases) {
+    const res = await req("/volunteer", { method: "POST", form: { ...volunteer, ...change } });
+    assert.equal(res.status, 400, JSON.stringify(change));
+    assert.match(res.text, msg);
+    assert.match(res.text, /value="Ravi Kumar"/, "typed values kept");
+  }
+
+  const res = await req("/volunteer", { method: "POST", form: volunteer });
+  assert.equal(res.status, 302);
+  assert.equal(res.location, "/volunteer?done=1");
+  assert.match((await req(res.location)).text, /Thank you for registering/);
+});
+
+test("contact form validates and saves", async () => {
+  const req = client();
+
+  let res = await req("/contact", { method: "POST", form: { ...message, message: "" } });
+  assert.equal(res.status, 400);
+  assert.match(res.text, /Message is required/);
+
+  res = await req("/contact", { method: "POST", form: { ...message, enquiryType: "Spam" } });
+  assert.equal(res.status, 400);
+
+  res = await req("/contact", { method: "POST", form: message });
+  assert.equal(res.status, 302);
+  assert.equal(res.location, "/contact?done=1");
+
+  res = await req("/contact?type=csr");
+  assert.match(res.text, /<option value="CSR or major donation" selected>/);
 });
 
 // ------------------------------------------------------------
@@ -267,6 +347,8 @@ test("admin login: wrong password rejected, right password opens dashboard", asy
   res = await req("/admin/dashboard");
   assert.equal(res.status, 200);
   assert.match(res.text, /Registered Users/);
+  assert.match(res.text, /Ravi Kumar/, "volunteer listed");
+  assert.match(res.text, /Example Industries/, "message listed");
 
   res = await req("/admin/logout", { method: "POST" });
   assert.equal(res.status, 302);

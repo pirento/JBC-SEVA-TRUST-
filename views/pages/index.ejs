@@ -12,162 +12,222 @@
 
       <!-- HERO -->
       <section class="hero">
-        <div class="hero-inner">
+        <div class="container hero-grid">
           <div class="hero-copy">
-            <p class="eyebrow">🙏 Seva with dignity · Every rupee accounted for</p>
-            <h1>Serving humanity.<br><span>Preserving nature.</span></h1>
-            <p class="hero-lead">
-              <%= trust.name %> stands with forgotten elders, poor families with
-              daughters to marry and children at risk of dropping out, while
-              restoring green cover in the villages of Basti.
-            </p>
+            <p class="hero-hindi" lang="hi"><%= trust.taglineHindi %></p>
+            <h1><%= trust.tagline %></h1>
+            <p class="lead"><%= trust.mission %></p>
 
-            <div class="hero-actions">
-              <button id="donateBtn" type="button" class="btn saffron">♥ Donate Now</button>
-              <button id="donateNowBtn" type="button" class="btn outline-white">Become a Member</button>
-              <a href="/medical" class="btn link-white">Need medical help? →</a>
+            <div class="button-row">
+              <a href="/donate" class="btn orange">Donate</a>
+              <a href="/volunteer" class="btn navy-outline">Volunteer with us</a>
             </div>
+
+            <p class="hero-note">
+              <%- include('../partials/icon', { name: 'receipt', size: 18 }) %>
+              Receipt by email for every donation · Payments through PayU
+            </p>
           </div>
 
-          <form class="quick-donate" action="/donate" method="GET" aria-labelledby="quickDonateTitle">
-            <h2 id="quickDonateTitle">Give in 30 seconds</h2>
-            <p>Choose a cause and an amount. Secure payment via PayU.</p>
-
-            <label for="quickCause">I want to support</label>
-            <select id="quickCause" name="cause">
-              <% trust.donationCauses.forEach((cause) => { %>
-                <option value="<%= cause %>"><%= cause %></option>
+          <aside class="hero-panel" aria-labelledby="panelTitle">
+            <h2 id="panelTitle">Our five programmes</h2>
+            <ul>
+              <% trust.programmes.forEach((p) => { %>
+                <li>
+                  <a href="/work/<%= p.slug %>">
+                    <span class="panel-icon"><%- include('../partials/icon', { name: p.icon }) %></span>
+                    <span>
+                      <strong><%= p.title %></strong>
+                      <small><%= p.area %></small>
+                    </span>
+                  </a>
+                </li>
               <% }) %>
-            </select>
-
-            <fieldset>
-              <legend>Amount</legend>
-              <div class="quick-amounts">
-                <% [501, 1100, 2100, 5100].forEach((value, index) => { %>
-                  <label class="radio-pill">
-                    <input type="radio" name="amount" value="<%= value %>" <%= index === 1 ? 'checked' : '' %> />
-                    <span>₹<%= value.toLocaleString('en-IN') %></span>
-                  </label>
-                <% }) %>
-              </div>
-            </fieldset>
-
-            <button type="submit" class="btn primary full">Continue to Donate →</button>
-            <small>🔒 UPI · Cards · Net Banking</small>
-          </form>
+            </ul>
+          </aside>
         </div>
-      </section>
-
-      <!-- GOALS -->
-      <section class="goals" aria-label="Our goals">
-        <% trust.goals.forEach((goal) => { %>
-          <div class="goal">
-            <strong><%= goal.value %></strong>
-            <span><%= goal.label %></span>
-          </div>
-        <% }) %>
       </section>
 
       <!-- PROGRAMMES -->
       <section id="work" class="section">
-        <div class="section-head">
-          <p class="kicker">What we do</p>
-          <h2>Our Work</h2>
-          <p>Five programmes, one promise: seva with dignity and full transparency.</p>
-        </div>
+        <div class="container">
+          <header class="section-head">
+            <h2>What we do</h2>
+            <p>
+              Every programme is run by our trustees and volunteers on the ground
+              in Basti. Money given for a programme is used only for that programme.
+            </p>
+          </header>
 
-        <div class="cards">
-          <% trust.programmes.forEach((programme) => { %>
-            <article class="card tone-<%= programme.tone %>" id="<%= programme.slug %>">
-              <div class="card-icon" aria-hidden="true"><%= programme.icon %></div>
-              <h3><%= programme.title %></h3>
-              <p><%= programme.summary %></p>
-              <ul class="tick-list">
-                <% programme.points.forEach((point) => { %>
-                  <li><%= point %></li>
-                <% }) %>
-              </ul>
-              <a href="/donate?cause=<%= encodeURIComponent(programme.title) %>" class="card-link">
-                Support <%= programme.title %> →
-              </a>
+          <div class="programme-grid">
+            <% trust.programmes.forEach((p) => { %>
+              <article class="programme" id="<%= p.slug %>">
+                <div class="programme-top">
+                  <span class="programme-icon"><%- include('../partials/icon', { name: p.icon, size: 28 }) %></span>
+                  <span class="programme-hindi" lang="hi"><%= p.hindi %></span>
+                </div>
+                <h3><a href="/work/<%= p.slug %>"><%= p.title %></a></h3>
+                <p class="programme-area"><%= p.area %></p>
+                <p><%= p.summary %></p>
+                <div class="programme-links">
+                  <a href="/work/<%= p.slug %>">Read more</a>
+                  <a href="/donate?cause=<%= encodeURIComponent(p.title) %>" class="donate-link">Donate to <%= p.title %></a>
+                </div>
+              </article>
+            <% }) %>
+
+            <article class="programme programme-general">
+              <h3>Where most needed</h3>
+              <p>
+                Not sure which programme to choose? The trustees will use your
+                gift where the need is most urgent, and tell you how it was spent.
+              </p>
+              <a href="/donate" class="btn orange">Donate</a>
             </article>
-          <% }) %>
-
-          <article class="card card-cta">
-            <div class="card-icon" aria-hidden="true">🤝</div>
-            <h3>Not sure where to give?</h3>
-            <p>Give to "Where Most Needed" and the trustees will use it where help is needed most urgently.</p>
-            <a href="/donate" class="btn saffron">Donate Where Most Needed</a>
-          </article>
+          </div>
         </div>
       </section>
 
-      <!-- VISION -->
-      <section class="vision">
-        <blockquote>
-          <p>“<%= trust.vision %>”</p>
-          <cite>— Our Vision</cite>
-        </blockquote>
+      <!-- TRANSPARENCY -->
+      <section class="section navy">
+        <div class="container">
+          <header class="section-head">
+            <h2>How we handle every rupee</h2>
+            <p>Trust is earned with records, not words. This is how we keep ours.</p>
+          </header>
+
+          <div class="promise-grid">
+            <div class="promise">
+              <%- include('../partials/icon', { name: 'ledger', size: 30 }) %>
+              <h3>A separate fund for each cause</h3>
+              <p>Each programme has its own ledger, and the temple fund is kept apart from the charitable work.</p>
+            </div>
+            <div class="promise">
+              <%- include('../partials/icon', { name: 'receipt', size: 30 }) %>
+              <h3>A receipt for every donation</h3>
+              <p>You get a receipt or certificate by email as soon as your payment is confirmed.</p>
+            </div>
+            <div class="promise">
+              <%- include('../partials/icon', { name: 'camera', size: 30 }) %>
+              <h3>Proof of the work</h3>
+              <p>Geotagged photos of trees we plant and delivery proof of kits we give.</p>
+            </div>
+            <div class="promise">
+              <%- include('../partials/icon', { name: 'sign', size: 30 }) %>
+              <h3>Both trustees sign</h3>
+              <p>Every decision is signed by both trustees, and the bank account is run jointly.</p>
+            </div>
+            <div class="promise">
+              <%- include('../partials/icon', { name: 'audit', size: 30 }) %>
+              <h3>Audited every year</h3>
+              <p>Accounts run April to March and are audited every year.</p>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <!-- HOW WE WORK -->
+      <!-- PLAN -->
       <section class="section">
-        <div class="section-head">
-          <p class="kicker">Our approach</p>
-          <h2>How We Work</h2>
-          <p>Every programme follows the same three steps.</p>
-        </div>
+        <div class="container">
+          <header class="section-head">
+            <h2>Our plan</h2>
+            <p>
+              We are starting with small, well-documented projects so that every
+              later step rests on real numbers. These are plans, not results yet.
+            </p>
+          </header>
 
-        <ol class="steps">
-          <li>
-            <div class="step-icon" aria-hidden="true">🔍</div>
-            <h3>Grassroots needs assessment</h3>
-            <p>Trustees and volunteers visit villages, meet elders, parents and panchayat leaders, and list who needs help.</p>
-          </li>
-          <li>
-            <div class="step-icon" aria-hidden="true">🤲</div>
-            <h3>Community partnership and care</h3>
-            <p>We work with local doctors, verified teachers and youth volunteers. Every beneficiary is treated with dignity.</p>
-          </li>
-          <li>
-            <div class="step-icon" aria-hidden="true">📒</div>
-            <h3>Transparent impact</h3>
-            <p>Every rupee is recorded. Donors get photos, delivery proof and a donation receipt.</p>
-          </li>
-        </ol>
+          <div class="table-wrap plan-table">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Programme</th>
+                  <th scope="col">First year</th>
+                  <th scope="col">Years 2–3</th>
+                  <th scope="col">How we will measure it</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% trust.programmes.forEach((p) => { %>
+                  <tr>
+                    <th scope="row"><a href="/work/<%= p.slug %>"><%= p.title %></a></th>
+                    <td><%= p.year1 %></td>
+                    <td><%= p.later %></td>
+                    <td><%= p.measure %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- GET INVOLVED -->
+      <section class="section cream">
+        <div class="container">
+          <header class="section-head">
+            <h2>How you can help</h2>
+          </header>
+
+          <div class="involve-grid">
+            <div class="involve">
+              <%- include('../partials/icon', { name: 'heart', size: 30 }) %>
+              <h3>Donate</h3>
+              <p>Give online by UPI, card or net banking and choose the cause your money goes to.</p>
+              <div class="button-row">
+                <a href="/donate" class="btn orange">Donate</a>
+                <a href="/donation" class="text-link">Become a member</a>
+              </div>
+            </div>
+            <div class="involve">
+              <%- include('../partials/icon', { name: 'hands', size: 30 }) %>
+              <h3>Volunteer</h3>
+              <p>Plant trees, spend time with elders, help at weddings or teach children. Volunteers get a certificate.</p>
+              <div class="button-row">
+                <a href="/volunteer" class="btn navy">Register as volunteer</a>
+              </div>
+            </div>
+            <div class="involve">
+              <%- include('../partials/icon', { name: 'building', size: 30 }) %>
+              <h3>Partner with us</h3>
+              <p>Companies, doctors, schools, panchayats and youth groups can work with us on any programme.</p>
+              <div class="button-row">
+                <a href="/contact?type=csr" class="btn navy-outline">Talk to us</a>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- ABOUT -->
-      <section id="about" class="section about">
-        <div class="about-grid">
+      <section id="about" class="section">
+        <div class="container about-grid">
           <div>
-            <p class="kicker">Who we are</p>
-            <h2>About <%= trust.name %></h2>
+            <h2>About the trust</h2>
             <p>
               <%= trust.name %> is a <%= trust.legalForm.toLowerCase() %> based in
               <%= trust.location %>. "JBC" stands for Jang Bahadur Chaudhary, who
-              founded the trust together with Ravikant Soni.
+              started the trust together with Ravikant Soni.
             </p>
             <p>
-              We are an independent body with our own bank account, books and
-              donors. Money given for a cause is kept in its own fund and used
-              only for that cause.
+              The trust is an independent body with its own bank account, books and
+              donors, and is not linked to any company.
             </p>
-            <ul class="tick-list">
-              <li>Both trustees sign every decision</li>
-              <li>Separate ledger for every programme</li>
-              <li>Receipt for every donation</li>
-            </ul>
+            <blockquote class="vision">
+              <p>“<%= trust.vision %>”</p>
+              <cite>Our vision</cite>
+            </blockquote>
           </div>
 
-          <div class="trustees">
-            <h3>Our Trustees</h3>
-            <% trust.trustees.forEach((trustee) => { %>
+          <div class="trustee-list">
+            <h3>Trustees</h3>
+            <% trust.trustees.forEach((t) => { %>
               <div class="trustee">
-                <div class="avatar" aria-hidden="true"><%= trustee.name.split(' ').map((w) => w[0]).join('').slice(0, 2) %></div>
+                <div class="avatar" aria-hidden="true"><%= t.name.split(' ').map((w) => w[0]).join('').slice(0, 2) %></div>
                 <div>
-                  <strong><%= trustee.name %></strong>
-                  <span><%= trustee.role %></span>
+                  <strong><%= t.name %></strong>
+                  <span class="trustee-role"><%= t.role %></span>
+                  <p><%= t.work %></p>
                 </div>
               </div>
             <% }) %>
@@ -175,30 +235,9 @@
         </div>
       </section>
 
-      <!-- CTA -->
-      <section class="cta">
-        <div class="cta-inner">
-          <div>
-            <h2>Be a part of the change</h2>
-            <p>Your support plants trees, feeds elders and keeps children in school.</p>
-          </div>
-          <div class="hero-actions">
-            <a href="/donate" class="btn saffron">♥ Donate Now</a>
-            <% if (!currentUser) { %>
-              <a href="/register" class="btn outline-white">Create an Account</a>
-            <% } else { %>
-              <a href="/account" class="btn outline-white">My Account</a>
-            <% } %>
-          </div>
-        </div>
-      </section>
-
     </main>
 
     <%- include('../partials/footer') %>
-
-    <%- include('../partials/donation-modal') %>
-    <%- include('../partials/donation-payment-modal') %>
 
   </body>
 </html>

@@ -9,6 +9,11 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 - Programmes: Green Earth, Anand Dham (old age home), Kanyadaan, Vidya and Poshan, Community Temple (separate fund head).
 - Not yet known: registration no., PAN, 12A/80G, helpline, email, website. Never invent these or claim 80G/FCRA before approval.
 
+## Brand
+- Logo: `public/images/logo-mark.png` (emblem, header/favicon), `logo.jpeg` (PDFs/emails), `logo-full.png` (with wordmark).
+- Colours from the logo: navy `#14365d`, saffron `#d97706` / `#e88c09`. Headings Noto Serif, body Noto Sans.
+- Keep the look plain and factual: no emoji, no invented numbers; plans are labelled as plans.
+
 ## Code notes
 - Trust facts used by pages live in `config/trustConfig.js`; change them there, not in views.
 - Every page uses `views/partials/head|header|footer`; `res.locals` gives `trust`, `currentUser`, `isAdmin`, `trustEmail`.
@@ -16,6 +21,5 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 - Run `npm test` before pushing.
 
 ## Pending
-- Replace `public/images/logo.jpeg` (still the Manorama logo).
 - Forgot-password by email (needs working email config).
 - Add real helpline/email/website to `views/partials/footer.ejs`; set `TRUST_EMAIL` in `.env`.

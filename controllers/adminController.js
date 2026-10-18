@@ -16,6 +16,11 @@ const {
 } = require("../models/userModel");
 
 const {
+  listVolunteers,
+  listMessages,
+} = require("../models/enquiryModel");
+
+const {
   generateDailyReportPdf,
 } = require("../services/adminReportPdfService");
 
@@ -985,11 +990,21 @@ exports.dashboard = async (
     const registeredUsers =
       (await listUsers()).length;
 
+    const volunteers =
+      await listVolunteers();
+
+    const messages =
+      await listMessages();
+
     return res.render(
       "admin/dashboard",
       {
 
         registeredUsers,
+
+        volunteers,
+
+        messages,
 
         // Membership
         memberships,

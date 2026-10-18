@@ -39,8 +39,8 @@ const PAGE = {
 
 const COLORS = {
   background: "#fffdf5",
-  orange: "#f47b00",
-  brand: "#14532d",
+  orange: "#d97706",
+  brand: "#14365d",
   dark: "#222222",
   lightGold: "#d2a45c",
   muted: "#555555",

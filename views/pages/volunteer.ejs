@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: 'Volunteer' }) %>
+</head>
+<body class="page-bg">
+  <%- include('../partials/header') %>
+  <% const user = currentUser || {}; const areas = [].concat(values.areas || []); %>
+
+  <main id="main" class="form-page">
+    <section class="form-card">
+      <h1 class="form-title">Volunteer with us</h1>
+      <p class="form-intro">
+        Give a few hours to plant trees, spend time with elders, help at mass
+        weddings or teach children. We will call you before the next drive near you.
+      </p>
+
+      <% if (done) { %>
+        <div class="alert success" role="status">
+          Thank you for registering! Our team will contact you soon.
+        </div>
+      <% } %>
+      <% if (error) { %>
+        <div class="alert error" role="alert"><%= error %></div>
+      <% } %>
+
+      <form action="/volunteer" method="POST" class="form-body js-once">
+        <div class="form-grid">
+          <div class="field">
+            <label for="vName">Full Name *</label>
+            <input id="vName" name="name" type="text" autocomplete="name" maxlength="100" required
+              value="<%= values.name || user.name || '' %>" />
+          </div>
+          <div class="field">
+            <label for="vCity">Village / City *</label>
+            <input id="vCity" name="city" type="text" maxlength="100" required
+              value="<%= values.city || '' %>" placeholder="e.g. Basti" />
+          </div>
+          <div class="field">
+            <label for="vPhone">Mobile Number *</label>
+            <input id="vPhone" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national"
+              maxlength="10" pattern="[6-9][0-9]{9}" title="10 digit mobile number" required
+              value="<%= values.phone || user.phone || '' %>" />
+          </div>
+          <div class="field">
+            <label for="vEmail">Email *</label>
+            <input id="vEmail" name="email" type="email" autocomplete="email" required
+              value="<%= values.email || user.email || '' %>" />
+          </div>
+        </div>
+
+        <fieldset class="field">
+          <legend>I would like to help with *</legend>
+          <div class="check-grid">
+            <% trust.volunteerAreas.forEach((area, i) => { %>
+              <label class="checkbox"><input type="checkbox" name="areas" value="<%= area %>" <%= areas.includes(area) ? 'checked' : '' %> /> <span><%= area %></span></label>
+            <% }) %>
+          </div>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend>When are you available? *</legend>
+          <div class="radio-row">
+            <% trust.volunteerAvailability.forEach((option) => { %>
+              <label class="radio-pill">
+                <input type="radio" name="availability" value="<%= option %>" <%= values.availability === option ? 'checked' : '' %> required />
+                <span><%= option %></span>
+              </label>
+            <% }) %>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label for="vMessage">Anything else? <span class="muted">(optional)</span></label>
+          <textarea id="vMessage" name="message" rows="3" maxlength="1000"
+            placeholder="Skills, languages, how you heard about us"><%= values.message || '' %></textarea>
+        </div>
+
+        <%- include('../partials/consent') %>
+
+        <div class="actions">
+          <button type="submit" class="btn orange">Register as Volunteer</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

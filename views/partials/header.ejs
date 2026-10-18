@@ -2,20 +2,30 @@
 
 <div class="topbar">
   <div class="topbar-inner">
-    <span>🌿 <%= trust.legalForm %> · <%= trust.location %></span>
-    <span class="topbar-hindi" lang="hi"><%= trust.taglineHindi %></span>
+    <span><%= trust.legalForm %> · <%= trust.location %></span>
+    <span class="topbar-links">
+      <% if (trustEmail) { %><a href="mailto:<%= trustEmail %>"><%= trustEmail %></a><% } %>
+      <% if (currentUser) { %>
+        <a href="/account">My Account</a>
+        <form action="/logout" method="POST" class="inline-form">
+          <button type="submit" class="topbar-btn">Logout</button>
+        </form>
+      <% } else { %>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+      <% } %>
+      <% if (isAdmin) { %><a href="/admin/dashboard">Admin</a><% } %>
+    </span>
   </div>
 </div>
 
 <header class="site-header">
   <div class="header-inner">
     <a class="brand" href="/" aria-label="<%= trust.name %> home">
-      <span class="logo-wrap">
-        <img src="/images/logo.jpeg" alt="" width="48" height="48">
-      </span>
+      <img src="/images/logo-mark.png" alt="" width="54" height="54" class="brand-mark">
       <span class="brand-text">
-        <strong><%= trust.name %></strong>
-        <small><%= trust.tagline %></small>
+        <strong>JBC</strong>
+        <small>SEVA TRUST</small>
       </span>
     </a>
 
@@ -30,15 +40,16 @@
     </button>
 
     <nav id="siteNav" class="site-nav" aria-label="Main">
-      <% const navLink = (href, label) => { %>
-        <a href="<%= href %>" class="<%= currentPath === href ? 'active' : '' %>" <% if (currentPath === href) { %>aria-current="page"<% } %>><%= label %></a>
+      <% const navLink = (href, label, extra) => { %>
+        <a href="<%= href %>" class="<%= (currentPath === href || (extra && currentPath.startsWith(extra))) ? 'active' : '' %>" <% if (currentPath === href) { %>aria-current="page"<% } %>><%= label %></a>
       <% } %>
 
       <% navLink('/', 'Home') %>
-      <a href="/#work">Our Work</a>
-      <a href="/#about">About</a>
+      <% navLink('/#work', 'Our Work', '/work/') %>
+      <% navLink('/#about', 'About Us') %>
+      <% navLink('/volunteer', 'Volunteer') %>
       <% navLink('/medical', 'Medical Help') %>
-      <% navLink('/donation', 'Membership') %>
+      <% navLink('/contact', 'Contact') %>
 
       <span class="nav-account">
         <% if (currentUser) { %>
@@ -55,7 +66,7 @@
         <% } %>
       </span>
 
-      <a href="/donate" class="btn nav-donate">♥ Donate</a>
+      <a href="/donate" class="btn nav-donate">Donate</a>
     </nav>
   </div>
 </header>

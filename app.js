@@ -145,6 +145,8 @@ const systemRoutes = require("./routes/systemRoutes");
 
 const userRoutes = require("./routes/userRoutes");
 
+const enquiryRoutes = require("./routes/enquiryRoutes");
+
 // ========================================
 // DONATION ROUTES
 // ========================================
@@ -176,6 +178,12 @@ app.use(webRoutes);
 // ========================================
 
 app.use(userRoutes);
+
+// ========================================
+// VOLUNTEER + CONTACT ROUTES
+// ========================================
+
+app.use(enquiryRoutes);
 
 // ========================================
 // SYSTEM ROUTES

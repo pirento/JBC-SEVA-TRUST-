@@ -3,48 +3,44 @@
 
     <div class="footer-about">
       <a href="/" class="footer-brand">
-        <span class="logo-wrap small">
-          <img src="/images/logo.jpeg" alt="" width="40" height="40">
-        </span>
-        <strong><%= trust.name %></strong>
+        <img src="/images/logo-mark.png" alt="" width="48" height="48">
+        <span><strong>JBC</strong> <em>SEVA TRUST</em></span>
       </a>
-      <p><%= trust.tagline %></p>
       <p class="footer-hindi" lang="hi"><%= trust.taglineHindi %></p>
       <p class="muted">
-        A <%= trust.legalForm.toLowerCase() %> working on elder care,
-        marriage support, child education, tree plantation and a
-        community temple.
+        A <%= trust.legalForm.toLowerCase() %> in <%= trust.location %>, working for
+        elders, poor families, children and the environment.
       </p>
     </div>
 
     <div>
-      <h3>Quick Links</h3>
+      <h3>Our Work</h3>
       <ul class="footer-list">
-        <li><a href="/#work">Our Work</a></li>
-        <li><a href="/donate">Donate</a></li>
-        <li><a href="/donation">Become a Member</a></li>
-        <li><a href="/medical">Medical Help</a></li>
-        <li><a href="<%= currentUser ? '/account' : '/login' %>"><%= currentUser ? 'My Account' : 'Login / Register' %></a></li>
+        <% trust.programmes.forEach((p) => { %>
+          <li><a href="/work/<%= p.slug %>"><%= p.title %></a></li>
+        <% }) %>
       </ul>
     </div>
 
     <div>
-      <h3>Legal</h3>
+      <h3>Get Involved</h3>
       <ul class="footer-list">
-        <li><a href="/terms">Terms &amp; Conditions</a></li>
-        <li><a href="/privacy-policy">Privacy Policy</a></li>
-        <li><a href="/refund-policy">Refund Policy</a></li>
-        <li><a href="/disclaimer">Disclaimer</a></li>
+        <li><a href="/donate">Donate</a></li>
+        <li><a href="/donation">Become a Member</a></li>
+        <li><a href="/volunteer">Volunteer</a></li>
+        <li><a href="/contact?type=csr">CSR Partnership</a></li>
+        <li><a href="/medical">Medical Help Request</a></li>
       </ul>
     </div>
 
     <div>
       <h3>Contact</h3>
-      <ul class="footer-list">
-        <li>📍 <%= trust.location %></li>
+      <ul class="footer-list contact-list">
+        <li><%- include('icon', { name: 'pin', size: 18 }) %> <%= trust.location %></li>
         <% if (trustEmail) { %>
-          <li>✉️ <a href="mailto:<%= trustEmail %>"><%= trustEmail %></a></li>
+          <li><%- include('icon', { name: 'mail', size: 18 }) %> <a href="mailto:<%= trustEmail %>"><%= trustEmail %></a></li>
         <% } %>
+        <li><%- include('icon', { name: 'arrow', size: 18 }) %> <a href="/contact">Send us a message</a></li>
       </ul>
     </div>
 
@@ -52,7 +48,12 @@
 
   <div class="footer-bottom">
     <p>© <%= year %> <%= trust.name %>. All rights reserved.</p>
-    <p>Payments are processed securely by PayU.</p>
+    <nav aria-label="Legal" class="footer-legal">
+      <a href="/terms">Terms</a>
+      <a href="/privacy-policy">Privacy</a>
+      <a href="/refund-policy">Refunds</a>
+      <a href="/disclaimer">Disclaimer</a>
+    </nav>
   </div>
 </footer>
 

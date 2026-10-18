@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { description: `${programme.title}: ${programme.summary}` }) %>
+</head>
+<body class="page-bg">
+  <%- include('../partials/header') %>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="/">Home</a> / <a href="/#work">Our Work</a> / <span><%= programme.title %></span>
+        </nav>
+        <div class="page-hero-title">
+          <span class="programme-icon large"><%- include('../partials/icon', { name: programme.icon, size: 36 }) %></span>
+          <div>
+            <p class="programme-hindi" lang="hi"><%= programme.hindi %></p>
+            <h1><%= programme.title %></h1>
+            <p class="lead"><%= programme.area %></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container detail-grid">
+        <div class="detail-main">
+          <p class="lead"><%= programme.summary %></p>
+          <% if (programme.goal) { %>
+            <p class="goal-note"><%= programme.goal %></p>
+          <% } %>
+
+          <h2>What we do</h2>
+          <ul class="check-list">
+            <% programme.details.forEach((item) => { %>
+              <li><%- include('../partials/icon', { name: 'check', size: 20 }) %><span><%= item %></span></li>
+            <% }) %>
+          </ul>
+
+          <h2>Our plan</h2>
+          <dl class="plan-list">
+            <div><dt>First year</dt><dd><%= programme.year1 %></dd></div>
+            <div><dt>Years 2–3</dt><dd><%= programme.later %></dd></div>
+            <div><dt>How we will measure it</dt><dd><%= programme.measure %></dd></div>
+          </dl>
+          <p class="muted small">These are plans and goals, not results yet. We will publish real figures as the work happens.</p>
+        </div>
+
+        <aside class="detail-side">
+          <div class="side-card">
+            <h2>Support <%= programme.title %></h2>
+            <p>Money given for <%= programme.title %> is used only for <%= programme.title %>.</p>
+            <a href="/donate?cause=<%= encodeURIComponent(programme.title) %>" class="btn orange full">Donate</a>
+            <a href="/volunteer" class="btn navy-outline full">Volunteer</a>
+          </div>
+
+          <div class="side-card plain">
+            <h3>Other programmes</h3>
+            <ul class="side-links">
+              <% trust.programmes.filter((p) => p.slug !== programme.slug).forEach((p) => { %>
+                <li><a href="/work/<%= p.slug %>"><%- include('../partials/icon', { name: p.icon, size: 18 }) %> <%= p.title %></a></li>
+              <% }) %>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

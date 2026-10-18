@@ -100,7 +100,7 @@
 
       font-weight: 700;
 
-      color: #14532d;
+      color: #14365d;
     }
 
     .dashboard-brand p {
@@ -140,7 +140,7 @@
     }
 
     .logout-btn {
-      background: #14532d;
+      background: #14365d;
       color: #fff;
     }
 
@@ -224,7 +224,7 @@
 
       border-radius: 50%;
 
-      background: rgba(20, 83, 45, .055);
+      background: rgba(20, 54, 93, .055);
     }
 
     .stat-icon {
@@ -459,10 +459,10 @@
 
     .filter-input:focus,
     .filter-select:focus {
-      border-color: #14532d;
+      border-color: #14365d;
 
       box-shadow:
-        0 0 0 3px rgba(20, 83, 45, .08);
+        0 0 0 3px rgba(20, 54, 93, .08);
     }
 
 
@@ -642,7 +642,7 @@
     .certificate-btn {
       display: inline-block;
 
-      background: #14532d;
+      background: #14365d;
 
       color: #fff;
 
@@ -715,7 +715,7 @@
     }
 
     .date-picker-area input:focus {
-      border-color: #14532d;
+      border-color: #14365d;
     }
 
     .clear-date-btn {
@@ -745,7 +745,7 @@
     .download-report-btn {
       height: 39px;
       border: none;
-      background: #14532d;
+      background: #14365d;
       color: #fff;
       border-radius: 8px;
       padding: 0 15px;
@@ -1084,6 +1084,14 @@
         Website accounts created
       </div>
 
+    </div>
+
+
+    <div class="stat-card">
+      <div class="stat-icon">🤝</div>
+      <div class="stat-label">Volunteers</div>
+      <div class="stat-value"><%= volunteers.length %></div>
+      <div class="stat-subtitle"><%= messages.length %> message(s) received</div>
     </div>
 
 
@@ -2754,6 +2762,95 @@
 
     <% } %>
 
+
+  </section>
+
+
+  <section class="dashboard-card">
+
+    <div class="card-header">
+      <div class="card-title">
+        <h2>Volunteers</h2>
+        <p>People who offered to help through the website</p>
+      </div>
+      <div>
+        <strong><%= volunteers.length %></strong>
+        <span style="color:#777;font-size:12px;">volunteer(s)</span>
+      </div>
+    </div>
+
+    <% if (volunteers.length === 0) { %>
+      <div class="empty-state">
+        <h3>No Volunteers Yet</h3>
+        <p>Volunteer registrations will appear here.</p>
+      </div>
+    <% } else { %>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr><th>#</th><th>Date</th><th>Name</th><th>Contact</th><th>Village / City</th><th>Areas</th><th>Availability</th><th>Message</th></tr>
+          </thead>
+          <tbody>
+            <% volunteers.forEach((item, index) => { %>
+              <tr>
+                <td><%= index + 1 %></td>
+                <td><%= new Date(item.createdAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" }) %></td>
+                <td><strong><%= item.name %></strong></td>
+                <td><%= item.phone %><br><small><%= item.email %></small></td>
+                <td><%= item.city %></td>
+                <td><%= [].concat(item.areas || []).join(", ") %></td>
+                <td><%= item.availability %></td>
+                <td style="white-space:normal;min-width:200px;"><%= item.message || "-" %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+
+  </section>
+
+
+  <section class="dashboard-card">
+
+    <div class="card-header">
+      <div class="card-title">
+        <h2>Messages</h2>
+        <p>Enquiries, CSR offers and event requests from the contact form</p>
+      </div>
+      <div>
+        <strong><%= messages.length %></strong>
+        <span style="color:#777;font-size:12px;">message(s)</span>
+      </div>
+    </div>
+
+    <% if (messages.length === 0) { %>
+      <div class="empty-state">
+        <h3>No Messages Yet</h3>
+        <p>Contact form messages will appear here.</p>
+      </div>
+    <% } else { %>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr><th>#</th><th>Date</th><th>Type</th><th>Name</th><th>Organisation</th><th>Contact</th><th>Message</th></tr>
+          </thead>
+          <tbody>
+            <% messages.forEach((item, index) => { %>
+              <tr>
+                <td><%= index + 1 %></td>
+                <td><%= new Date(item.createdAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" }) %></td>
+                <td><strong><%= item.enquiryType %></strong></td>
+                <td><%= item.name %></td>
+                <td><%= item.organisation || "-" %></td>
+                <td><%= item.phone %><br><small><%= item.email %></small></td>
+                <td style="white-space:normal;min-width:260px;"><%= item.message %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
 
   </section>
 

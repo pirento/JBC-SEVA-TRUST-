@@ -7,7 +7,7 @@
     <%- include('../partials/header') %>
     <main id="main" class="result-page">
       <div class="result-card" role="alert">
-        <div class="result-icon" aria-hidden="true">⚠️</div>
+        <img src="/images/logo-mark.png" alt="" width="64" height="64" class="result-logo">
         <h1><%= locals.title || 'Submission Failed' %></h1>
         <p class="error-text"><%= message %></p>
         <a class="btn red" href="<%= backUrl %>">Go Back</a>
