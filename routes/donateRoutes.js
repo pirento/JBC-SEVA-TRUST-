@@ -12,6 +12,18 @@ router.get(
   controller.showDonationForm
 );
 
+// Download donation certificate (before /:slug so it is not taken as a cause)
+router.get(
+  "/certificate/:transactionId",
+  controller.downloadCertificate
+);
+
+// Donation form for one cause, e.g. /donate/temple
+router.get(
+  "/:slug",
+  controller.showCauseForm
+);
+
 // Start donation payment
 router.post(
   "/",
@@ -28,16 +40,6 @@ router.post(
 router.post(
   "/failure",
   controller.paymentFailure
-);
-
-// ========================================
-// DONATION CERTIFICATE
-// ========================================
-
-// Download donation certificate
-router.get(
-  "/certificate/:transactionId",
-  controller.downloadCertificate
 );
 
 module.exports = router;

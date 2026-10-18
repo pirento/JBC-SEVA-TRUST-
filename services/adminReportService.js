@@ -177,6 +177,17 @@ function normalizeDonation(record) {
     cause:
       String(record.cause || "").trim(),
 
+    purpose:
+      String(record.purpose || "").trim(),
+
+    dedication:
+      record.dedicatedTo
+        ? `${record.dedicationType} ${record.dedicatedTo}`.trim()
+        : "",
+
+    sevaDate:
+      String(record.sevaDate || "").trim(),
+
     date: date ? formatDate(date) : "-",
     time: date ? formatTime(date) : "-",
   };

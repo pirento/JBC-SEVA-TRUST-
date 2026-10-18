@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body class="page-bg">
+  <%- include('../partials/header') %>
+  <%
+    const opt = page.donation;
+    const user = currentUser || {};
+    const v = values || {};
+    const today = new Date().toISOString().slice(0, 10);
+    const yearAhead = new Date(Date.now() + 365 * 864e5).toISOString().slice(0, 10);
+    const purpose = v.purpose || (opt.purposes.length === 1 ? opt.purposes[0] : '');
+  %>
+
+  <main id="main" class="form-page">
+    <div class="donate-layout">
+      <section class="form-card">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/donate">Donate</a> / <span><%= page.title %></span></nav>
+        <h1 class="form-title left">Donate to <%= page.title %></h1>
+        <p class="form-intro left"><%= page.area %></p>
+
+        <% if (error) { %>
+          <div class="alert error" role="alert"><%= error %></div>
+        <% } %>
+
+        <form action="/donate" method="POST" class="form-body js-once">
+          <input type="hidden" name="cause" value="<%= page.title %>" />
+
+          <% if (opt.purposes.length > 1) { %>
+            <fieldset class="field">
+              <legend>Use my donation for *</legend>
+              <div class="purpose-list">
+                <% opt.purposes.forEach((item) => { %>
+                  <label class="purpose-option">
+                    <input type="radio" name="purpose" value="<%= item %>" <%= purpose === item ? 'checked' : '' %> required />
+                    <span><%= item %></span>
+                  </label>
+                <% }) %>
+              </div>
+            </fieldset>
+          <% } else { %>
+            <input type="hidden" name="purpose" value="<%= opt.purposes[0] %>" />
+          <% } %>
+
+          <div class="field">
+            <label for="dAmount">Amount (₹) *</label>
+            <input id="dAmount" name="amount" type="number" min="100" step="1" inputmode="numeric"
+              placeholder="Minimum ₹100" value="<%= v.amount || '' %>" required />
+            <div class="amount-chips" data-target="dAmount">
+              <% opt.amounts.forEach((value) => { %>
+                <button type="button" class="chip" data-amount="<%= value %>">₹<%= value.toLocaleString('en-IN') %></button>
+              <% }) %>
+            </div>
+          </div>
+
+          <h2 class="form-section">Dedicate this donation <span class="muted">(optional)</span></h2>
+          <div class="form-grid">
+            <div class="field">
+              <label for="dDedicationType">Dedication</label>
+              <select id="dDedicationType" name="dedicationType">
+                <option value="">No dedication</option>
+                <% trust.dedicationTypes.forEach((type) => { %>
+                  <option value="<%= type %>" <%= v.dedicationType === type ? 'selected' : '' %>><%= type %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="field">
+              <label for="dDedicatedTo">Name or occasion</label>
+              <input id="dDedicatedTo" name="dedicatedTo" type="text" maxlength="100"
+                placeholder="e.g. Late Shri Ram Prasad / Beti's birthday" value="<%= v.dedicatedTo || '' %>" />
+            </div>
+            <% if (opt.sevaDate) { %>
+              <div class="field">
+                <label for="dSevaDate">Preferred date for seva</label>
+                <input id="dSevaDate" name="sevaDate" type="date" min="<%= today %>" max="<%= yearAhead %>" value="<%= v.sevaDate || '' %>" aria-describedby="dSevaHelp" />
+                <small id="dSevaHelp"><%= opt.religious ? 'We will try to hold the aarti / bhog on this day.' : 'We will try to serve meals or care on this day.' %></small>
+              </div>
+            <% } %>
+            <% if (opt.gotra) { %>
+              <div class="field">
+                <label for="dGotra">Gotra (for sankalp)</label>
+                <input id="dGotra" name="gotra" type="text" maxlength="50" value="<%= v.gotra || '' %>" />
+              </div>
+            <% } %>
+          </div>
+
+          <h2 class="form-section">Your details</h2>
+          <div class="form-grid">
+            <div class="field">
+              <label for="dName">Full Name *</label>
+              <input id="dName" name="donorName" type="text" autocomplete="name" maxlength="100" required
+                value="<%= v.donorName || user.name || '' %>" />
+            </div>
+            <div class="field">
+              <label for="dPhone">Mobile Number *</label>
+              <input id="dPhone" name="phoneNumber" type="tel" inputmode="numeric" autocomplete="tel-national"
+                maxlength="10" pattern="[6-9][0-9]{9}" title="10 digit mobile number" required
+                value="<%= v.phoneNumber || user.phone || '' %>" />
+            </div>
+            <div class="field">
+              <label for="dEmail">Email *</label>
+              <input id="dEmail" name="email" type="email" autocomplete="email" required
+                value="<%= v.email || user.email || '' %>" />
+              <small>Your receipt is sent here.</small>
+            </div>
+            <div class="field">
+              <label for="dPan">PAN <span class="muted">(optional)</span></label>
+              <input id="dPan" name="pan" type="text" maxlength="10" autocomplete="off"
+                pattern="[A-Za-z]{5}[0-9]{4}[A-Za-z]" title="10 character PAN, e.g. ABCDE1234F"
+                value="<%= v.pan || '' %>" />
+              <small><%= opt.religious ? 'Optional, for our records.' : 'Needed for an 80G receipt once the trust is approved.' %> Stored encrypted.</small>
+            </div>
+          </div>
+
+          <%- include('../partials/payment-mode') %>
+
+          <div class="field">
+            <label for="dMessage">Message <span class="muted">(optional)</span></label>
+            <textarea id="dMessage" name="message" rows="3" maxlength="500"><%= v.message || '' %></textarea>
+          </div>
+
+          <%- include('../partials/consent', { withRefund: true }) %>
+
+          <div class="actions">
+            <button type="submit" class="btn orange">Continue to Payment</button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="donate-side">
+        <div class="side-card">
+          <h2><%= page.title %></h2>
+          <p><%= page.summary || page.area %></p>
+          <% if (page.slug !== 'general') { %>
+            <a href="/work/<%= page.slug %>" class="side-link">About this programme →</a>
+          <% } %>
+        </div>
+        <div class="side-card plain">
+          <h3>What happens next</h3>
+          <ol class="steps-list">
+            <li>You pay securely on PayU.</li>
+            <li>Your receipt is emailed to you and can be downloaded.</li>
+            <li>The money goes into the <strong><%= page.title %></strong> fund<%= opt.religious ? ', kept apart from the charitable programmes' : '' %>.</li>
+          </ol>
+          <p class="muted small"><%= opt.religious ? trust.taxNotes.religious : trust.taxNotes.default %></p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

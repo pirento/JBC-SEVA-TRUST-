@@ -11,7 +11,7 @@ const logoPath = path.join(
   "..",
   "public",
   "images",
-  "logo.jpeg"
+  "logo-mark.png"
 );
 
 const devanagariFontPath = path.join(
@@ -36,6 +36,9 @@ const PAGE = {
 // ============================================================
 // COLORS
 // ============================================================
+
+const { donationPages, taxNotes } = require("../config/trustConfig");
+const { dataDir } = require("../config/appConfig");
 
 const COLORS = {
   background: "#fffdf5",
@@ -295,10 +298,10 @@ function generateCertificateNumber(data) {
     .slice(-10);
 
   if (cleanId) {
-    return `MCTD${cleanId.toUpperCase()}`;
+    return `JBCD${cleanId.toUpperCase()}`;
   }
 
-  return `MCTD${Date.now()}`;
+  return `JBCD${Date.now()}`;
 }
 
 
@@ -353,9 +356,7 @@ function generateDonationCertificate(data) {
           // ==================================================
 
           const receiptsDir = path.join(
-            __dirname,
-            "..",
-            "data",
+            dataDir,
             "receipts"
           );
 
@@ -787,12 +788,16 @@ function drawMainContent(doc, data) {
   // Appreciation
   // ----------------------------------------------------------
 
+  // Cause, purpose and dedication take the place of a generic line
+  const cause = safe(data.cause, "Where Most Needed");
+  const purpose = String(data.purpose || "").trim();
+
   doc
     .font("Times-Roman")
     .fontSize(11.5)
     .fillColor(COLORS.dark)
     .text(
-      "Your valuable support strengthens our efforts towards",
+      truncate(`towards ${cause}${purpose && purpose !== "General donation" ? ` — ${purpose}` : ""}`, 80),
       185,
       384,
       {
@@ -803,7 +808,9 @@ function drawMainContent(doc, data) {
 
   doc
     .text(
-      "a healthier, stronger and more compassionate society.",
+      data.dedicatedTo
+        ? truncate(`${data.dedicationType} ${data.dedicatedTo}`, 80)
+        : "a healthier, stronger and more compassionate society.",
       185,
       402,
       {
@@ -863,6 +870,19 @@ function drawMainContent(doc, data) {
         align: "center",
       }
     );
+
+  const page = donationPages.find((p) => p.title === data.cause);
+
+  doc
+    .text(
+      page && page.donation.religious ? taxNotes.religious : taxNotes.default,
+      205,
+      488,
+      {
+        width: 440,
+        align: "center",
+      }
+    );
 }
 
 
@@ -908,7 +928,7 @@ function drawInformationBox(doc, data) {
   // ----------------------------------------------------------
 
   const boxX = 47;
-  const boxY = 425;
+  const boxY = 412;
   const boxWidth = 225;
   const boxHeight = 125;
 
@@ -959,6 +979,13 @@ function drawInformationBox(doc, data) {
       label: "Payment ID",
       value: paymentId,
     },
+    {
+      label: "Fund",
+      value: safe(data.cause, "Where Most Needed"),
+    },
+    ...(data.sevaDate
+      ? [{ label: "Seva Date", value: formatDate(data.sevaDate) }]
+      : []),
   ];
 
   const startY =

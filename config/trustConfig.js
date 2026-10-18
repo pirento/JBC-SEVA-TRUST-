@@ -11,6 +11,10 @@
 const programmes = [
   {
     slug: "green-earth",
+    donation: {
+      purposes: ["Tree plantation", "Pond clean-up and rainwater harvesting", "Plastic clean-up drives", "Wherever Green Earth needs it"],
+      amounts: [501, 1100, 2100, 5100],
+    },
     icon: "tree",
     title: "Green Earth",
     hindi: "हरित धरा",
@@ -31,6 +35,11 @@ const programmes = [
   },
   {
     slug: "anand-dham",
+    donation: {
+      purposes: ["Meals for elders (annadaan)", "Medicines and health check-ups", "Blankets and clothing", "Eye camp", "Wherever Anand Dham needs it"],
+      amounts: [501, 1100, 2100, 5100],
+      sevaDate: true,
+    },
     icon: "home",
     title: "Anand Dham",
     hindi: "आनंद धाम",
@@ -50,6 +59,10 @@ const programmes = [
   },
   {
     slug: "kanyadaan",
+    donation: {
+      purposes: ["Household starter kit", "Sewing machine and tailoring training", "Mass marriage ceremony", "Wherever Kanyadaan needs it"],
+      amounts: [1100, 2100, 5100, 11000],
+    },
     icon: "rings",
     title: "Kanyadaan",
     hindi: "कन्यादान",
@@ -69,6 +82,10 @@ const programmes = [
   },
   {
     slug: "vidya-poshan",
+    donation: {
+      purposes: ["School kit (bag, books, uniform)", "Evening tutoring", "Meals for children", "Scholarships", "Wherever Vidya and Poshan needs it"],
+      amounts: [501, 1100, 2100, 5100],
+    },
     icon: "book",
     title: "Vidya and Poshan",
     hindi: "विद्या और पोषण",
@@ -87,6 +104,13 @@ const programmes = [
   },
   {
     slug: "temple",
+    donation: {
+      purposes: ["Temple construction fund", "Daily aarti and bhog", "Prasad distribution", "General temple seva"],
+      amounts: [251, 501, 1100, 2100],
+      sevaDate: true,
+      gotra: true,
+      religious: true,
+    },
     icon: "temple",
     title: "Community Temple",
     hindi: "सामुदायिक मंदिर",
@@ -104,6 +128,23 @@ const programmes = [
 ];
 
 const GENERAL_CAUSE = "Where Most Needed";
+
+// Donation page for "Where Most Needed" (not a programme of its own)
+const generalDonation = {
+  slug: "general",
+  icon: "heart",
+  title: GENERAL_CAUSE,
+  area: "Used by the trustees where the need is most urgent",
+  donation: { purposes: ["General donation"], amounts: [501, 1100, 2100, 5100] },
+};
+
+const dedicationTypes = ["In memory of", "In honour of", "On the occasion of"];
+
+// Shown on receipts; never claim 80G before approval is received
+const taxNotes = {
+  default: "80G tax-exemption receipts will be issued only after the Trust receives 80G approval.",
+  religious: "Kept in the separate Temple Fund. Temple donations are generally not eligible for 80G deduction.",
+};
 
 // Causes a donor can pick; earmarked money goes only to that cause
 const donationCauses = [GENERAL_CAUSE, ...programmes.map((p) => p.title)];
@@ -133,6 +174,11 @@ module.exports = {
   programmes,
   GENERAL_CAUSE,
   donationCauses,
+  generalDonation,
+  dedicationTypes,
+  taxNotes,
+  // Every donation page: "Where Most Needed" first, then the programmes
+  donationPages: [generalDonation, ...programmes],
   volunteerAreas: [
     "Tree plantation",
     "Elder companionship",

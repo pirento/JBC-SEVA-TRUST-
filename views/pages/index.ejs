@@ -71,7 +71,7 @@
                 <p><%= p.summary %></p>
                 <div class="programme-links">
                   <a href="/work/<%= p.slug %>">Read more</a>
-                  <a href="/donate?cause=<%= encodeURIComponent(p.title) %>" class="donate-link">Donate to <%= p.title %></a>
+                  <a href="/donate/<%= p.slug %>" class="donate-link">Donate to <%= p.title %></a>
                 </div>
               </article>
             <% }) %>
@@ -82,7 +82,7 @@
                 Not sure which programme to choose? The trustees will use your
                 gift where the need is most urgent, and tell you how it was spent.
               </p>
-              <a href="/donate" class="btn orange">Donate</a>
+              <a href="/donate/general" class="btn orange">Donate</a>
             </article>
           </div>
         </div>

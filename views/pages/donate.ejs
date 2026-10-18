@@ -6,11 +6,35 @@
 <body class="page-bg">
   <%- include('../partials/header') %>
 
-  <main id="main" class="form-page">
-    <section class="form-card narrow">
-      <h1 class="form-title">Make a Donation</h1>
-      <p class="form-intro">Choose a cause and give securely online through PayU (UPI, card or net banking).</p>
-      <%- include('../partials/donation-form', { idPrefix: 'donatePage' }) %>
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <h1>Donate</h1>
+        <p class="lead">Choose what you want to support. Money given for a cause is kept in that cause's fund and used only for it.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="cause-grid">
+          <% trust.donationPages.forEach((p) => { %>
+            <a class="cause-card<%= p.slug === 'general' ? ' general' : '' %>" href="/donate/<%= p.slug %>">
+              <span class="programme-icon"><%- include('../partials/icon', { name: p.icon, size: 26 }) %></span>
+              <span class="cause-body">
+                <strong><%= p.title %></strong>
+                <small><%= p.area %></small>
+                <span class="cause-purposes"><%= p.donation.purposes.slice(0, 3).join(' · ') %></span>
+              </span>
+              <span class="cause-arrow"><%- include('../partials/icon', { name: 'arrow', size: 20 }) %></span>
+            </a>
+          <% }) %>
+        </div>
+
+        <p class="muted small cause-foot">
+          Payments are processed by PayU (UPI, card, net banking). You get a receipt by email.
+          Want to join as a member instead? <a href="/donation">Become a member</a>.
+        </p>
+      </div>
     </section>
   </main>
 

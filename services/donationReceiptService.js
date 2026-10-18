@@ -11,7 +11,7 @@ const logoPath = path.join(
   "..",
   "public",
   "images",
-  "logo.jpeg"
+  "logo-mark.png"
 );
 
 // ============================================================
@@ -330,10 +330,10 @@ function generateCertificateNumber(data) {
     .slice(-10);
 
   if (cleanId) {
-    return `MCT${cleanId.toUpperCase()}`;
+    return `JBCM${cleanId.toUpperCase()}`;
   }
 
-  return `MCT${Date.now()}`;
+  return `JBCM${Date.now()}`;
 }
 
 // ============================================================

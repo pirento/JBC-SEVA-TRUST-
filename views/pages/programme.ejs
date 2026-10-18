@@ -51,7 +51,7 @@
           <div class="side-card">
             <h2>Support <%= programme.title %></h2>
             <p>Money given for <%= programme.title %> is used only for <%= programme.title %>.</p>
-            <a href="/donate?cause=<%= encodeURIComponent(programme.title) %>" class="btn orange full">Donate</a>
+            <a href="/donate/<%= programme.slug %>" class="btn orange full">Donate</a>
             <a href="/volunteer" class="btn navy-outline full">Volunteer</a>
           </div>
 

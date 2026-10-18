@@ -2104,6 +2104,8 @@
 
               <th>Donor</th>
 
+              <th>Fund / Purpose</th>
+
               <th>Contact</th>
 
               <th>Amount</th>
@@ -2229,6 +2231,16 @@
 
                   <% } %>
 
+                </td>
+
+
+                <td style="white-space:normal;min-width:180px;">
+                  <strong><%= donation.cause || "Where Most Needed" %></strong>
+                  <% if (donation.purpose) { %><br><small><%= donation.purpose %></small><% } %>
+                  <% if (donation.dedicatedTo) { %><br><small><%= donation.dedicationType %> <%= donation.dedicatedTo %></small><% } %>
+                  <% if (donation.sevaDate) { %><br><small>Seva date: <%= donation.sevaDate %></small><% } %>
+                  <% if (donation.gotra) { %><br><small>Gotra: <%= donation.gotra %></small><% } %>
+                  <% if (donation.pan) { %><br><small>PAN: <%= donation.pan %></small><% } %>
                 </td>
 
 
@@ -2762,6 +2774,35 @@
 
     <% } %>
 
+
+  </section>
+
+
+  <section class="dashboard-card">
+
+    <div class="card-header">
+      <div class="card-title">
+        <h2>Fund-wise Collection</h2>
+        <p>Successful donations by cause. Each fund is kept in its own ledger.</p>
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr><th>Fund</th><th>Donations</th><th>Amount</th></tr>
+        </thead>
+        <tbody>
+          <% fundTotals.forEach((fund) => { %>
+            <tr>
+              <td><strong><%= fund.cause %></strong></td>
+              <td><%= fund.count %></td>
+              <td>₹<%= fund.amount.toLocaleString("en-IN") %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
 
   </section>
 

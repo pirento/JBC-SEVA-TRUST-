@@ -11,7 +11,7 @@ const logoPath = path.join(
   "..",
   "public",
   "images",
-  "logo.jpeg"
+  "logo-mark.png"
 );
 
 // ========================================

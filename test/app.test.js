@@ -126,15 +126,48 @@ test("security headers are set and x-powered-by is hidden", async () => {
   assert.equal(res.headers.get("x-powered-by"), null);
 });
 
-test("donate page preselects the cause from the link", async () => {
-  const res = await client()("/donate?cause=Anand%20Dham");
-  assert.match(res.text, /<option value="Anand Dham" selected>/);
+test("donate page lists every cause and old ?cause= links redirect", async () => {
+  const get = client();
+  const trust = require("../config/trustConfig");
 
-  const quick = await client()("/donate?cause=Green%20Earth&amount=2100");
-  assert.match(quick.text, /value="2100"/, "amount from quick donate");
+  const res = await get("/donate");
+  for (const p of trust.donationPages) {
+    assert.match(res.text, new RegExp(`href="/donate/${p.slug}"`));
+  }
 
-  const bad = await client()("/donate?amount=%22%3E%3Cscript%3E");
+  let redirect = await get("/donate?cause=Anand%20Dham");
+  assert.equal(redirect.status, 302);
+  assert.equal(redirect.location, "/donate/anand-dham");
+
+  redirect = await get("/donate?cause=Green%20Earth&amount=2100");
+  assert.equal(redirect.location, "/donate/green-earth?amount=2100");
+
+  const page = await get("/donate/green-earth?amount=2100");
+  assert.match(page.text, /value="2100"/, "amount carried over");
+
+  const bad = await get("/donate/green-earth?amount=%22%3E%3Cscript%3E");
   assert.doesNotMatch(bad.text, /<script>/);
+
+  assert.equal((await get("/donate/unknown")).status, 404);
+});
+
+test("each cause page shows only its own options", async () => {
+  const get = client();
+
+  const temple = await get("/donate/temple");
+  assert.match(temple.text, /Daily aarti and bhog/);
+  assert.match(temple.text, /name="gotra"/);
+  assert.match(temple.text, /name="sevaDate"/);
+  assert.match(temple.text, /not eligible for 80G/);
+
+  const green = await get("/donate/green-earth");
+  assert.match(green.text, /Tree plantation/);
+  assert.doesNotMatch(green.text, /name="gotra"/);
+  assert.doesNotMatch(green.text, /name="sevaDate"/);
+
+  const elders = await get("/donate/anand-dham");
+  assert.match(elders.text, /Meals for elders/);
+  assert.match(elders.text, /name="sevaDate"/);
 });
 
 test("every programme has its own page, unknown ones 404", async () => {
@@ -145,7 +178,7 @@ test("every programme has its own page, unknown ones 404", async () => {
     const res = await get(`/work/${p.slug}`);
     assert.equal(res.status, 200, p.slug);
     assert.match(res.text, new RegExp(`<h1>${p.title}</h1>`));
-    assert.match(res.text, new RegExp(`/donate\\?cause=${encodeURIComponent(p.title)}`));
+    assert.match(res.text, new RegExp(`href="/donate/${p.slug}"`));
   }
 
   assert.equal((await get("/work/unknown")).status, 404);
@@ -418,6 +451,7 @@ test("medical request is saved with an unguessable reference and shows in accoun
 
 const donation = {
   cause: "Green Earth",
+  purpose: "Tree plantation",
   donorName: "Asha Verma",
   phoneNumber: "9876543210",
   email: "asha@example.com",
@@ -436,6 +470,31 @@ test("donation form requires consent and a valid amount", async () => {
   res = await req("/donate", { method: "POST", form: { ...donation, amount: "50" } });
   assert.equal(res.status, 400);
   assert.match(res.text, /Minimum donation/);
+  assert.match(res.text, /value="Asha Verma"/, "form is shown again with typed values");
+});
+
+test("donation details are checked against the chosen cause", async () => {
+  const req = client();
+  const future = new Date(Date.now() + 10 * 864e5).toISOString().slice(0, 10);
+  const cases = [
+    [{ purpose: "Daily aarti and bhog" }, /choose what your donation for Green Earth/],
+    [{ purpose: "" }, /choose what your donation/],
+    [{ pan: "ABC123" }, /valid 10 character PAN/],
+    [{ dedicationType: "In memory of", dedicatedTo: "" }, /enter the name or occasion/],
+    [{ dedicationType: "Bogus", dedicatedTo: "x" }, /valid dedication/],
+    [{ cause: "Community Temple", purpose: "Prasad distribution", sevaDate: "2001-01-01" }, /within the next year/],
+    [{ cause: "Community Temple", purpose: "Prasad distribution", sevaDate: "2999-01-01" }, /within the next year/],
+  ];
+
+  for (const [change, msg] of cases) {
+    const res = await req("/donate", { method: "POST", form: { ...donation, ...change } });
+    assert.equal(res.status, 400, JSON.stringify(change));
+    assert.match(res.text, msg);
+  }
+
+  // Temple-only fields are ignored for other causes
+  const res = await req("/donate", { method: "POST", form: { ...donation, sevaDate: future, gotra: "Kashyap" } });
+  assert.equal(res.status, 200);
 });
 
 test("verified PayU donation is saved with its cause and listed in the account", async () => {
@@ -480,6 +539,59 @@ test("verified PayU donation is saved with its cause and listed in the account",
   assert.match(res.text, new RegExp(txnid));
   assert.match(res.text, /Green Earth/);
   assert.match(res.text, /₹1,100/);
+});
+
+// Starts a donation and returns the signed callback PayU would send back
+async function startDonation(req, form) {
+  const res = await req("/donate", { method: "POST", form });
+  assert.equal(res.status, 200, res.text.slice(0, 300));
+
+  const field = (name) => res.text.match(new RegExp(`name="${name}"\\s+value="([^"]*)"`))?.[1] ?? "";
+  const callback = { key: "testkey", status: "success", mihpayid: "PAYU" + Date.now() };
+  for (const name of ["txnid", "amount", "productinfo", "firstname", "email", "udf1", "udf2", "udf3", "udf4", "udf5"]) {
+    callback[name] = field(name);
+  }
+
+  const reverse = `testsalt|success||||||${callback.udf5}|${callback.udf4}|${callback.udf3}|${callback.udf2}|${callback.udf1}|${callback.email}|${callback.firstname}|${callback.productinfo}|${callback.amount}|${callback.txnid}|testkey`;
+  callback.hash = crypto.createHash("sha512").update(reverse).digest("hex");
+  return callback;
+}
+
+test("temple donation keeps purpose, dedication, seva date and gotra end to end", async () => {
+  const req = client();
+  const sevaDate = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10);
+
+  const callback = await startDonation(req, {
+    ...donation,
+    cause: "Community Temple",
+    purpose: "Daily aarti and bhog",
+    amount: "501",
+    dedicationType: "In memory of",
+    dedicatedTo: "Late Shri Ram Prasad",
+    sevaDate,
+    gotra: "Kashyap",
+    pan: "abcde1234f",
+  });
+
+  assert.equal(callback.udf4, "Community Temple");
+  assert.equal(callback.udf5, "Daily aarti and bhog", "purpose signed into PayU request");
+
+  let res = await req("/donate/success", { method: "POST", form: callback });
+  assert.equal(res.status, 200, res.text.slice(0, 300));
+  assert.match(res.text, /for <strong>Community Temple<\/strong>/);
+  assert.match(res.text, /In memory of Late Shri Ram Prasad/);
+  assert.match(res.text, new RegExp(sevaDate));
+
+  const certificate = await req(`/donate/certificate/${callback.txnid}`);
+  assert.equal(certificate.status, 200);
+  assert.match(certificate.headers.get("content-type"), /pdf/);
+
+  await req("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+  res = await req("/admin/dashboard");
+  assert.match(res.text, /Fund-wise Collection/);
+  assert.match(res.text, /Gotra: Kashyap/);
+  assert.match(res.text, /PAN: ABCDE1234F/, "PAN stored uppercased");
+  assert.match(res.text, /<td><strong>Community Temple<\/strong><\/td>\s*<td>1<\/td>\s*<td>₹501<\/td>/);
 });
 
 // ------------------------------------------------------------

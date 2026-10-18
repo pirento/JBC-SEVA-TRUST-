@@ -188,7 +188,7 @@
     <p class="message">
 
       Thank you for your generous donation to
-      <strong>JBC Seva Trust</strong>.
+      <strong>JBC Seva Trust</strong><% if (donation?.cause) { %> for <strong><%= donation.cause %></strong><% } %>.
 
       Your donation has been successfully received.
 
@@ -260,6 +260,18 @@
         </td>
 
       </tr>
+
+      <% [
+        ["Donated For", donation?.cause],
+        ["Purpose", donation?.purpose],
+        ["Dedication", donation?.dedicatedTo ? `${donation.dedicationType} ${donation.dedicatedTo}` : ""],
+        ["Preferred Seva Date", donation?.sevaDate],
+      ].filter(([, value]) => value).forEach(([label, value]) => { %>
+        <tr>
+          <td><%= label %></td>
+          <td><%= value %></td>
+        </tr>
+      <% }) %>
 
     </table>
 

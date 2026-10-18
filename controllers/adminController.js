@@ -21,6 +21,11 @@ const {
 } = require("../models/enquiryModel");
 
 const {
+  donationPages,
+  GENERAL_CAUSE,
+} = require("../config/trustConfig");
+
+const {
   generateDailyReportPdf,
 } = require("../services/adminReportPdfService");
 
@@ -990,6 +995,20 @@ exports.dashboard = async (
     const registeredUsers =
       (await listUsers()).length;
 
+    // One row per fund, in the order shown on the donate page
+    const fundTotals =
+      donationPages.map((page) => {
+        const items = successfulDonations.filter(
+          (d) => (d.cause || GENERAL_CAUSE) === page.title
+        );
+
+        return {
+          cause: page.title,
+          count: items.length,
+          amount: items.reduce((total, d) => total + Number(d.amount || 0), 0),
+        };
+      });
+
     const volunteers =
       await listVolunteers();
 
@@ -1005,6 +1024,8 @@ exports.dashboard = async (
         volunteers,
 
         messages,
+
+        fundTotals,
 
         // Membership
         memberships,

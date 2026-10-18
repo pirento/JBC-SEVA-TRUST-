@@ -2,6 +2,7 @@ const path = require("path");
 
 const { sendEmail } = require("./emailService");
 const escapeHtml = require("../utils/escapeHtml");
+const { donationPages, taxNotes } = require("../config/trustConfig");
 
 async function sendDonationCertificateEmail({
   donation,
@@ -29,8 +30,20 @@ async function sendDonationCertificateEmail({
     donation.paymentMode || "Online Payment"
   ).trim();
 
+  // Cause-specific lines; empty ones are left out
+  const details = [
+    ["Donated For", donation.cause],
+    ["Purpose", donation.purpose],
+    ["Dedication", donation.dedicatedTo ? `${donation.dedicationType} ${donation.dedicatedTo}` : ""],
+    ["Preferred Seva Date", donation.sevaDate],
+    ["Gotra", donation.gotra],
+  ].filter(([, value]) => value);
+
+  const page = donationPages.find((p) => p.title === donation.cause);
+  const taxNote = page && page.donation.religious ? taxNotes.religious : taxNotes.default;
+
   const subject =
-    "Donation Certificate - JBC Seva Trust";
+    `Donation Receipt - ${donation.cause || "JBC Seva Trust"} - JBC Seva Trust`;
 
   const text = `
 Dear ${donorName},
@@ -43,8 +56,11 @@ Donor Name: ${donorName}
 Donation Amount: ₹${amount}
 Payment Mode: ${paymentMode}
 Transaction ID: ${transactionId}
+${details.map(([label, value]) => `${label}: ${value}`).join("\n")}
 
 Your Donation Certificate is attached with this email.
+
+${taxNote}
 
 We sincerely appreciate your valuable contribution and support.
 
@@ -109,11 +125,17 @@ JBC Seva Trust
           ${escapeHtml(transactionId)}
         </p>
 
+        ${details.map(([label, value]) => `<p><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</p>`).join("")}
+
       </div>
 
       <p>
         Your <strong>Donation Certificate</strong>
         is attached with this email.
+      </p>
+
+      <p style="font-size: 13px; color: #666;">
+        ${escapeHtml(taxNote)}
       </p>
 
       <p>

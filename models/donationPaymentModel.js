@@ -100,6 +100,12 @@ async function create(data) {
     cause: String(
       data.cause || ""
     ).trim(),
+    purpose: String(data.purpose || "").trim(),
+    dedicationType: String(data.dedicationType || "").trim(),
+    dedicatedTo: String(data.dedicatedTo || "").trim(),
+    sevaDate: String(data.sevaDate || "").trim(),
+    gotra: String(data.gotra || "").trim(),
+    pan: String(data.pan || "").trim(),
 
     paymentDate:
       data.paymentDate ||

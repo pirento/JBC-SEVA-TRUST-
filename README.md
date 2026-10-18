@@ -40,7 +40,7 @@ request flow, a signed PayU donation callback, and login rate limiting.
 
 ## Features
 
-- **Pages:** home (programmes, how money is handled, plan, how to help, trustees), a page per programme (`/work/:slug`), donate (choose a cause), membership, medical help
+- **Pages:** home (programmes, how money is handled, plan, how to help, trustees), a page per programme (`/work/:slug`), donate (choose a cause, then a page per cause with its own purposes, dedication, seva date and gotra for the temple, optional PAN), membership, medical help
 - **Volunteer and contact:** `/volunteer` (areas, availability) and `/contact` (general, CSR, events); both listed in the admin dashboard and emailed to `TRUST_EMAIL`
 - **Legal:** `/terms`, `/privacy-policy`, `/refund-policy`, `/disclaimer`; every form asks for consent
 - **User accounts:** `/register`, `/login`, `/account` (donations, memberships, medical requests and receipts matched by email; change password)

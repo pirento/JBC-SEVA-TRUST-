@@ -23,7 +23,8 @@ const {
 } = require("../utils/validation");
 
 const {
-  donationCauses,
+  donationPages,
+  dedicationTypes,
   GENERAL_CAUSE,
 } = require("../config/trustConfig");
 
@@ -58,10 +59,11 @@ function validateDonation(input) {
   const message =
     String(input.message || "").trim();
 
-  const cause =
-    donationCauses.includes(input.cause)
-      ? input.cause
-      : GENERAL_CAUSE;
+  const page =
+    donationPages.find((p) => p.title === input.cause) ||
+    donationPages[0];
+
+  const cause = page.title;
 
   if (!required(donorName)) {
     throw new Error("Donor name is required.");
@@ -127,6 +129,79 @@ function validateDonation(input) {
     paymentMode,
     message,
     cause,
+    ...validateDonationDetails(page, input),
+  };
+}
+
+// =========================================================
+// CAUSE-SPECIFIC DETAILS (purpose, dedication, seva date...)
+// =========================================================
+
+function validateDonationDetails(page, input) {
+  const options = page.donation;
+  const text = (value) => String(value || "").trim();
+
+  const purpose = text(input.purpose);
+
+  if (!options.purposes.includes(purpose)) {
+    throw new Error(
+      `Please choose what your donation for ${page.title} should be used for.`
+    );
+  }
+
+  const dedicationType = text(input.dedicationType);
+  const dedicatedTo = text(input.dedicatedTo);
+
+  if (dedicationType && !dedicationTypes.includes(dedicationType)) {
+    throw new Error("Please choose a valid dedication.");
+  }
+
+  if (dedicationType && !dedicatedTo) {
+    throw new Error(`Please enter the name or occasion for "${dedicationType}".`);
+  }
+
+  if (dedicatedTo.length > 100) {
+    throw new Error("Dedication cannot exceed 100 characters.");
+  }
+
+  let sevaDate = "";
+
+  if (options.sevaDate && text(input.sevaDate)) {
+    sevaDate = text(input.sevaDate);
+    const date = new Date(`${sevaDate}T00:00:00Z`);
+    const today = new Date(new Date().toISOString().slice(0, 10));
+    const yearAhead = new Date(today.getTime() + 366 * 24 * 60 * 60 * 1000);
+
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(sevaDate) ||
+      Number.isNaN(date.getTime()) ||
+      date.toISOString().slice(0, 10) !== sevaDate ||
+      date < today ||
+      date > yearAhead
+    ) {
+      throw new Error("Seva date must be a valid date within the next year.");
+    }
+  }
+
+  const gotra = options.gotra ? text(input.gotra) : "";
+
+  if (gotra.length > 50) {
+    throw new Error("Gotra cannot exceed 50 characters.");
+  }
+
+  const pan = text(input.pan).toUpperCase();
+
+  if (pan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) {
+    throw new Error("Please enter a valid 10 character PAN, or leave it empty.");
+  }
+
+  return {
+    purpose,
+    dedicationType: dedicatedTo ? dedicationType : "",
+    dedicatedTo: dedicationType ? dedicatedTo : "",
+    sevaDate,
+    gotra,
+    pan,
   };
 }
 
@@ -173,7 +248,7 @@ async function initiateDonation(input) {
         donation.cause,
 
       udf5:
-        "",
+        donation.purpose,
 
       // Donation gets separate PayU callbacks.
       surl:
@@ -417,6 +492,9 @@ async function handlePaymentSuccess(data) {
 
         cause:
           String(data.udf4 || "").trim() || GENERAL_CAUSE,
+
+        purpose:
+          String(data.udf5 || "").trim(),
 
         txnid:
           String(data.txnid),

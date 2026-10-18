@@ -3,6 +3,7 @@ const path = require("path");
 
 const donateService = require("../services/donateService");
 const store = require("../models/pendingDonationStore");
+const trust = require("../config/trustConfig");
 
 
 // ============================================================
@@ -10,10 +11,33 @@ const store = require("../models/pendingDonationStore");
 // ============================================================
 
 function showDonationForm(req, res) {
-  return res.render("pages/donate", {
-    selectedCause: String(req.query.cause || ""),
-    selectedAmount: /^\d{3,7}$/.test(String(req.query.amount || "")) ? req.query.amount : "",
+  // Old links used ?cause=<title>; send them to that cause's page
+  if (req.query.cause) {
+    const page = trust.donationPages.find((p) => p.title === req.query.cause);
+    if (page) {
+      const amount = /^\d{3,7}$/.test(String(req.query.amount || "")) ? `?amount=${req.query.amount}` : "";
+      return res.redirect(`/donate/${page.slug}${amount}`);
+    }
+  }
+
+  return res.render("pages/donate");
+}
+
+function renderCauseForm(res, page, { error = null, values = {}, status = 200 } = {}) {
+  return res.status(status).render("pages/donate-cause", {
+    page,
+    error,
+    values,
+    title: `Donate to ${page.title}`,
   });
+}
+
+function showCauseForm(req, res, next) {
+  const page = trust.donationPages.find((p) => p.slug === req.params.slug);
+  if (!page) return next();
+
+  const amount = /^\d{3,7}$/.test(String(req.query.amount || "")) ? req.query.amount : "";
+  return renderCauseForm(res, page, { values: { amount } });
 }
 
 
@@ -41,13 +65,15 @@ async function submitDonation(req, res) {
       error.message
     );
 
-    return res.status(400).render(
-      "pages/form-error",
-      {
-        message: error.message,
-        backUrl: "/donate",
-      }
-    );
+    const page =
+      trust.donationPages.find((p) => p.title === (req.body || {}).cause) ||
+      trust.donationPages[0];
+
+    return renderCauseForm(res, page, {
+      error: error.message,
+      values: req.body || {},
+      status: 400,
+    });
   }
 }
 
@@ -283,6 +309,7 @@ function downloadCertificate(req, res) {
 
 module.exports = {
   showDonationForm,
+  showCauseForm,
   submitDonation,
   paymentSuccess,
   paymentFailure,
