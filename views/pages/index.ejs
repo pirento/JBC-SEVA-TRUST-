@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+
+    <title>JBC Seva Trust</title>
+
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+
+  <body class="page-bg">
+
+    <%- include('../partials/header') %>
+
+    <main>
+
+      <section class="hero">
+
+        <h1>JBC Seva Trust</h1>
+
+        <p>
+          Serving humanity. Preserving nature.
+        </p>
+
+        <div class="hero-actions">
+
+          <button
+            id="donateNowBtn"
+            class="btn white"
+          >
+            Become a Member
+          </button>
+
+          <button
+            id="donateBtn"
+            class="btn white"
+          >
+            Donate Now
+          </button>
+
+          <a
+            href="/medical"
+            class="btn white"
+          >
+            Medical Help
+          </a>
+
+        </div>
+
+      </section>
+
+
+      <section class="about">
+
+        <h2>About Us</h2>
+
+        <p>
+          JBC Seva Trust is a public charitable trust founded by
+          Jang Bahadur Chaudhary and Ravikant Soni. We work on the
+          ground with forgotten elders, poor families with daughters
+          to marry and children at risk of dropping out, while
+          restoring green cover in our villages, with every rupee
+          accounted for.
+        </p>
+
+      </section>
+
+
+      <section class="work">
+
+        <h2>Our Work</h2>
+
+        <div class="cards">
+
+          <div class="card">
+
+            <div>
+
+              <h3>Green Earth</h3>
+
+              <p>
+                Planting native shade and fruit trees on village, school and roadside land, each geotagged and cared for 3 years.
+              </p>
+
+              <ul>
+                <li>Tree Plantation</li>
+                <li>Pond Clean-up</li>
+                <li>Rainwater Harvesting</li>
+                <li>Plastic Clean-up Drives</li>
+              </ul>
+
+            </div>
+
+          </div>
+
+
+          <div class="card">
+
+            <div>
+
+              <h3>Anand Dham</h3>
+
+              <p>
+                A free home for abandoned and destitute senior citizens, with meals and medical care.
+              </p>
+
+              <ul>
+                <li>Shelter &amp; Meals</li>
+                <li>Health Check-ups</li>
+                <li>Eye Camps</li>
+                <li>Blanket Distribution</li>
+              </ul>
+
+            </div>
+
+          </div>
+
+
+          <div class="card">
+
+            <div>
+
+              <h3>Kanyadaan</h3>
+
+              <p>
+                Marriage support for girls from poor families, with legal age and consent checks.
+              </p>
+
+              <ul>
+                <li>Mass Marriage Ceremonies</li>
+                <li>Household Starter Kits</li>
+                <li>Sewing Machines</li>
+                <li>Tailoring Training</li>
+              </ul>
+
+            </div>
+
+          </div>
+
+
+          <div class="card">
+
+            <div>
+
+              <h3>Vidya and Poshan</h3>
+
+              <p>
+                Education and nutrition for children so no child drops out of school.
+              </p>
+
+              <ul>
+                <li>School Kits &amp; Uniforms</li>
+                <li>Evening Tutoring</li>
+                <li>Healthy Meals</li>
+                <li>Scholarships</li>
+              </ul>
+
+            </div>
+
+          </div>
+
+
+          <div class="card">
+
+            <div>
+
+              <h3>Community Temple</h3>
+
+              <p>
+                A place for worship, meditation, daily aarti and free prasad, run from a separate fund.
+              </p>
+
+              <ul>
+                <li>Temple Construction</li>
+                <li>Daily Aarti</li>
+                <li>Prasad Distribution</li>
+                <li>Meditation Space</li>
+              </ul>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+
+    <%- include('../partials/footer') %>
+
+    <!-- Membership Modal -->
+    <%- include('../partials/donation-modal') %>
+
+    <!-- Donation Modal -->
+    <%- include('../partials/donation-payment-modal') %>
+
+
+    <script src="/js/main.js"></script>
+
+  </body>
+</html>

@@ -1,0 +1,375 @@
+const { readRecords } = require("../models/fileStore");
+
+// ========================================
+// GET RECORD DATE
+// ========================================
+
+function getRecordDate(record) {
+  const dateValue =
+    record.paymentDate ||
+    record.submittedAt ||
+    record.createdAt ||
+    null;
+
+  if (!dateValue) {
+    return null;
+  }
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date;
+}
+
+// ========================================
+// FORMAT DATE
+// ========================================
+
+function formatDate(date) {
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+// ========================================
+// FORMAT TIME
+// ========================================
+
+function formatTime(date) {
+  return date.toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+// ========================================
+// CHECK SELECTED DATE
+// ========================================
+
+function isSameDate(record, selectedDate) {
+  const date = getRecordDate(record);
+
+  if (!date) {
+    return false;
+  }
+
+  const recordDate = date.toLocaleDateString("en-IN");
+
+  const selected = new Date(`${selectedDate}T00:00:00`);
+
+  if (Number.isNaN(selected.getTime())) {
+    return false;
+  }
+
+  const selectedDateString =
+    selected.toLocaleDateString("en-IN");
+
+  return recordDate === selectedDateString;
+}
+
+// ========================================
+// NORMALIZE MEMBERSHIP
+// ========================================
+
+function normalizeMembership(record) {
+  const date = getRecordDate(record);
+
+  const memberName = String(
+    record.memberName ||
+    record.donorName ||
+    (
+      Array.isArray(record.memberNames)
+        ? record.memberNames[0]
+        : ""
+    ) ||
+    ""
+  ).trim();
+
+  const amount =
+    Number(record.amount) || 0;
+
+  const membershipType =
+    String(record.membershipType || "").trim() ||
+    (
+      amount >= 11000
+        ? "Lifetime Member"
+        : "1 Year Member"
+    );
+
+  return {
+    memberName,
+    membershipType,
+    amount,
+    paymentMode:
+      String(record.paymentMode || "Online").trim(),
+    paymentStatus:
+      String(record.paymentStatus || "SUCCESS").trim(),
+    transactionId:
+      String(
+        record.transactionId ||
+        record.txnid ||
+        ""
+      ).trim(),
+    payuPaymentId:
+      String(
+        record.payuPaymentId ||
+        record.mihpayid ||
+        ""
+      ).trim(),
+    phoneNumber:
+      String(record.phoneNumber || "").trim(),
+    email:
+      String(record.email || "").trim(),
+    date: date ? formatDate(date) : "-",
+    time: date ? formatTime(date) : "-",
+  };
+}
+
+// ========================================
+// NORMALIZE DONATION
+// ========================================
+
+function normalizeDonation(record) {
+  const date = getRecordDate(record);
+
+  return {
+    donorName:
+      String(record.donorName || "").trim(),
+
+    phoneNumber:
+      String(record.phoneNumber || "").trim(),
+
+    email:
+      String(record.email || "").trim(),
+
+    amount:
+      Number(record.amount) || 0,
+
+    paymentMode:
+      String(record.paymentMode || "Online").trim(),
+
+    paymentStatus:
+      String(record.paymentStatus || "SUCCESS").trim(),
+
+    transactionId:
+      String(
+        record.transactionId ||
+        record.txnid ||
+        ""
+      ).trim(),
+
+    payuPaymentId:
+      String(
+        record.payuPaymentId ||
+        record.mihpayid ||
+        ""
+      ).trim(),
+
+    message:
+      String(record.message || "").trim(),
+
+    date: date ? formatDate(date) : "-",
+    time: date ? formatTime(date) : "-",
+  };
+}
+
+// ========================================
+// NORMALIZE MEDICAL
+// ========================================
+
+function normalizeMedical(record) {
+  const date = getRecordDate(record);
+
+  return {
+    patientName:
+      String(record.patientName || "").trim(),
+
+    aadharNumber:
+      String(record.aadharNumber || "").trim(),
+
+    dateBirth:
+      String(record.dateBirth || "").trim(),
+
+    patientReferenceName:
+      String(
+        record.patientReferenceName || ""
+      ).trim(),
+
+    patientPhoneNumber:
+      String(
+        record.patientPhoneNumber || ""
+      ).trim(),
+
+    patientEmail:
+      String(
+        record.patientEmail || ""
+      ).trim(),
+
+    nameDiseases:
+      String(
+        record.nameDiseases || ""
+      ).trim(),
+
+    hospitalName:
+      String(
+        record.hospitalName || ""
+      ).trim(),
+
+    referenceRegistrationNumber:
+      String(
+        record.referenceRegistrationNumber || ""
+      ).trim(),
+
+    date: date ? formatDate(date) : "-",
+    time: date ? formatTime(date) : "-",
+  };
+}
+
+// ========================================
+// GET DAILY REPORT DATA
+// ========================================
+
+async function getDailyReport(selectedDate) {
+  if (!selectedDate) {
+    throw new Error("Report date is required");
+  }
+
+  // ========================================
+  // READ ALL DATA
+  // ========================================
+
+  const paymentRecords =
+    await readRecords("payment.txt");
+
+  const donationRecords =
+    await readRecords("donations.txt");
+
+  const medicalRecordsRaw =
+    await readRecords("user.txt");
+
+  // ========================================
+  // MEMBERSHIPS
+  // ========================================
+
+  const memberships =
+    paymentRecords
+      .filter((record) => {
+        const status =
+          String(
+            record.paymentStatus || "SUCCESS"
+          ).toUpperCase();
+
+        return (
+          status === "SUCCESS" &&
+          isSameDate(record, selectedDate)
+        );
+      })
+      .map(normalizeMembership);
+
+  // ========================================
+  // DONATIONS
+  // ========================================
+
+  const donations =
+    donationRecords
+      .filter((record) => {
+        const status =
+          String(
+            record.paymentStatus || "SUCCESS"
+          ).toUpperCase();
+
+        return (
+          status === "SUCCESS" &&
+          isSameDate(record, selectedDate)
+        );
+      })
+      .map(normalizeDonation);
+
+  // ========================================
+  // MEDICAL HELP
+  // ========================================
+
+  const medicalRecords =
+    medicalRecordsRaw
+      .filter((record) => {
+        const type =
+          String(
+            record?.type || ""
+          ).toUpperCase();
+
+        return (
+          type === "MEDICAL_HELP" &&
+          isSameDate(record, selectedDate)
+        );
+      })
+      .map(normalizeMedical);
+
+  // ========================================
+  // CALCULATIONS
+  // ========================================
+
+  const membershipCollection =
+    memberships.reduce(
+      (total, item) =>
+        total + Number(item.amount || 0),
+      0
+    );
+
+  const donationCollection =
+    donations.reduce(
+      (total, item) =>
+        total + Number(item.amount || 0),
+      0
+    );
+
+  const totalCollection =
+    membershipCollection +
+    donationCollection;
+
+  // ========================================
+  // REPORT SUMMARY
+  // ========================================
+
+  return {
+    reportDate: selectedDate,
+
+    generatedAt: new Date().toISOString(),
+
+    summary: {
+      membershipCount:
+        memberships.length,
+
+      membershipCollection,
+
+      donationCount:
+        donations.length,
+
+      donationCollection,
+
+      medicalCount:
+        medicalRecords.length,
+
+      totalCollection,
+    },
+
+    memberships,
+
+    donations,
+
+    medicalRecords,
+  };
+}
+
+// ========================================
+// EXPORTS
+// ========================================
+
+module.exports = {
+  getDailyReport,
+};

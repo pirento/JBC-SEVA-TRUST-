@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Medical Request Submitted -
+        JBC Seva Trust
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
+</head>
+
+
+<body class="page-bg">
+
+
+    <!-- HEADER -->
+
+    <%- include('../partials/header') %>
+
+
+    <!-- MAIN -->
+
+    <main class="result-page">
+
+        <div
+            class="result-card"
+            style="text-align:center;"
+        >
+
+            <!-- SUCCESS ICON -->
+
+            <div
+                style="
+                    font-size:56px;
+                    margin-bottom:15px;
+                "
+            >
+                ✅
+            </div>
+
+
+            <h2>
+                Medical Help Request Submitted
+            </h2>
+
+
+            <p>
+
+                Your medical help request has been
+                successfully submitted to
+
+                <strong>
+                    JBC Seva Trust
+                </strong>.
+
+            </p>
+
+
+            <!-- REFERENCE NUMBER -->
+
+            <% if (reference) { %>
+
+                <div
+                    style="
+                        margin:25px auto;
+                        padding:16px;
+                        max-width:420px;
+                        background:#f7f7f7;
+                        border:1px solid #ddd;
+                        border-radius:8px;
+                    "
+                >
+
+                    <div
+                        style="
+                            font-size:14px;
+                            color:#666;
+                            margin-bottom:6px;
+                        "
+                    >
+                        Reference Number
+                    </div>
+
+
+                    <strong
+                        style="
+                            font-size:20px;
+                        "
+                    >
+                        <%= reference %>
+                    </strong>
+
+                </div>
+
+            <% } %>
+
+
+            <!-- EMAIL MESSAGE -->
+
+            <p>
+
+                📧 A confirmation email with your
+                receipt has been sent to your
+                registered email address.
+
+            </p>
+
+
+            <!-- DOWNLOAD STATUS -->
+
+            <p
+                id="downloadMessage"
+                style="
+                    margin-top:25px;
+                    color:#555;
+                "
+            >
+
+                📄 Preparing your receipt...
+
+            </p>
+
+
+            <!-- MANUAL DOWNLOAD FALLBACK -->
+
+            <% if (file) { %>
+
+                <a
+                    id="downloadButton"
+                    class="btn red"
+                    href="/medical/receipt/<%= encodeURIComponent(file) %>"
+                    download="<%= file %>"
+                >
+
+                    📥 Download Medical Receipt
+
+                </a>
+
+            <% } %>
+
+
+            <br>
+            <br>
+
+
+            <a
+                class="btn secondary"
+                href="/"
+            >
+                Back to Home
+            </a>
+
+
+        </div>
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <%- include('../partials/footer') %>
+
+
+    <!-- ========================================
+         AUTOMATIC PDF DOWNLOAD
+    ========================================= -->
+
+    <% if (file) { %>
+
+        <script>
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                function () {
+
+                    const downloadUrl =
+                        "/medical/receipt/<%= encodeURIComponent(file) %>";
+
+
+                    const fileName =
+                        "<%= file %>";
+
+
+                    const message =
+                        document.getElementById(
+                            "downloadMessage"
+                        );
+
+
+                    /*
+                     * Small delay so that the
+                     * success page can render first.
+                     */
+
+                    setTimeout(function () {
+
+                        const link =
+                            document.createElement("a");
+
+
+                        link.href =
+                            downloadUrl;
+
+
+                        link.download =
+                            fileName;
+
+
+                        link.style.display =
+                            "none";
+
+
+                        document.body.appendChild(
+                            link
+                        );
+
+
+                        /*
+                         * Automatically start download
+                         */
+
+                        link.click();
+
+
+                        /*
+                         * Remove temporary element
+                         */
+
+                        document.body.removeChild(
+                            link
+                        );
+
+
+                        /*
+                         * Update status
+                         */
+
+                        if (message) {
+
+                            message.innerHTML =
+                                "✅ Your receipt download has started.";
+
+                        }
+
+                    }, 500);
+
+                }
+            );
+
+        </script>
+
+    <% } %>
+
+
+</body>
+
+</html>

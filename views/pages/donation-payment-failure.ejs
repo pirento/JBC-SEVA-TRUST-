@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    Donation Payment Failed - JBC Seva Trust
+  </title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-family: Arial, sans-serif;
+
+      background:
+        linear-gradient(
+          135deg,
+          #f5f7fa,
+          #e8eef5
+        );
+    }
+
+    .failure-card {
+      width: 90%;
+      max-width: 600px;
+
+      background: white;
+
+      padding: 40px;
+
+      border-radius: 14px;
+
+      box-shadow:
+        0 10px 35px
+        rgba(0, 0, 0, 0.12);
+
+      text-align: center;
+    }
+
+    .failure-icon {
+      width: 70px;
+      height: 70px;
+
+      margin: 0 auto 20px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 50%;
+
+      background: #fdecec;
+
+      font-size: 34px;
+
+      color: #c62828;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+
+      color: #222;
+    }
+
+    .message {
+      color: #555;
+
+      line-height: 1.6;
+
+      margin-bottom: 25px;
+    }
+
+    .transaction {
+      padding: 14px;
+
+      background: #f5f8fb;
+
+      border-radius: 7px;
+
+      font-size: 14px;
+
+      color: #555;
+
+      word-break: break-word;
+    }
+
+    .btn {
+      display: inline-block;
+
+      margin-top: 25px;
+
+      padding: 12px 22px;
+
+      border-radius: 7px;
+
+      text-decoration: none;
+
+      background: #222;
+
+      color: white;
+
+      font-size: 14px;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+  <div class="failure-card">
+
+    <div class="failure-icon">
+      ×
+    </div>
+
+
+    <h1>
+      Donation Payment Failed
+    </h1>
+
+
+    <p class="message">
+
+      Unfortunately, your donation payment
+      could not be completed.
+
+      Please try again.
+
+    </p>
+
+
+    <div class="transaction">
+
+      <strong>
+        Transaction ID:
+      </strong>
+
+      <br>
+
+      <%= transactionId || "Not Available" %>
+
+      <br><br>
+
+      <strong>
+        Reason:
+      </strong>
+
+      <br>
+
+      <%= errorMessage || "Payment could not be completed." %>
+
+    </div>
+
+
+    <a
+      href="/"
+      class="btn"
+    >
+      Back to Home
+    </a>
+
+  </div>
+
+</body>
+
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Admin Login - JBC Seva Trust</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
+</head>
+
+
+<body class="page-bg">
+
+    <main class="result-page">
+
+        <div class="result-card">
+
+            <h2>
+                Admin Login
+            </h2>
+
+
+            <% if (error) { %>
+
+                <p style="color: red;">
+                    <%= error %>
+                </p>
+
+            <% } %>
+
+
+            <form
+                action="/admin/login"
+                method="POST"
+            >
+
+                <div>
+
+                    <label for="password">
+                        Admin Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                        autocomplete="current-password"
+                    >
+
+                </div>
+
+
+                <br>
+
+
+                <button
+                    type="submit"
+                    class="btn red"
+                >
+                    Login
+                </button>
+
+            </form>
+
+
+            <br>
+
+
+            <a href="/">
+                Back to Home
+            </a>
+
+        </div>
+
+    </main>
+
+</body>
+
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    Medical Help - JBC Seva Trust
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="/css/style.css"
+  />
+
+</head>
+
+
+<body class="page-bg">
+
+  <!-- HEADER -->
+
+  <%- include('../partials/header') %>
+
+
+  <!-- MAIN -->
+
+  <main class="form-page">
+
+    <section class="form-card">
+
+      <h2>
+        Medical Help Form
+      </h2>
+
+
+      <!-- MEDICAL FORM -->
+
+      <form
+        action="/medical"
+        method="POST"
+        class="form-body"
+      >
+
+
+        <!-- ================================= -->
+        <!-- PATIENT BASIC DETAILS -->
+        <!-- ================================= -->
+
+        <div class="form-grid">
+
+          <div class="field">
+
+            <label>
+              Patient's Name *
+            </label>
+
+            <input
+              type="text"
+              name="patientName"
+              required
+              placeholder="Name"
+            />
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Aadhar Number *
+            </label>
+
+            <input
+              type="text"
+              name="aadharNumber"
+              maxlength="12"
+              pattern="[0-9]{12}"
+              inputmode="numeric"
+              required
+              placeholder="12 digit Aadhar Number"
+            />
+
+          </div>
+
+        </div>
+
+
+        <hr />
+
+
+        <!-- ================================= -->
+        <!-- DOB & REFERENCE -->
+        <!-- ================================= -->
+
+        <div class="form-grid">
+
+          <div class="field">
+
+            <label>
+              Date of Birth *
+            </label>
+
+            <input
+              type="date"
+              name="dateBirth"
+              required
+            />
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Patient Reference Name
+            </label>
+
+            <input
+              type="text"
+              name="patientReferenceName"
+              placeholder="Reference Name"
+            />
+
+          </div>
+
+        </div>
+
+
+        <hr />
+
+
+        <!-- ================================= -->
+        <!-- CONTACT DETAILS -->
+        <!-- ================================= -->
+
+        <div class="form-grid">
+
+          <div class="field">
+
+            <label>
+              Patient Phone Number *
+            </label>
+
+            <input
+              type="tel"
+              name="patientPhoneNumber"
+              maxlength="10"
+              pattern="[0-9]{10}"
+              inputmode="numeric"
+              required
+              placeholder="10 digit phone number"
+            />
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Patient Email Id *
+            </label>
+
+            <input
+              type="email"
+              name="patientEmail"
+              required
+              placeholder="Enter email address"
+            />
+
+          </div>
+
+        </div>
+
+
+        <hr />
+
+
+        <!-- ================================= -->
+        <!-- MEDICAL DETAILS -->
+        <!-- ================================= -->
+
+        <div class="form-grid">
+
+          <div class="field">
+
+            <label>
+              Name of Diseases *
+            </label>
+
+            <input
+              type="text"
+              name="nameDiseases"
+              required
+              placeholder="Disease name"
+            />
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              Name of Hospital *
+            </label>
+
+            <input
+              type="text"
+              name="hospitalName"
+              required
+              placeholder="Hospital name"
+            />
+
+          </div>
+
+        </div>
+
+
+        <!-- ================================= -->
+        <!-- SUBMIT -->
+        <!-- ================================= -->
+
+        <div class="actions center">
+
+          <button
+            class="btn primary"
+            type="submit"
+          >
+            Submit
+          </button>
+
+        </div>
+
+
+      </form>
+
+    </section>
+
+  </main>
+
+
+  <!-- FOOTER -->
+
+  <%- include('../partials/footer') %>
+
+
+</body>
+
+</html>

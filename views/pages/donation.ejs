@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  />
+
+  <title>
+    Membership - JBC Seva Trust
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="/css/style.css"
+  />
+</head>
+
+<body class="page-bg">
+
+  <%- include('../partials/header') %>
+
+  <main class="result-page">
+
+    <div class="result-card">
+
+      <h2>
+        Become a Member
+      </h2>
+
+      <%- include('../partials/donation-modal') %>
+
+    </div>
+
+  </main>
+
+  <%- include('../partials/footer') %>
+
+
+  <script>
+
+    const modal =
+      document.getElementById('donationModal');
+
+    if (modal) {
+      modal.hidden = false;
+    }
+
+  </script>
+
+</body>
+
+</html>
