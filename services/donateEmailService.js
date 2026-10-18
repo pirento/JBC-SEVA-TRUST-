@@ -1,6 +1,7 @@
 const path = require("path");
 
 const { sendEmail } = require("./emailService");
+const escapeHtml = require("../utils/escapeHtml");
 
 async function sendDonationCertificateEmail({
   donation,
@@ -69,7 +70,7 @@ JBC Seva Trust
       </h2>
 
       <p>
-        Dear <strong>${donorName}</strong>,
+        Dear <strong>${escapeHtml(donorName)}</strong>,
       </p>
 
       <p>
@@ -90,7 +91,7 @@ JBC Seva Trust
 
         <p>
           <strong>Donor Name:</strong>
-          ${donorName}
+          ${escapeHtml(donorName)}
         </p>
 
         <p>
@@ -100,12 +101,12 @@ JBC Seva Trust
 
         <p>
           <strong>Payment Mode:</strong>
-          ${paymentMode}
+          ${escapeHtml(paymentMode)}
         </p>
 
         <p>
           <strong>Transaction ID:</strong>
-          ${transactionId}
+          ${escapeHtml(transactionId)}
         </p>
 
       </div>

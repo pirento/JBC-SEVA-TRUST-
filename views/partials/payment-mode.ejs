@@ -1,0 +1,12 @@
+<fieldset class="field">
+  <legend>Payment Mode *</legend>
+
+  <div class="radio-row">
+    <% ['UPI', 'Card', 'Net Banking'].forEach((mode, index) => { %>
+      <label class="radio-pill">
+        <input type="radio" name="paymentMode" value="<%= mode %>" <%= index === 0 ? 'checked' : '' %> required />
+        <span><%= mode %></span>
+      </label>
+    <% }) %>
+  </div>
+</fieldset>

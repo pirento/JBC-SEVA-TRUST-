@@ -16,11 +16,10 @@ async function submitMedical(req, res) {
     );
   } catch (error) {
     console.error("❌ Medical request failed:", error.message);
-    return res
-      .status(500)
-      .send(
-        `<h1>❌ Something went wrong</h1><p>${error.message}</p><a href="/medical">Go Back</a>`,
-      );
+    return res.status(400).render("pages/form-error", {
+      message: error.message,
+      backUrl: "/medical",
+    });
   }
 }
 

@@ -3,11 +3,15 @@ const router = express.Router();
 
 const adminController = require("../controllers/adminController");
 const adminAuth = require("../middleware/adminAuth");
+const createRateLimiter = require("../middleware/rateLimit");
+
+const loginLimiter = createRateLimiter();
 
 router.get("/login", adminController.showLogin);
 
 router.post(
   "/login",
+  loginLimiter,
   adminController.login
 );
 

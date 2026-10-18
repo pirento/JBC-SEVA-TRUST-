@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Form Error</title>
-    <link rel="stylesheet" href="/css/style.css" />
+    <%- include('../partials/head', { title: locals.title || 'Something went wrong' }) %>
   </head>
   <body class="page-bg">
-    <main class="result-page">
-      <div class="result-card">
-        <h2>Submission Failed</h2>
+    <%- include('../partials/header') %>
+    <main id="main" class="result-page">
+      <div class="result-card" role="alert">
+        <div class="result-icon" aria-hidden="true">⚠️</div>
+        <h1><%= locals.title || 'Submission Failed' %></h1>
         <p class="error-text"><%= message %></p>
         <a class="btn red" href="<%= backUrl %>">Go Back</a>
       </div>
     </main>
+    <%- include('../partials/footer') %>
   </body>
 </html>

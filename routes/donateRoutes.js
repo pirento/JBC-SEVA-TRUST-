@@ -6,6 +6,12 @@ const controller = require("../controllers/donateController");
 // DONATION PAYMENT
 // ========================================
 
+// Donation form page
+router.get(
+  "/",
+  controller.showDonationForm
+);
+
 // Start donation payment
 router.post(
   "/",

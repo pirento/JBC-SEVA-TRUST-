@@ -6,6 +6,17 @@ const store = require("../models/pendingDonationStore");
 
 
 // ============================================================
+// SHOW DONATION FORM
+// ============================================================
+
+function showDonationForm(req, res) {
+  return res.render("pages/donate", {
+    selectedCause: String(req.query.cause || ""),
+  });
+}
+
+
+// ============================================================
 // SUBMIT DONATION
 // ============================================================
 
@@ -33,7 +44,7 @@ async function submitDonation(req, res) {
       "pages/form-error",
       {
         message: error.message,
-        backUrl: "/",
+        backUrl: "/donate",
       }
     );
   }
@@ -270,6 +281,7 @@ function downloadCertificate(req, res) {
 // ============================================================
 
 module.exports = {
+  showDonationForm,
   submitDonation,
   paymentSuccess,
   paymentFailure,

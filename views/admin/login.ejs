@@ -1,91 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Admin Login - JBC Seva Trust</title>
-
-    <link
-        rel="stylesheet"
-        href="/css/style.css"
-    >
-
+  <%- include('../partials/head', { title: 'Admin Login' }) %>
+  <meta name="robots" content="noindex" />
 </head>
-
-
 <body class="page-bg">
+  <%- include('../partials/header') %>
 
-    <main class="result-page">
+  <main id="main" class="form-page">
+    <section class="form-card auth-card">
+      <div class="result-icon" aria-hidden="true">🔐</div>
+      <h1 class="form-title">Admin Login</h1>
+      <p class="form-intro">For authorised trustees only.</p>
 
-        <div class="result-card">
+      <% if (error) { %>
+        <div class="alert error" role="alert"><%= error %></div>
+      <% } %>
 
-            <h2>
-                Admin Login
-            </h2>
-
-
-            <% if (error) { %>
-
-                <p style="color: red;">
-                    <%= error %>
-                </p>
-
-            <% } %>
-
-
-            <form
-                action="/admin/login"
-                method="POST"
-            >
-
-                <div>
-
-                    <label for="password">
-                        Admin Password
-                    </label>
-
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        required
-                        autocomplete="current-password"
-                    >
-
-                </div>
-
-
-                <br>
-
-
-                <button
-                    type="submit"
-                    class="btn red"
-                >
-                    Login
-                </button>
-
-            </form>
-
-
-            <br>
-
-
-            <a href="/">
-                Back to Home
-            </a>
-
+      <form action="/admin/login" method="POST" class="form-body js-once">
+        <div class="field">
+          <label for="password">Admin Password</label>
+          <div class="password-wrap">
+            <input type="password" id="password" name="password" required autocomplete="current-password" autofocus />
+            <button type="button" class="toggle-password" aria-label="Show password" data-toggle-password="password">Show</button>
+          </div>
         </div>
 
-    </main>
+        <div class="actions">
+          <button type="submit" class="btn primary full">Login</button>
+        </div>
+      </form>
 
+      <p class="auth-switch"><a href="/">← Back to Home</a></p>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
 </body>
-
 </html>

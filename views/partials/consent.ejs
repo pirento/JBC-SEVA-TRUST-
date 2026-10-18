@@ -1,0 +1,14 @@
+<div class="field consent">
+  <label class="checkbox">
+    <input type="checkbox" name="consent" required />
+    <span>
+      I agree to the <a href="/terms" target="_blank" rel="noopener">Terms</a><% if (typeof withRefund !== 'undefined' && withRefund) { %>,
+        <a href="/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a> and
+        <a href="/refund-policy" target="_blank" rel="noopener">Refund Policy</a>
+      <% } else { %>
+        and <a href="/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>
+      <% } %>
+      of <%= trust.name %>. *
+    </span>
+  </label>
+</div>

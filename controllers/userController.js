@@ -1,0 +1,144 @@
+const userAuthService = require("../services/userAuthService");
+const accountService = require("../services/accountService");
+
+// Only same-site paths, so ?next= cannot send users to another site
+function safeNext(value) {
+  const next = String(value || "");
+  return next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\")
+    ? next
+    : "/account";
+}
+
+// New session id on login stops session fixation
+function startSession(req, user) {
+  return new Promise((resolve, reject) => {
+    const isAdmin = req.session.isAdmin;
+    const adminLoginTime = req.session.adminLoginTime;
+
+    req.session.regenerate((error) => {
+      if (error) return reject(error);
+
+      req.session.user = user;
+
+      if (isAdmin) {
+        req.session.isAdmin = isAdmin;
+        req.session.adminLoginTime = adminLoginTime;
+      }
+
+      return resolve();
+    });
+  });
+}
+
+function showRegister(req, res) {
+  if (req.session.user) return res.redirect("/account");
+
+  return res.render("user/register", { error: null, values: {} });
+}
+
+async function register(req, res, next) {
+  const body = req.body || {};
+
+  req.rateLimit?.hit();
+
+  try {
+    const user = await userAuthService.register(body);
+    await startSession(req, user);
+    return res.redirect("/account?welcome=1");
+  } catch (error) {
+    if (!error.expose) return next(error);
+
+    return res.status(400).render("user/register", {
+      error: error.message,
+      values: { name: body.name, email: body.email, phone: body.phone },
+    });
+  }
+}
+
+function showLogin(req, res) {
+  if (req.session.user) return res.redirect(safeNext(req.query.next));
+
+  return res.render("user/login", {
+    error: null,
+    values: {},
+    next: safeNext(req.query.next),
+  });
+}
+
+async function login(req, res, next) {
+  const body = req.body || {};
+  const target = safeNext(body.next);
+
+  try {
+    const user = await userAuthService.login(body);
+    req.rateLimit?.reset();
+    await startSession(req, user);
+    return res.redirect(target);
+  } catch (error) {
+    if (!error.expose) return next(error);
+
+    req.rateLimit?.hit();
+
+    return res.status(401).render("user/login", {
+      error: error.message,
+      values: { email: body.email },
+      next: target,
+    });
+  }
+}
+
+function logout(req, res) {
+  delete req.session.user;
+
+  req.session.save(() => res.redirect("/"));
+}
+
+async function account(req, res, next) {
+  try {
+    const activity = await accountService.getActivity(req.session.user.email);
+
+    return res.render("user/account", {
+      activity,
+      welcome: req.query.welcome === "1",
+      passwordChanged: req.query.password === "changed",
+      passwordError: null,
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function changePassword(req, res, next) {
+  try {
+    await userAuthService.changePassword(req.session.user, req.body || {});
+    req.rateLimit?.reset();
+    return res.redirect("/account?password=changed#security");
+  } catch (error) {
+    if (!error.expose) return next(error);
+
+    req.rateLimit?.hit();
+
+    try {
+      const activity = await accountService.getActivity(req.session.user.email);
+
+      return res.status(400).render("user/account", {
+        activity,
+        welcome: false,
+        passwordChanged: false,
+        passwordError: error.message,
+      });
+    } catch (readError) {
+      return next(readError);
+    }
+  }
+}
+
+module.exports = {
+  showRegister,
+  register,
+  showLogin,
+  login,
+  logout,
+  account,
+  changePassword,
+};

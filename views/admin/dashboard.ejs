@@ -185,7 +185,7 @@
       display: grid;
 
       grid-template-columns:
-        repeat(5, minmax(0, 1fr));
+        repeat(auto-fit, minmax(170px, 1fr));
 
       gap: 14px;
 
@@ -1064,6 +1064,27 @@
   =================================================== -->
 
   <section class="stats-grid">
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon">
+        🙋
+      </div>
+
+      <div class="stat-label">
+        Registered Users
+      </div>
+
+      <div class="stat-value">
+        <%= registeredUsers %>
+      </div>
+
+      <div class="stat-subtitle">
+        Website accounts created
+      </div>
+
+    </div>
 
 
     <div class="stat-card">

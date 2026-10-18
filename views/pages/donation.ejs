@@ -1,56 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1"
-  />
-
-  <title>
-    Membership - JBC Seva Trust
-  </title>
-
-  <link
-    rel="stylesheet"
-    href="/css/style.css"
-  />
+  <%- include('../partials/head', { title: 'Membership' }) %>
 </head>
-
 <body class="page-bg">
-
   <%- include('../partials/header') %>
 
-  <main class="result-page">
-
-    <div class="result-card">
-
-      <h2>
-        Become a Member
-      </h2>
-
-      <%- include('../partials/donation-modal') %>
-
-    </div>
-
+  <main id="main" class="form-page">
+    <section class="form-card narrow">
+      <h1 class="form-title">Become a Member</h1>
+      <p class="form-intro">Join <%= trust.name %> and receive a membership certificate by email.</p>
+      <%- include('../partials/membership-form', { idPrefix: 'membershipPage' }) %>
+    </section>
   </main>
 
   <%- include('../partials/footer') %>
-
-
-  <script>
-
-    const modal =
-      document.getElementById('donationModal');
-
-    if (modal) {
-      modal.hidden = false;
-    }
-
-  </script>
-
 </body>
-
 </html>

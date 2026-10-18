@@ -5,9 +5,20 @@ const session = require("express-session");
 
 const {
   port,
+  nodeEnv,
   viewsDir,
   publicDir,
 } = require("./config/appConfig");
+
+const { trustEmail } = require("./config/emailConfig");
+
+const trust = require("./config/trustConfig");
+
+if (!process.env.SESSION_SECRET) {
+  throw new Error("SESSION_SECRET is missing in .env");
+}
+
+const isProduction = nodeEnv === "production";
 
 const {
   verifyEmailConnection,
@@ -26,6 +37,28 @@ const errorHandler = require("./middleware/errorHandler");
 // ========================================
 
 const app = express();
+
+// Behind a proxy (Render, Nginx, etc.) so req.ip and secure cookies work
+if (isProduction) {
+  app.set("trust proxy", 1);
+}
+
+app.disable("x-powered-by");
+
+// ========================================
+// SECURITY HEADERS
+// ========================================
+
+app.use((req, res, next) => {
+  res.set({
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "SAMEORIGIN",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  });
+
+  next();
+});
 
 // ========================================
 // EJS CONFIGURATION
@@ -65,17 +98,34 @@ app.use(
 
     saveUninitialized: false,
 
+    // Active users stay logged in; 2 hours idle logs them out
+    rolling: true,
+
     cookie: {
       httpOnly: true,
 
-      secure: false,
+      secure: isProduction,
 
       sameSite: "lax",
 
-      maxAge: 1000 * 60 * 60,
+      maxAge: 1000 * 60 * 60 * 2,
     },
   }),
 );
+
+// ========================================
+// VIEW LOCALS
+// ========================================
+
+app.use((req, res, next) => {
+  res.locals.trust = trust;
+  res.locals.currentUser = req.session.user || null;
+  res.locals.isAdmin = req.session.isAdmin === true;
+  res.locals.currentPath = req.path;
+  res.locals.trustEmail = trustEmail || "";
+  res.locals.year = new Date().getFullYear();
+  next();
+});
 
 // ========================================
 // ROUTES
@@ -92,6 +142,8 @@ const adminRoutes = require("./routes/adminRoutes");
 const webRoutes = require("./routes/webRoutes");
 
 const systemRoutes = require("./routes/systemRoutes");
+
+const userRoutes = require("./routes/userRoutes");
 
 // ========================================
 // DONATION ROUTES
@@ -118,6 +170,12 @@ app.use("/admin", adminRoutes);
 // ========================================
 
 app.use(webRoutes);
+
+// ========================================
+// USER ACCOUNT ROUTES
+// ========================================
+
+app.use(userRoutes);
 
 // ========================================
 // SYSTEM ROUTES

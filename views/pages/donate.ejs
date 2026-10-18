@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: 'Donate' }) %>
+</head>
+<body class="page-bg">
+  <%- include('../partials/header') %>
+
+  <main id="main" class="form-page">
+    <section class="form-card narrow">
+      <h1 class="form-title">Make a Donation</h1>
+      <p class="form-intro">Choose a cause and give securely online through PayU (UPI, card or net banking).</p>
+      <%- include('../partials/donation-form', { idPrefix: 'donatePage' }) %>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

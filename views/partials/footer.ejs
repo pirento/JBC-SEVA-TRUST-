@@ -1,36 +1,58 @@
 <footer class="site-footer">
   <div class="footer-grid">
 
-    <div class="footer-logo">
-      <a href="/">
-        <img
-          src="/images/logo.jpeg"
-          alt="JBC Seva Trust Logo"
-        >
+    <div class="footer-about">
+      <a href="/" class="footer-brand">
+        <span class="logo-wrap small">
+          <img src="/images/logo.jpeg" alt="" width="40" height="40">
+        </span>
+        <strong><%= trust.name %></strong>
       </a>
-    </div>
-
-    <div class="footer-links">
-      <div>
-        <a href="#">Terms &amp; Condition</a>
-        <a href="#">Privacy Policy</a>
-        <a href="#">Disclaimer</a>
-        <a href="#">Refund Policy</a>
-      </div>
-
-      <p>
-        © 2026 All rights reserved
-        <strong>JBC Seva Trust</strong>
-      </p>
-
-      <p>
-        A Public Charitable Trust
+      <p><%= trust.tagline %></p>
+      <p class="muted">
+        A <%= trust.legalForm.toLowerCase() %> working on elder care,
+        marriage support, child education, tree plantation and a
+        community temple.
       </p>
     </div>
 
-    <div class="footer-contact">
-      <p>Office - Basti, Uttar Pradesh, India</p>
+    <div>
+      <h3>Quick Links</h3>
+      <ul class="footer-list">
+        <li><a href="/#work">Our Work</a></li>
+        <li><a href="/donate">Donate</a></li>
+        <li><a href="/donation">Become a Member</a></li>
+        <li><a href="/medical">Medical Help</a></li>
+        <li><a href="<%= currentUser ? '/account' : '/login' %>"><%= currentUser ? 'My Account' : 'Login / Register' %></a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h3>Legal</h3>
+      <ul class="footer-list">
+        <li><a href="/terms">Terms &amp; Conditions</a></li>
+        <li><a href="/privacy-policy">Privacy Policy</a></li>
+        <li><a href="/refund-policy">Refund Policy</a></li>
+        <li><a href="/disclaimer">Disclaimer</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h3>Contact</h3>
+      <ul class="footer-list">
+        <li>📍 <%= trust.location %></li>
+        <% if (trustEmail) { %>
+          <li>✉️ <a href="mailto:<%= trustEmail %>"><%= trustEmail %></a></li>
+        <% } %>
+      </ul>
     </div>
 
   </div>
+
+  <div class="footer-bottom">
+    <p>© <%= year %> <%= trust.name %>. All rights reserved.</p>
+    <p>Payments are processed securely by PayU.</p>
+  </div>
 </footer>
+
+<script src="/js/main.js" defer></script>

@@ -26,14 +26,14 @@ async function submitDonation(req, res) {
     if (!memberName) {
       return res.status(400).render("pages/form-error", {
         message: "Please provide the member name.",
-        backUrl: "/",
+        backUrl: "/donation",
       });
     }
 
     if (memberName.length > 100) {
       return res.status(400).render("pages/form-error", {
         message: "Member name cannot exceed 100 characters.",
-        backUrl: "/",
+        backUrl: "/donation",
       });
     }
 
@@ -49,7 +49,7 @@ async function submitDonation(req, res) {
     if (!Number.isFinite(amount) || amount < 100) {
       return res.status(400).render("pages/form-error", {
         message: "Minimum membership amount is ₹100.",
-        backUrl: "/",
+        backUrl: "/donation",
       });
     }
 
@@ -79,7 +79,7 @@ async function submitDonation(req, res) {
 
     return res.status(400).render("pages/form-error", {
       message: error.message,
-      backUrl: "/",
+      backUrl: "/donation",
     });
   }
 }

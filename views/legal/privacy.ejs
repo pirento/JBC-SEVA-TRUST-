@@ -1,0 +1,69 @@
+<%- include('../partials/legal-top') %>
+
+<p>
+  <%= trust.name %> respects your privacy. This policy explains what personal
+  data we collect, why, and how we protect it, in line with the Digital
+  Personal Data Protection Act, 2023 and the Information Technology Act, 2000.
+</p>
+
+<h2>1. Data we collect</h2>
+<ul>
+  <li><strong>Account:</strong> name, email, mobile number and a securely hashed password (we never store your actual password).</li>
+  <li><strong>Donations and membership:</strong> name, email, mobile number, amount, cause, payment mode, message and transaction ID.</li>
+  <li><strong>Medical help requests:</strong> patient's name, Aadhaar number, date of birth, mobile number, email, illness, hospital and referrer's name.</li>
+  <li><strong>Technical:</strong> a session cookie that keeps you logged in, and basic server logs (such as IP address) for security.</li>
+</ul>
+<p>
+  We do not collect card numbers, UPI PINs or bank passwords. These are handled
+  directly by our payment gateway, PayU.
+</p>
+
+<h2>2. Why we use it</h2>
+<ul>
+  <li>To process donations and memberships and send receipts and certificates.</li>
+  <li>To review and respond to medical help requests.</li>
+  <li>To run your account and show your history with the Trust.</li>
+  <li>To keep accounts as required by law and to prevent fraud.</li>
+</ul>
+<p>We use your data only with your consent, which you give by ticking the consent box on our forms.</p>
+
+<h2>3. How we protect it</h2>
+<ul>
+  <li>Stored records are encrypted (AES-256-GCM).</li>
+  <li>Passwords are hashed with bcrypt.</li>
+  <li>Only the last 4 digits of an Aadhaar number are printed on receipts.</li>
+  <li>Admin access is limited to authorised trustees and protected by a password.</li>
+</ul>
+
+<h2>4. Who we share it with</h2>
+<ul>
+  <li><strong>PayU</strong>, to process payments.</li>
+  <li><strong>Our email provider</strong>, to send receipts and replies.</li>
+  <li>Government authorities, only when the law requires it.</li>
+</ul>
+<p>We never sell, rent or publish your personal data.</p>
+
+<h2>5. How long we keep it</h2>
+<p>
+  Donation and payment records are kept for at least 8 years, as required for
+  a charitable trust's accounts and audits. Other data is kept only as long as
+  needed for the purpose it was collected for.
+</p>
+
+<h2>6. Your rights</h2>
+<p>
+  You can ask us to see, correct or delete your personal data, or withdraw
+  your consent, by contacting us. Records we must keep by law (such as
+  donation records) cannot be deleted before the legal period ends.
+</p>
+
+<h2>7. Cookies</h2>
+<p>
+  We use one essential cookie to keep you logged in. We do not use advertising
+  or tracking cookies.
+</p>
+
+<h2>8. Changes</h2>
+<p>We may update this policy. The date at the top shows the latest version.</p>
+
+<%- include('../partials/legal-bottom') %>

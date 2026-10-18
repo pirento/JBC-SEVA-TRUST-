@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: 'Create Account' }) %>
+</head>
+<body class="page-bg">
+  <%- include('../partials/header') %>
+
+  <main id="main" class="form-page">
+    <section class="form-card auth-card">
+      <h1 class="form-title">Create your account</h1>
+      <p class="form-intro">Track your donations, memberships and medical requests in one place.</p>
+
+      <% if (error) { %>
+        <div class="alert error" role="alert"><%= error %></div>
+      <% } %>
+
+      <form action="/register" method="POST" class="form-body js-once">
+        <div class="field">
+          <label for="name">Full Name *</label>
+          <input id="name" name="name" type="text" autocomplete="name" maxlength="100"
+            value="<%= values.name || '' %>" required />
+        </div>
+
+        <div class="field">
+          <label for="email">Email *</label>
+          <input id="email" name="email" type="email" autocomplete="email"
+            value="<%= values.email || '' %>" required />
+        </div>
+
+        <div class="field">
+          <label for="phone">Mobile Number *</label>
+          <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national"
+            maxlength="10" pattern="[6-9][0-9]{9}" title="10 digit mobile number"
+            value="<%= values.phone || '' %>" required />
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="password">Password *</label>
+            <div class="password-wrap">
+              <input id="password" name="password" type="password" autocomplete="new-password"
+                minlength="8" maxlength="72" required aria-describedby="passwordHelp" />
+              <button type="button" class="toggle-password" aria-label="Show password" data-toggle-password="password">Show</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="confirmPassword">Confirm Password *</label>
+            <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password"
+              minlength="8" maxlength="72" required />
+          </div>
+        </div>
+        <small id="passwordHelp" class="block-help">At least 8 characters, with a letter and a number.</small>
+
+        <%- include('../partials/consent') %>
+
+        <div class="actions">
+          <button type="submit" class="btn primary full">Create Account</button>
+        </div>
+      </form>
+
+      <p class="auth-switch">Already have an account? <a href="/login">Log in</a></p>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

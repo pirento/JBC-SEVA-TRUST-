@@ -174,6 +174,9 @@ function normalizeDonation(record) {
     message:
       String(record.message || "").trim(),
 
+    cause:
+      String(record.cause || "").trim(),
+
     date: date ? formatDate(date) : "-",
     time: date ? formatTime(date) : "-",
   };
@@ -372,4 +375,7 @@ async function getDailyReport(selectedDate) {
 
 module.exports = {
   getDailyReport,
+  normalizeMembership,
+  normalizeDonation,
+  normalizeMedical,
 };

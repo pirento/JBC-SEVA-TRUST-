@@ -1,242 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-  <meta charset="UTF-8" />
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
-
-  <title>
-    Medical Help - JBC Seva Trust
-  </title>
-
-  <link
-    rel="stylesheet"
-    href="/css/style.css"
-  />
-
+  <%- include('../partials/head', { title: 'Medical Help' }) %>
 </head>
-
 
 <body class="page-bg">
 
-  <!-- HEADER -->
-
   <%- include('../partials/header') %>
 
+  <% const user = currentUser || {}; const today = new Date().toISOString().slice(0, 10); %>
 
-  <!-- MAIN -->
-
-  <main class="form-page">
+  <main id="main" class="form-page">
 
     <section class="form-card">
 
-      <h2>
-        Medical Help Form
-      </h2>
+      <h1 class="form-title">Medical Help Request</h1>
+      <p class="form-intro">
+        Fill in the patient's details. You will get a reference number and a
+        PDF receipt by email, and our team will contact you.
+      </p>
 
+      <form action="/medical" method="POST" class="form-body js-once">
 
-      <!-- MEDICAL FORM -->
-
-      <form
-        action="/medical"
-        method="POST"
-        class="form-body"
-      >
-
-
-        <!-- ================================= -->
-        <!-- PATIENT BASIC DETAILS -->
-        <!-- ================================= -->
+        <h2 class="form-section">Patient Details</h2>
 
         <div class="form-grid">
-
           <div class="field">
-
-            <label>
-              Patient's Name *
-            </label>
-
-            <input
-              type="text"
-              name="patientName"
-              required
-              placeholder="Name"
-            />
-
+            <label for="patientName">Patient's Name *</label>
+            <input id="patientName" type="text" name="patientName" maxlength="100"
+              autocomplete="off" required placeholder="Full name" />
           </div>
 
-
           <div class="field">
-
-            <label>
-              Aadhar Number *
-            </label>
-
-            <input
-              type="text"
-              name="aadharNumber"
-              maxlength="12"
-              pattern="[0-9]{12}"
-              inputmode="numeric"
-              required
-              placeholder="12 digit Aadhar Number"
-            />
-
+            <label for="aadharNumber">Aadhaar Number *</label>
+            <input id="aadharNumber" type="text" name="aadharNumber" maxlength="12"
+              pattern="[0-9]{12}" title="12 digit Aadhaar number" inputmode="numeric"
+              autocomplete="off" required placeholder="12 digit Aadhaar number"
+              aria-describedby="aadharHelp" />
+            <small id="aadharHelp">Stored encrypted. Only the last 4 digits appear on the receipt.</small>
           </div>
 
+          <div class="field">
+            <label for="dateBirth">Date of Birth *</label>
+            <input id="dateBirth" type="date" name="dateBirth" min="1900-01-01" max="<%= today %>" required />
+          </div>
+
+          <div class="field">
+            <label for="patientReferenceName">Referred By <span class="muted">(optional)</span></label>
+            <input id="patientReferenceName" type="text" name="patientReferenceName" maxlength="100"
+              placeholder="Name of person who referred" />
+          </div>
         </div>
 
-
-        <hr />
-
-
-        <!-- ================================= -->
-        <!-- DOB & REFERENCE -->
-        <!-- ================================= -->
+        <h2 class="form-section">Contact Details</h2>
 
         <div class="form-grid">
-
           <div class="field">
-
-            <label>
-              Date of Birth *
-            </label>
-
-            <input
-              type="date"
-              name="dateBirth"
-              required
-            />
-
+            <label for="patientPhoneNumber">Mobile Number *</label>
+            <input id="patientPhoneNumber" type="tel" name="patientPhoneNumber" maxlength="10"
+              pattern="[6-9][0-9]{9}" title="10 digit mobile number" inputmode="numeric"
+              autocomplete="tel-national" required placeholder="10 digit mobile number"
+              value="<%= user.phone || '' %>" />
           </div>
 
-
           <div class="field">
-
-            <label>
-              Patient Reference Name
-            </label>
-
-            <input
-              type="text"
-              name="patientReferenceName"
-              placeholder="Reference Name"
-            />
-
+            <label for="patientEmail">Email *</label>
+            <input id="patientEmail" type="email" name="patientEmail" autocomplete="email"
+              required placeholder="you@example.com" value="<%= user.email || '' %>" />
           </div>
-
         </div>
 
-
-        <hr />
-
-
-        <!-- ================================= -->
-        <!-- CONTACT DETAILS -->
-        <!-- ================================= -->
+        <h2 class="form-section">Medical Details</h2>
 
         <div class="form-grid">
-
           <div class="field">
-
-            <label>
-              Patient Phone Number *
-            </label>
-
-            <input
-              type="tel"
-              name="patientPhoneNumber"
-              maxlength="10"
-              pattern="[0-9]{10}"
-              inputmode="numeric"
-              required
-              placeholder="10 digit phone number"
-            />
-
+            <label for="nameDiseases">Illness / Disease *</label>
+            <input id="nameDiseases" type="text" name="nameDiseases" maxlength="150"
+              required placeholder="e.g. Cataract, Kidney stone" />
           </div>
 
-
           <div class="field">
-
-            <label>
-              Patient Email Id *
-            </label>
-
-            <input
-              type="email"
-              name="patientEmail"
-              required
-              placeholder="Enter email address"
-            />
-
+            <label for="hospitalName">Hospital Name *</label>
+            <input id="hospitalName" type="text" name="hospitalName" maxlength="150"
+              required placeholder="Hospital where treatment is planned" />
           </div>
-
         </div>
 
-
-        <hr />
-
-
-        <!-- ================================= -->
-        <!-- MEDICAL DETAILS -->
-        <!-- ================================= -->
-
-        <div class="form-grid">
-
-          <div class="field">
-
-            <label>
-              Name of Diseases *
-            </label>
-
-            <input
-              type="text"
-              name="nameDiseases"
-              required
-              placeholder="Disease name"
-            />
-
-          </div>
-
-
-          <div class="field">
-
-            <label>
-              Name of Hospital *
-            </label>
-
-            <input
-              type="text"
-              name="hospitalName"
-              required
-              placeholder="Hospital name"
-            />
-
-          </div>
-
-        </div>
-
-
-        <!-- ================================= -->
-        <!-- SUBMIT -->
-        <!-- ================================= -->
+        <%- include('../partials/consent') %>
 
         <div class="actions center">
-
-          <button
-            class="btn primary"
-            type="submit"
-          >
-            Submit
-          </button>
-
+          <button class="btn primary" type="submit">Submit Request</button>
         </div>
-
 
       </form>
 
@@ -244,12 +98,7 @@
 
   </main>
 
-
-  <!-- FOOTER -->
-
   <%- include('../partials/footer') %>
 
-
 </body>
-
 </html>

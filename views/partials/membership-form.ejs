@@ -1,0 +1,55 @@
+<% const p = locals.idPrefix || 'membership'; const user = locals.currentUser || {}; %>
+<form action="/donation" method="POST" class="form-body js-once">
+
+  <div class="field">
+    <label for="<%= p %>Name">Member Name *</label>
+    <input id="<%= p %>Name" name="memberName" type="text" autocomplete="name"
+      placeholder="Full name" maxlength="100" value="<%= user.name || '' %>" required />
+  </div>
+
+  <div class="form-grid">
+    <div class="field">
+      <label for="<%= p %>Phone">Mobile Number *</label>
+      <input id="<%= p %>Phone" name="phoneNumber" type="tel" inputmode="numeric" autocomplete="tel-national"
+        maxlength="10" pattern="[6-9][0-9]{9}" title="10 digit mobile number"
+        placeholder="10 digit mobile number" value="<%= user.phone || '' %>" required />
+    </div>
+
+    <div class="field">
+      <label for="<%= p %>Email">Email *</label>
+      <input id="<%= p %>Email" name="email" type="email" autocomplete="email"
+        placeholder="you@example.com" value="<%= user.email || '' %>" required />
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="<%= p %>Amount">Membership Amount (₹) *</label>
+    <input id="<%= p %>Amount" name="amount" type="number" min="100" step="1" inputmode="numeric"
+      placeholder="Minimum ₹100" required aria-describedby="<%= p %>AmountHelp" />
+    <div class="amount-chips" data-target="<%= p %>Amount">
+      <% [500, 1100, 5100, 11000].forEach((value) => { %>
+        <button type="button" class="chip" data-amount="<%= value %>">₹<%= value.toLocaleString('en-IN') %></button>
+      <% }) %>
+    </div>
+    <small id="<%= p %>AmountHelp">
+      ₹100 – ₹10,999: 1 Year Membership · ₹11,000 or more: Lifetime Membership
+    </small>
+  </div>
+
+  <%- include('payment-mode') %>
+
+  <div class="field">
+    <label for="<%= p %>Message">Message <span class="muted">(optional)</span></label>
+    <textarea id="<%= p %>Message" name="message" rows="3" maxlength="500"
+      placeholder="Any message for the trust"></textarea>
+  </div>
+
+  <%- include('consent', { withRefund: true }) %>
+
+  <div class="actions">
+    <% if (locals.inModal) { %>
+      <button type="button" class="btn secondary" data-close-modal>Cancel</button>
+    <% } %>
+    <button type="submit" class="btn primary">Pay &amp; Become a Member</button>
+  </div>
+</form>

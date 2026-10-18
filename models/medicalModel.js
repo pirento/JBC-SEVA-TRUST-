@@ -5,6 +5,8 @@ const {
   phone,
   email,
   aadhar,
+  pastDate,
+  accepted,
 } = require("../utils/validation");
 
 // ============================================================
@@ -36,6 +38,26 @@ async function create(data) {
         `${field} is required`
       );
     }
+  }
+
+  for (const field of [...fields, "patientReferenceName"]) {
+    if (String(data[field] || "").trim().length > 150) {
+      throw new Error(
+        `${field} is too long`
+      );
+    }
+  }
+
+  if (!pastDate(data.dateBirth)) {
+    throw new Error(
+      "Please enter a valid date of birth"
+    );
+  }
+
+  if (!accepted(data.consent)) {
+    throw new Error(
+      "Please accept the Terms and Privacy Policy"
+    );
   }
 
   // ----------------------------------------------------------

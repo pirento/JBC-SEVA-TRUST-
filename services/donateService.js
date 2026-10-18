@@ -19,7 +19,13 @@ const {
   phone,
   email,
   positiveAmount,
+  accepted,
 } = require("../utils/validation");
+
+const {
+  donationCauses,
+  GENERAL_CAUSE,
+} = require("../config/trustConfig");
 
 const {
   generateDonationCertificate,
@@ -51,6 +57,11 @@ function validateDonation(input) {
 
   const message =
     String(input.message || "").trim();
+
+  const cause =
+    donationCauses.includes(input.cause)
+      ? input.cause
+      : GENERAL_CAUSE;
 
   if (!required(donorName)) {
     throw new Error("Donor name is required.");
@@ -102,6 +113,12 @@ function validateDonation(input) {
     );
   }
 
+  if (!accepted(input.consent)) {
+    throw new Error(
+      "Please accept the Terms, Privacy Policy and Refund Policy."
+    );
+  }
+
   return {
     donorName,
     phoneNumber,
@@ -109,6 +126,7 @@ function validateDonation(input) {
     amount,
     paymentMode,
     message,
+    cause,
   };
 }
 
@@ -152,7 +170,7 @@ async function initiateDonation(input) {
         donation.message,
 
       udf4:
-        "",
+        donation.cause,
 
       udf5:
         "",
@@ -396,6 +414,9 @@ async function handlePaymentSuccess(data) {
 
         message:
           callbackMessage,
+
+        cause:
+          String(data.udf4 || "").trim() || GENERAL_CAUSE,
 
         txnid:
           String(data.txnid),

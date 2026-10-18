@@ -1,0 +1,12 @@
+      <h2>Contact</h2>
+      <p>
+        For any question about this page, contact <%= trust.name %>,
+        <%= trust.location %><% if (trustEmail) { %>, by email at
+        <a href="mailto:<%= trustEmail %>"><%= trustEmail %></a><% } %>.
+      </p>
+    </article>
+  </main>
+
+  <%- include('footer') %>
+</body>
+</html>

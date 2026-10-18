@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('head') %>
+</head>
+<body class="page-bg">
+  <%- include('header') %>
+
+  <main id="main" class="legal-page">
+    <nav class="legal-nav" aria-label="Legal pages">
+      <a href="/terms" class="<%= currentPath === '/terms' ? 'active' : '' %>">Terms &amp; Conditions</a>
+      <a href="/privacy-policy" class="<%= currentPath === '/privacy-policy' ? 'active' : '' %>">Privacy Policy</a>
+      <a href="/refund-policy" class="<%= currentPath === '/refund-policy' ? 'active' : '' %>">Refund Policy</a>
+      <a href="/disclaimer" class="<%= currentPath === '/disclaimer' ? 'active' : '' %>">Disclaimer</a>
+    </nav>
+
+    <article class="legal-content">
+      <h1><%= title %></h1>
+      <p class="muted">Last updated: <%= updated %></p>

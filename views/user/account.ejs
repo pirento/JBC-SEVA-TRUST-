@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: 'My Account' }) %>
+</head>
+<body class="page-bg">
+  <%- include('../partials/header') %>
+
+  <% const rupees = (n) => '₹' + Number(n || 0).toLocaleString('en-IN'); %>
+
+  <main id="main" class="account-page">
+
+    <% if (welcome) { %>
+      <div class="alert success" role="status">Welcome, <%= currentUser.name %>! Your account has been created.</div>
+    <% } %>
+    <% if (passwordChanged) { %>
+      <div class="alert success" role="status">Your password has been changed.</div>
+    <% } %>
+
+    <section class="account-head">
+      <div>
+        <h1>Namaste, <%= currentUser.name %></h1>
+        <p class="muted"><%= currentUser.email %> · <%= currentUser.phone %></p>
+      </div>
+      <div class="hero-actions">
+        <a href="/donate" class="btn primary">Donate</a>
+        <a href="/medical" class="btn secondary">Request Medical Help</a>
+      </div>
+    </section>
+
+    <section class="stats">
+      <div class="stat"><span>Total Given</span><strong><%= rupees(activity.totalGiven) %></strong></div>
+      <div class="stat"><span>Donations</span><strong><%= activity.donations.length %></strong></div>
+      <div class="stat"><span>Memberships</span><strong><%= activity.memberships.length %></strong></div>
+      <div class="stat"><span>Medical Requests</span><strong><%= activity.medicalRequests.length %></strong></div>
+    </section>
+
+    <p class="muted small-note">Records are matched by the email <strong><%= currentUser.email %></strong>. Use the same email when you donate.</p>
+
+    <section class="panel">
+      <h2>Donations</h2>
+      <% if (activity.donations.length === 0) { %>
+        <p class="empty">No donations yet. <a href="/donate">Make your first donation</a>.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Cause</th><th>Amount</th><th>Transaction</th><th>Certificate</th></tr></thead>
+            <tbody>
+              <% activity.donations.forEach((d) => { %>
+                <tr>
+                  <td><%= d.date %></td>
+                  <td><%= d.cause || 'General' %></td>
+                  <td><%= rupees(d.amount) %></td>
+                  <td class="mono"><%= d.transactionId %></td>
+                  <td><a href="/donate/certificate/<%= encodeURIComponent(d.transactionId) %>">Download</a></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="panel">
+      <h2>Memberships</h2>
+      <% if (activity.memberships.length === 0) { %>
+        <p class="empty">You are not a member yet. <a href="/donation">Become a member</a>.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Transaction</th><th>Receipt</th></tr></thead>
+            <tbody>
+              <% activity.memberships.forEach((m) => { %>
+                <tr>
+                  <td><%= m.date %></td>
+                  <td><%= m.membershipType %></td>
+                  <td><%= rupees(m.amount) %></td>
+                  <td class="mono"><%= m.transactionId %></td>
+                  <td><a href="/donation/receipt/<%= encodeURIComponent(m.transactionId) %>">Download</a></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="panel">
+      <h2>Medical Help Requests</h2>
+      <% if (activity.medicalRequests.length === 0) { %>
+        <p class="empty">No medical help requests.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Patient</th><th>Illness</th><th>Hospital</th><th>Reference</th><th>Receipt</th></tr></thead>
+            <tbody>
+              <% activity.medicalRequests.forEach((r) => { %>
+                <tr>
+                  <td><%= r.date %></td>
+                  <td><%= r.patientName %></td>
+                  <td><%= r.nameDiseases %></td>
+                  <td><%= r.hospitalName %></td>
+                  <td class="mono"><%= r.referenceRegistrationNumber %></td>
+                  <td><a href="/medical/receipt/<%= encodeURIComponent(`Medical-Help-Receipt-${r.referenceRegistrationNumber}.pdf`) %>">Download</a></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="panel" id="security">
+      <h2>Change Password</h2>
+
+      <% if (passwordError) { %>
+        <div class="alert error" role="alert"><%= passwordError %></div>
+      <% } %>
+
+      <form action="/account/password" method="POST" class="form-body compact js-once">
+        <div class="form-grid three">
+          <div class="field">
+            <label for="currentPassword">Current Password</label>
+            <input id="currentPassword" name="currentPassword" type="password" autocomplete="current-password" required />
+          </div>
+          <div class="field">
+            <label for="newPassword">New Password</label>
+            <input id="newPassword" name="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="72" required />
+          </div>
+          <div class="field">
+            <label for="confirmPassword">Confirm New Password</label>
+            <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="72" required />
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn red">Update Password</button>
+        </div>
+      </form>
+    </section>
+
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

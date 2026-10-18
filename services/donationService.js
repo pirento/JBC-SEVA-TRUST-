@@ -33,6 +33,7 @@ const {
   phone,
   email,
   positiveAmount,
+  accepted,
 } = require("../utils/validation");
 
 const escapeHtml = require("../utils/escapeHtml");
@@ -148,6 +149,12 @@ function validateDonation(input) {
   if (paymentMode === "Cash") {
     throw new Error(
       "Cash payment is not available through online PayU payment"
+    );
+  }
+
+  if (!accepted(input.consent)) {
+    throw new Error(
+      "Please accept the Terms, Privacy Policy and Refund Policy"
     );
   }
 

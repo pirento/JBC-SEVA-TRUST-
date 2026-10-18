@@ -12,6 +12,10 @@ const {
 } = require("../services/adminReportService");
 
 const {
+  listUsers,
+} = require("../models/userModel");
+
+const {
   generateDailyReportPdf,
 } = require("../services/adminReportPdfService");
 
@@ -67,6 +71,8 @@ exports.login = async (req, res) => {
       });
 
     if (!result.success) {
+      req.rateLimit?.hit();
+
       return res.status(401).render(
         "admin/login",
         {
@@ -75,9 +81,25 @@ exports.login = async (req, res) => {
       );
     }
 
+    req.rateLimit?.reset();
+
     // ========================================
     // CREATE ADMIN SESSION
     // ========================================
+    // New session id on login stops session fixation;
+    // a logged-in website user stays logged in.
+
+    const user = req.session.user;
+
+    await new Promise((resolve, reject) =>
+      req.session.regenerate((error) =>
+        error ? reject(error) : resolve()
+      )
+    );
+
+    if (user) {
+      req.session.user = user;
+    }
 
     req.session.isAdmin = true;
 
@@ -960,9 +982,14 @@ exports.dashboard = async (
     // RENDER DASHBOARD
     // ========================================
 
+    const registeredUsers =
+      (await listUsers()).length;
+
     return res.render(
       "admin/dashboard",
       {
+
+        registeredUsers,
 
         // Membership
         memberships,

@@ -1,207 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
-
-    <title>JBC Seva Trust</title>
-
-    <link rel="stylesheet" href="/css/style.css" />
+    <%- include('../partials/head') %>
   </head>
 
   <body class="page-bg">
 
     <%- include('../partials/header') %>
 
-    <main>
+    <main id="main">
 
       <section class="hero">
+        <div class="hero-inner">
+          <p class="eyebrow"><%= trust.legalForm %> · <%= trust.location %></p>
+          <h1><%= trust.tagline %></h1>
+          <p class="hero-lead">
+            We stand with forgotten elders, poor families with daughters to
+            marry and children at risk of dropping out, while restoring green
+            cover in our villages. Every rupee is accounted for.
+          </p>
 
-        <h1>JBC Seva Trust</h1>
-
-        <p>
-          Serving humanity. Preserving nature.
-        </p>
-
-        <div class="hero-actions">
-
-          <button
-            id="donateNowBtn"
-            class="btn white"
-          >
-            Become a Member
-          </button>
-
-          <button
-            id="donateBtn"
-            class="btn white"
-          >
-            Donate Now
-          </button>
-
-          <a
-            href="/medical"
-            class="btn white"
-          >
-            Medical Help
-          </a>
-
+          <div class="hero-actions">
+            <button id="donateBtn" type="button" class="btn white">Donate Now</button>
+            <button id="donateNowBtn" type="button" class="btn outline-white">Become a Member</button>
+            <a href="/medical" class="btn outline-white">Medical Help</a>
+          </div>
         </div>
-
       </section>
 
-
-      <section class="about">
-
-        <h2>About Us</h2>
-
-        <p>
-          JBC Seva Trust is a public charitable trust founded by
-          Jang Bahadur Chaudhary and Ravikant Soni. We work on the
-          ground with forgotten elders, poor families with daughters
-          to marry and children at risk of dropping out, while
-          restoring green cover in our villages, with every rupee
-          accounted for.
-        </p>
-
-      </section>
-
-
-      <section class="work">
-
-        <h2>Our Work</h2>
+      <section id="work" class="section">
+        <div class="section-head">
+          <h2>Our Work</h2>
+          <p>Five programmes, one promise: seva with dignity and full transparency.</p>
+        </div>
 
         <div class="cards">
-
-          <div class="card">
-
-            <div>
-
-              <h3>Green Earth</h3>
-
-              <p>
-                Planting native shade and fruit trees on village, school and roadside land, each geotagged and cared for 3 years.
-              </p>
-
+          <% trust.programmes.forEach((programme) => { %>
+            <article class="card" id="<%= programme.slug %>">
+              <div class="card-icon" aria-hidden="true"><%= programme.icon %></div>
+              <h3><%= programme.title %></h3>
+              <p><%= programme.summary %></p>
               <ul>
-                <li>Tree Plantation</li>
-                <li>Pond Clean-up</li>
-                <li>Rainwater Harvesting</li>
-                <li>Plastic Clean-up Drives</li>
+                <% programme.points.forEach((point) => { %>
+                  <li><%= point %></li>
+                <% }) %>
               </ul>
+              <a href="/donate?cause=<%= encodeURIComponent(programme.title) %>" class="card-link">
+                Support <%= programme.title %> →
+              </a>
+            </article>
+          <% }) %>
+        </div>
+      </section>
 
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div>
-
-              <h3>Anand Dham</h3>
-
-              <p>
-                A free home for abandoned and destitute senior citizens, with meals and medical care.
-              </p>
-
-              <ul>
-                <li>Shelter &amp; Meals</li>
-                <li>Health Check-ups</li>
-                <li>Eye Camps</li>
-                <li>Blanket Distribution</li>
-              </ul>
-
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div>
-
-              <h3>Kanyadaan</h3>
-
-              <p>
-                Marriage support for girls from poor families, with legal age and consent checks.
-              </p>
-
-              <ul>
-                <li>Mass Marriage Ceremonies</li>
-                <li>Household Starter Kits</li>
-                <li>Sewing Machines</li>
-                <li>Tailoring Training</li>
-              </ul>
-
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div>
-
-              <h3>Vidya and Poshan</h3>
-
-              <p>
-                Education and nutrition for children so no child drops out of school.
-              </p>
-
-              <ul>
-                <li>School Kits &amp; Uniforms</li>
-                <li>Evening Tutoring</li>
-                <li>Healthy Meals</li>
-                <li>Scholarships</li>
-              </ul>
-
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div>
-
-              <h3>Community Temple</h3>
-
-              <p>
-                A place for worship, meditation, daily aarti and free prasad, run from a separate fund.
-              </p>
-
-              <ul>
-                <li>Temple Construction</li>
-                <li>Daily Aarti</li>
-                <li>Prasad Distribution</li>
-                <li>Meditation Space</li>
-              </ul>
-
-            </div>
-
-          </div>
-
+      <section class="section tint">
+        <div class="section-head">
+          <h2>How We Work</h2>
+          <p>Every programme follows the same three steps.</p>
         </div>
 
+        <ol class="steps">
+          <li>
+            <h3>Grassroots needs assessment</h3>
+            <p>Trustees and volunteers visit villages, meet elders, parents and panchayat leaders, and list who needs help.</p>
+          </li>
+          <li>
+            <h3>Community partnership and care</h3>
+            <p>We work with local doctors, verified teachers and youth volunteers. Every beneficiary is treated with dignity.</p>
+          </li>
+          <li>
+            <h3>Transparent impact</h3>
+            <p>Every rupee is recorded. Donors get photos, delivery proof and a donation receipt.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section id="about" class="section">
+        <div class="section-head">
+          <h2>About Us</h2>
+          <p class="about-text">
+            <%= trust.name %> is a <%= trust.legalForm.toLowerCase() %> based in
+            <%= trust.location %>. "JBC" stands for Jang Bahadur Chaudhary, who
+            founded the trust together with Ravikant Soni. True seva is
+            honouring the dignity in every living being and every inch of our Earth.
+          </p>
+        </div>
+
+        <div class="trustees">
+          <% trust.trustees.forEach((trustee) => { %>
+            <div class="trustee">
+              <div class="avatar" aria-hidden="true"><%= trustee.name.split(' ').map((w) => w[0]).join('').slice(0, 2) %></div>
+              <div>
+                <strong><%= trustee.name %></strong>
+                <span><%= trustee.role %></span>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </section>
+
+      <section class="cta">
+        <h2>Be a part of the change</h2>
+        <p>Your support plants trees, feeds elders and keeps children in school.</p>
+        <div class="hero-actions">
+          <a href="/donate" class="btn white">Donate Now</a>
+          <% if (!currentUser) { %>
+            <a href="/register" class="btn outline-white">Create an Account</a>
+          <% } %>
+        </div>
       </section>
 
     </main>
 
-
     <%- include('../partials/footer') %>
 
-    <!-- Membership Modal -->
     <%- include('../partials/donation-modal') %>
-
-    <!-- Donation Modal -->
     <%- include('../partials/donation-payment-modal') %>
-
-
-    <script src="/js/main.js"></script>
 
   </body>
 </html>

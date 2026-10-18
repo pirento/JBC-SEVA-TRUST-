@@ -97,6 +97,10 @@ async function create(data) {
       data.message || ""
     ).trim(),
 
+    cause: String(
+      data.cause || ""
+    ).trim(),
+
     paymentDate:
       data.paymentDate ||
       new Date().toISOString(),

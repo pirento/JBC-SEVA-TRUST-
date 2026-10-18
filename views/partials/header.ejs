@@ -1,12 +1,54 @@
-<nav class="site-header">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
   <div class="header-inner">
-    <a class="logo-wrap" href="/">
-      <img src="/images/logo.jpeg" alt="JBC Seva Trust Logo">
+    <a class="brand" href="/" aria-label="<%= trust.name %> home">
+      <span class="logo-wrap">
+        <img src="/images/logo.jpeg" alt="" width="48" height="48">
+      </span>
+      <span class="brand-text">
+        <strong><%= trust.name %></strong>
+        <small><%= trust.tagline %></small>
+      </span>
     </a>
 
-    <div class="header-title">
-      <h1>JBC Seva Trust</h1>
-      <p>Serving humanity. Preserving nature.</p>
-    </div>
+    <button
+      type="button"
+      class="nav-toggle"
+      aria-controls="siteNav"
+      aria-expanded="false"
+      aria-label="Open menu"
+    >
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav id="siteNav" class="site-nav" aria-label="Main">
+      <% const navLink = (href, label) => { %>
+        <a href="<%= href %>" class="<%= currentPath === href ? 'active' : '' %>" <% if (currentPath === href) { %>aria-current="page"<% } %>><%= label %></a>
+      <% } %>
+
+      <% navLink('/', 'Home') %>
+      <a href="/#work">Our Work</a>
+      <a href="/#about">About</a>
+      <% navLink('/medical', 'Medical Help') %>
+      <% navLink('/donation', 'Membership') %>
+
+      <span class="nav-account">
+        <% if (currentUser) { %>
+          <% navLink('/account', 'My Account') %>
+          <form action="/logout" method="POST" class="inline-form">
+            <button type="submit" class="nav-link-btn">Logout</button>
+          </form>
+        <% } else { %>
+          <% navLink('/login', 'Login') %>
+          <% navLink('/register', 'Register') %>
+        <% } %>
+        <% if (isAdmin) { %>
+          <a href="/admin/dashboard">Admin</a>
+        <% } %>
+      </span>
+
+      <a href="/donate" class="btn nav-donate">Donate</a>
+    </nav>
   </div>
-</nav>
+</header>
