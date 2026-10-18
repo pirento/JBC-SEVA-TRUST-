@@ -10,37 +10,79 @@
 
     <main id="main">
 
+      <!-- HERO -->
       <section class="hero">
         <div class="hero-inner">
-          <p class="eyebrow"><%= trust.legalForm %> · <%= trust.location %></p>
-          <h1><%= trust.tagline %></h1>
-          <p class="hero-lead">
-            We stand with forgotten elders, poor families with daughters to
-            marry and children at risk of dropping out, while restoring green
-            cover in our villages. Every rupee is accounted for.
-          </p>
+          <div class="hero-copy">
+            <p class="eyebrow">🙏 Seva with dignity · Every rupee accounted for</p>
+            <h1>Serving humanity.<br><span>Preserving nature.</span></h1>
+            <p class="hero-lead">
+              <%= trust.name %> stands with forgotten elders, poor families with
+              daughters to marry and children at risk of dropping out, while
+              restoring green cover in the villages of Basti.
+            </p>
 
-          <div class="hero-actions">
-            <button id="donateBtn" type="button" class="btn white">Donate Now</button>
-            <button id="donateNowBtn" type="button" class="btn outline-white">Become a Member</button>
-            <a href="/medical" class="btn outline-white">Medical Help</a>
+            <div class="hero-actions">
+              <button id="donateBtn" type="button" class="btn saffron">♥ Donate Now</button>
+              <button id="donateNowBtn" type="button" class="btn outline-white">Become a Member</button>
+              <a href="/medical" class="btn link-white">Need medical help? →</a>
+            </div>
           </div>
+
+          <form class="quick-donate" action="/donate" method="GET" aria-labelledby="quickDonateTitle">
+            <h2 id="quickDonateTitle">Give in 30 seconds</h2>
+            <p>Choose a cause and an amount. Secure payment via PayU.</p>
+
+            <label for="quickCause">I want to support</label>
+            <select id="quickCause" name="cause">
+              <% trust.donationCauses.forEach((cause) => { %>
+                <option value="<%= cause %>"><%= cause %></option>
+              <% }) %>
+            </select>
+
+            <fieldset>
+              <legend>Amount</legend>
+              <div class="quick-amounts">
+                <% [501, 1100, 2100, 5100].forEach((value, index) => { %>
+                  <label class="radio-pill">
+                    <input type="radio" name="amount" value="<%= value %>" <%= index === 1 ? 'checked' : '' %> />
+                    <span>₹<%= value.toLocaleString('en-IN') %></span>
+                  </label>
+                <% }) %>
+              </div>
+            </fieldset>
+
+            <button type="submit" class="btn primary full">Continue to Donate →</button>
+            <small>🔒 UPI · Cards · Net Banking</small>
+          </form>
         </div>
       </section>
 
+      <!-- GOALS -->
+      <section class="goals" aria-label="Our goals">
+        <% trust.goals.forEach((goal) => { %>
+          <div class="goal">
+            <strong><%= goal.value %></strong>
+            <span><%= goal.label %></span>
+          </div>
+        <% }) %>
+      </section>
+
+      <!-- PROGRAMMES -->
       <section id="work" class="section">
         <div class="section-head">
+          <p class="kicker">What we do</p>
           <h2>Our Work</h2>
           <p>Five programmes, one promise: seva with dignity and full transparency.</p>
         </div>
 
         <div class="cards">
           <% trust.programmes.forEach((programme) => { %>
-            <article class="card" id="<%= programme.slug %>">
+            <article class="card tone-<%= programme.tone %>" id="<%= programme.slug %>">
               <div class="card-icon" aria-hidden="true"><%= programme.icon %></div>
               <h3><%= programme.title %></h3>
               <p><%= programme.summary %></p>
-              <ul>
+              <ul class="tick-list">
                 <% programme.points.forEach((point) => { %>
                   <li><%= point %></li>
                 <% }) %>
@@ -50,63 +92,104 @@
               </a>
             </article>
           <% }) %>
+
+          <article class="card card-cta">
+            <div class="card-icon" aria-hidden="true">🤝</div>
+            <h3>Not sure where to give?</h3>
+            <p>Give to "Where Most Needed" and the trustees will use it where help is needed most urgently.</p>
+            <a href="/donate" class="btn saffron">Donate Where Most Needed</a>
+          </article>
         </div>
       </section>
 
-      <section class="section tint">
+      <!-- VISION -->
+      <section class="vision">
+        <blockquote>
+          <p>“<%= trust.vision %>”</p>
+          <cite>— Our Vision</cite>
+        </blockquote>
+      </section>
+
+      <!-- HOW WE WORK -->
+      <section class="section">
         <div class="section-head">
+          <p class="kicker">Our approach</p>
           <h2>How We Work</h2>
           <p>Every programme follows the same three steps.</p>
         </div>
 
         <ol class="steps">
           <li>
+            <div class="step-icon" aria-hidden="true">🔍</div>
             <h3>Grassroots needs assessment</h3>
             <p>Trustees and volunteers visit villages, meet elders, parents and panchayat leaders, and list who needs help.</p>
           </li>
           <li>
+            <div class="step-icon" aria-hidden="true">🤲</div>
             <h3>Community partnership and care</h3>
             <p>We work with local doctors, verified teachers and youth volunteers. Every beneficiary is treated with dignity.</p>
           </li>
           <li>
+            <div class="step-icon" aria-hidden="true">📒</div>
             <h3>Transparent impact</h3>
             <p>Every rupee is recorded. Donors get photos, delivery proof and a donation receipt.</p>
           </li>
         </ol>
       </section>
 
-      <section id="about" class="section">
-        <div class="section-head">
-          <h2>About Us</h2>
-          <p class="about-text">
-            <%= trust.name %> is a <%= trust.legalForm.toLowerCase() %> based in
-            <%= trust.location %>. "JBC" stands for Jang Bahadur Chaudhary, who
-            founded the trust together with Ravikant Soni. True seva is
-            honouring the dignity in every living being and every inch of our Earth.
-          </p>
-        </div>
+      <!-- ABOUT -->
+      <section id="about" class="section about">
+        <div class="about-grid">
+          <div>
+            <p class="kicker">Who we are</p>
+            <h2>About <%= trust.name %></h2>
+            <p>
+              <%= trust.name %> is a <%= trust.legalForm.toLowerCase() %> based in
+              <%= trust.location %>. "JBC" stands for Jang Bahadur Chaudhary, who
+              founded the trust together with Ravikant Soni.
+            </p>
+            <p>
+              We are an independent body with our own bank account, books and
+              donors. Money given for a cause is kept in its own fund and used
+              only for that cause.
+            </p>
+            <ul class="tick-list">
+              <li>Both trustees sign every decision</li>
+              <li>Separate ledger for every programme</li>
+              <li>Receipt for every donation</li>
+            </ul>
+          </div>
 
-        <div class="trustees">
-          <% trust.trustees.forEach((trustee) => { %>
-            <div class="trustee">
-              <div class="avatar" aria-hidden="true"><%= trustee.name.split(' ').map((w) => w[0]).join('').slice(0, 2) %></div>
-              <div>
-                <strong><%= trustee.name %></strong>
-                <span><%= trustee.role %></span>
+          <div class="trustees">
+            <h3>Our Trustees</h3>
+            <% trust.trustees.forEach((trustee) => { %>
+              <div class="trustee">
+                <div class="avatar" aria-hidden="true"><%= trustee.name.split(' ').map((w) => w[0]).join('').slice(0, 2) %></div>
+                <div>
+                  <strong><%= trustee.name %></strong>
+                  <span><%= trustee.role %></span>
+                </div>
               </div>
-            </div>
-          <% }) %>
+            <% }) %>
+          </div>
         </div>
       </section>
 
+      <!-- CTA -->
       <section class="cta">
-        <h2>Be a part of the change</h2>
-        <p>Your support plants trees, feeds elders and keeps children in school.</p>
-        <div class="hero-actions">
-          <a href="/donate" class="btn white">Donate Now</a>
-          <% if (!currentUser) { %>
-            <a href="/register" class="btn outline-white">Create an Account</a>
-          <% } %>
+        <div class="cta-inner">
+          <div>
+            <h2>Be a part of the change</h2>
+            <p>Your support plants trees, feeds elders and keeps children in school.</p>
+          </div>
+          <div class="hero-actions">
+            <a href="/donate" class="btn saffron">♥ Donate Now</a>
+            <% if (!currentUser) { %>
+              <a href="/register" class="btn outline-white">Create an Account</a>
+            <% } else { %>
+              <a href="/account" class="btn outline-white">My Account</a>
+            <% } %>
+          </div>
         </div>
       </section>
 

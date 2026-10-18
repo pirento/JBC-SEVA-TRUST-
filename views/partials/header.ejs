@@ -1,5 +1,12 @@
 <a class="skip-link" href="#main">Skip to content</a>
 
+<div class="topbar">
+  <div class="topbar-inner">
+    <span>🌿 <%= trust.legalForm %> · <%= trust.location %></span>
+    <span class="topbar-hindi" lang="hi"><%= trust.taglineHindi %></span>
+  </div>
+</div>
+
 <header class="site-header">
   <div class="header-inner">
     <a class="brand" href="/" aria-label="<%= trust.name %> home">
@@ -48,7 +55,7 @@
         <% } %>
       </span>
 
-      <a href="/donate" class="btn nav-donate">Donate</a>
+      <a href="/donate" class="btn nav-donate">♥ Donate</a>
     </nav>
   </div>
 </header>

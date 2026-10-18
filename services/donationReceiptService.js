@@ -42,7 +42,7 @@ const PAGE = {
 const COLORS = {
   background: "#fffdf5",
   orange: "#f47b00",
-  darkRed: "#8e1717",
+  brand: "#14532d",
   dark: "#222222",
   lightGold: "#d2a45c",
   muted: "#555555",
@@ -583,7 +583,7 @@ function drawTitle(doc) {
   doc
     .font("Times-Bold")
     .fontSize(38)
-    .fillColor(COLORS.darkRed)
+    .fillColor(COLORS.brand)
     .text(
       "Membership Certificate",
       170,
@@ -598,7 +598,7 @@ function drawTitle(doc) {
     .moveTo(330, 249)
     .lineTo(510, 249)
     .lineWidth(0.8)
-    .stroke(COLORS.darkRed);
+    .stroke(COLORS.brand);
 
   doc
     .font("Times-Roman")
@@ -666,7 +666,7 @@ function drawMainContent(doc, data) {
 
   doc
     .fontSize(25)
-    .fillColor(COLORS.darkRed)
+    .fillColor(COLORS.brand)
     .text(
       truncate(memberName, 45),
       145,
@@ -699,7 +699,7 @@ function drawMainContent(doc, data) {
   doc
     .font("Times-Bold")
     .fontSize(14)
-    .fillColor(COLORS.darkRed)
+    .fillColor(COLORS.brand)
     .text(
       "JBC Seva Trust",
       185,
@@ -759,7 +759,7 @@ function drawMainContent(doc, data) {
   doc
     .font("Times-Italic")
     .fontSize(12.5)
-    .fillColor(COLORS.darkRed)
+    .fillColor(COLORS.brand)
     .text(
       "Thank you for being a part of our mission",
       185,
@@ -987,7 +987,7 @@ function drawRegards(doc) {
       461
     )
     .lineWidth(0.8)
-    .stroke(COLORS.darkRed);
+    .stroke(COLORS.brand);
 
   doc
     .font("Times-Roman")
@@ -1006,7 +1006,7 @@ function drawRegards(doc) {
   doc
     .font("Times-Bold")
     .fontSize(12)
-    .fillColor(COLORS.darkRed)
+    .fillColor(COLORS.brand)
     .text(
       "JBC Seva Trust",
       x - 15,
@@ -1029,7 +1029,7 @@ function drawRegards(doc) {
       lineY
     )
     .lineWidth(0.7)
-    .stroke(COLORS.darkRed);
+    .stroke(COLORS.brand);
 
   // PDFKit-compatible diamond
   doc
@@ -1050,7 +1050,7 @@ function drawRegards(doc) {
       lineY
     )
     .closePath()
-    .fill(COLORS.darkRed);
+    .fill(COLORS.brand);
 }
 
 // ============================================================
@@ -1158,7 +1158,7 @@ function drawBottomWave(doc) {
   doc
     .font("Times-Bold")
     .fontSize(7)
-    .fillColor(COLORS.darkRed)
+    .fillColor(COLORS.brand)
     .text(
       "HEALTHY PEOPLE   |   EMPOWERED COMMUNITIES   |   A BETTER TOMORROW",
       205,

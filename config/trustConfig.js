@@ -10,6 +10,7 @@
 const programmes = [
   {
     slug: "green-earth",
+    tone: "green",
     icon: "🌳",
     title: "Green Earth",
     summary:
@@ -18,6 +19,7 @@ const programmes = [
   },
   {
     slug: "anand-dham",
+    tone: "saffron",
     icon: "🏡",
     title: "Anand Dham",
     summary:
@@ -26,6 +28,7 @@ const programmes = [
   },
   {
     slug: "kanyadaan",
+    tone: "rose",
     icon: "💐",
     title: "Kanyadaan",
     summary:
@@ -34,6 +37,7 @@ const programmes = [
   },
   {
     slug: "vidya-poshan",
+    tone: "blue",
     icon: "📚",
     title: "Vidya and Poshan",
     summary:
@@ -42,6 +46,7 @@ const programmes = [
   },
   {
     slug: "temple",
+    tone: "amber",
     icon: "🛕",
     title: "Community Temple",
     summary:
@@ -58,6 +63,16 @@ const donationCauses = [GENERAL_CAUSE, ...programmes.map((p) => p.title)];
 module.exports = {
   name: "JBC Seva Trust",
   tagline: "Serving humanity. Preserving nature.",
+  taglineHindi: "मानवता की सेवा, प्रकृति का संरक्षण",
+  vision:
+    "True seva is honouring the dignity in every living being and every inch of our Earth.",
+  // Targets from the work plan: goals, not results achieved
+  goals: [
+    { value: "10,000", label: "native trees to plant (goal)" },
+    { value: "3 years", label: "of care for every tree planted" },
+    { value: "5", label: "programmes run by the trust" },
+    { value: "100%", label: "of earmarked money used for its cause" },
+  ],
   legalForm: "Public Charitable Trust",
   location: "Basti, Uttar Pradesh, India",
   trustees: [

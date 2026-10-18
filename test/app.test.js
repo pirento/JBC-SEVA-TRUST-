@@ -129,6 +129,12 @@ test("security headers are set and x-powered-by is hidden", async () => {
 test("donate page preselects the cause from the link", async () => {
   const res = await client()("/donate?cause=Anand%20Dham");
   assert.match(res.text, /<option value="Anand Dham" selected>/);
+
+  const quick = await client()("/donate?cause=Green%20Earth&amount=2100");
+  assert.match(quick.text, /value="2100"/, "amount from quick donate");
+
+  const bad = await client()("/donate?amount=%22%3E%3Cscript%3E");
+  assert.doesNotMatch(bad.text, /<script>/);
 });
 
 // ------------------------------------------------------------

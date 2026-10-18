@@ -35,7 +35,7 @@
   <div class="field">
     <label for="<%= p %>Amount">Donation Amount (₹) *</label>
     <input id="<%= p %>Amount" name="amount" type="number" min="100" step="1" inputmode="numeric"
-      placeholder="Minimum ₹100" required />
+      placeholder="Minimum ₹100" value="<%= locals.selectedAmount || '' %>" required />
     <div class="amount-chips" data-target="<%= p %>Amount">
       <% [501, 1100, 2100, 5100].forEach((value) => { %>
         <button type="button" class="chip" data-amount="<%= value %>">₹<%= value.toLocaleString('en-IN') %></button>

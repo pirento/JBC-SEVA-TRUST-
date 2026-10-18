@@ -12,6 +12,7 @@ const store = require("../models/pendingDonationStore");
 function showDonationForm(req, res) {
   return res.render("pages/donate", {
     selectedCause: String(req.query.cause || ""),
+    selectedAmount: /^\d{3,7}$/.test(String(req.query.amount || "")) ? req.query.amount : "",
   });
 }
 
