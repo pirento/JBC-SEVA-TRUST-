@@ -1,29 +1,12 @@
-const userModel = require("../models/userModel");
-
 // ========================================
 // USER AUTHENTICATION MIDDLEWARE
 // ========================================
-// Also logs out a session that started before the password was last
-// changed or reset, so whoever reset it takes the account back.
+// Sessions from before a password change are already logged out in
+// app.js, so a session user here is current.
 
-async function userAuth(req, res, next) {
-  const sessionUser = req.session && req.session.user;
-
-  if (sessionUser) {
-    try {
-      const user = await userModel.findByEmail(sessionUser.email);
-
-      if (
-        user &&
-        (Number(user.passwordChangedAt) || 0) === sessionUser.passwordChangedAt
-      ) {
-        return next();
-      }
-
-      delete req.session.user;
-    } catch (error) {
-      return next(error);
-    }
+function userAuth(req, res, next) {
+  if (req.session && req.session.user) {
+    return next();
   }
 
   return res.redirect(`/login?next=${encodeURIComponent(req.originalUrl)}`);

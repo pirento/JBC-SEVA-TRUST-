@@ -18,22 +18,32 @@ const PAYU_CALLBACKS = new Set([
   "/payu/webhook",
 ]);
 
+// www.jbcsevatrust.org and jbcsevatrust.org count as the same site
+const bare = (host) =>
+  String(host || "")
+    .toLowerCase()
+    .replace(/^www\./, "");
+
 function hostOf(url) {
   try {
-    return new URL(url).host;
+    return bare(new URL(url).host);
   } catch {
     return "";
   }
 }
 
 function sameOrigin(req, res, next) {
-  if (req.method !== "POST" || PAYU_CALLBACKS.has(req.path)) return next();
+  // Express matches routes ignoring case and a trailing slash; so must this
+  const path = req.path.toLowerCase().replace(/\/+$/, "");
+  if (req.method !== "POST" || PAYU_CALLBACKS.has(path)) return next();
 
   const source = req.get("origin") || req.get("referer");
   if (!source) return next();
 
-  // Host header, or APP_URL in case a proxy rewrites Host
-  const allowed = [req.get("host"), hostOf(appUrl)];
+  // Host header, the proxy's forwarded host, or APP_URL in case a proxy rewrites Host
+  const allowed = [req.get("host"), req.host, appUrl].map((h) =>
+    h === appUrl ? hostOf(h) : bare(h),
+  );
   if (allowed.includes(hostOf(source))) return next();
 
   return res.status(403).render("pages/form-error", {

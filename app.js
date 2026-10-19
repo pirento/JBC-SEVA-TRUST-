@@ -155,6 +155,41 @@ app.use(i18n);
 // VIEW LOCALS
 // ========================================
 
+const userModel = require("./models/userModel");
+
+// A session from before the password was last changed or reset is
+// logged out on every page, so it cannot show or pre-fill the owner's details
+app.use(async (req, res, next) => {
+  const sessionUser = req.session.user;
+  if (!sessionUser) return next();
+
+  try {
+    const user = await userModel.findByEmail(sessionUser.email);
+    if (
+      !user ||
+      (Number(user.passwordChangedAt) || 0) !== sessionUser.passwordChangedAt
+    ) {
+      delete req.session.user;
+    }
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// Behind Cloudflare with TRUST_PROXY unset, every visitor would share
+// one IP for rate limits; say so once in the log
+let proxyWarned = !isProduction || Boolean(process.env.TRUST_PROXY);
+app.use((req, res, next) => {
+  if (!proxyWarned && req.get("cf-connecting-ip")) {
+    proxyWarned = true;
+    console.warn(
+      "⚠️  Cloudflare detected: set TRUST_PROXY=2 in .env so visitors are told apart",
+    );
+  }
+  next();
+});
+
 app.use((req, res, next) => {
   res.locals.trust = trust;
   res.locals.currentUser = req.session.user || null;

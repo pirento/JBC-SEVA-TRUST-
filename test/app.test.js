@@ -400,6 +400,11 @@ test("full user journey: register, logout, login, change password", async () => 
   assert.equal(res.status, 302);
   assert.equal((await req("/account")).status, 200, "this session stays logged in");
   assert.equal((await other("/account")).status, 302, "older session is logged out");
+  assert.doesNotMatch(
+    (await other("/contact")).text,
+    /asha@example\.com/,
+    "and its forms are no longer pre-filled with the owner's details",
+  );
 
   await req("/logout", { method: "POST" });
 
@@ -1456,4 +1461,20 @@ test("forms posted from another website are refused, PayU callbacks are not", as
 
   res = await req("/donate/failure", { method: "POST", form: {}, headers: evil });
   assert.equal(res.status, 303, "PayU posts from its own site");
+
+  res = await req("/donate/failure/", { method: "POST", form: {}, headers: evil });
+  assert.equal(res.status, 303, "callback URL with a trailing slash too");
+
+  // Visitor on www.<site>, Host without www (an IP cannot carry "www.", so use localhost)
+  const local = base.replace("127.0.0.1", "localhost");
+  const www = await fetch(local + "/login", {
+    method: "POST",
+    headers: {
+      origin: local.replace("//", "//www."),
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body: "email=a%40example.com&password=whatever1",
+    redirect: "manual",
+  });
+  assert.notEqual(www.status, 403, "www and bare domain are the same site");
 });
