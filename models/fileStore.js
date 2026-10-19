@@ -6,6 +6,24 @@ const { dataDir } = require("../config/appConfig");
 const { encrypt, decrypt } = require("../services/encryptionService");
 
 // ========================================
+// READ CACHE
+// ========================================
+//
+// Decrypting a whole file on every request gets slow as records grow.
+// Decrypted records are kept per file and reused until the file's size
+// or modified time changes. Writes through this module clear the entry.
+//
+// shortcut: one Node process only; with several processes each keeps
+// its own cache, which is still correct because it checks the file.
+// ========================================
+
+const cache = new Map();
+
+function clearCache(fileName) {
+  cache.delete(fileName);
+}
+
+// ========================================
 // ENSURE DATA DIRECTORY
 // ========================================
 
@@ -174,6 +192,8 @@ async function appendRecord(fileName, record) {
 
   await fs.appendFile(filePath, encryptedRecord + "\n", "utf8");
 
+  clearCache(fileName);
+
   return {
     fileName,
 
@@ -191,6 +211,37 @@ async function readRecords(fileName) {
   await ensureDataDirectory();
 
   const filePath = getFilePath(fileName);
+
+  let stat;
+
+  try {
+    stat = await fs.stat(filePath);
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return [];
+    }
+
+    throw error;
+  }
+
+  const cached = cache.get(fileName);
+
+  if (cached && cached.size === stat.size && cached.mtimeMs === stat.mtimeMs) {
+    // Copies, so callers can change a record without touching the cache
+    return cached.records.map((record) => ({ ...record }));
+  }
+
+  const records = await readRecordsFromDisk(fileName, filePath);
+
+  // A legacy migration rewrites the file; take the stat after it
+  const fresh = await fs.stat(filePath).catch(() => stat);
+
+  cache.set(fileName, { size: fresh.size, mtimeMs: fresh.mtimeMs, records });
+
+  return records.map((record) => ({ ...record }));
+}
+
+async function readRecordsFromDisk(fileName, filePath) {
 
   let content;
 

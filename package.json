@@ -12,16 +12,19 @@
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "compression": "^1.8.2",
     "dotenv": "^17.4.2",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-session": "^1.19.0",
+    "memorystore": "^1.6.8",
     "multer": "^2.4.0",
     "node-cron": "^4.6.0",
     "nodemailer": "^10.0.0",
     "pdfkit": "^0.20.2"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "prettier": "^3.9.10"
   }
 }

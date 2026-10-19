@@ -2,6 +2,8 @@ require("dotenv").config();
 
 const express = require("express");
 const session = require("express-session");
+const compression = require("compression");
+const MemoryStore = require("memorystore")(session);
 
 const {
   port,
@@ -76,10 +78,28 @@ app.set("view engine", "ejs");
 app.set("views", viewsDir);
 
 // ========================================
+// COMPRESSION
+// ========================================
+// Pages are mostly text; gzip makes them several times smaller on
+// slow mobile connections.
+
+app.use(compression());
+
+// ========================================
 // STATIC FILES
 // ========================================
+// Images and fonts rarely change; CSS and JS are re-checked hourly.
 
-app.use(express.static(publicDir));
+app.use(
+  express.static(publicDir, {
+    maxAge: "1h",
+    setHeaders(res, filePath) {
+      if (/\.(png|jpe?g|webp|svg|ico|ttf|woff2?)$/.test(filePath)) {
+        res.set("Cache-Control", "public, max-age=604800");
+      }
+    },
+  }),
+);
 
 // ========================================
 // BODY PARSER
@@ -100,6 +120,9 @@ app.use(express.json());
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
+
+    // The default store never removes expired sessions; this one does
+    store: new MemoryStore({ checkPeriod: 1000 * 60 * 15 }),
 
     resave: false,
 

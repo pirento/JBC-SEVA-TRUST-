@@ -29,7 +29,7 @@ async function getPending(id) {
     const record = records[i];
     if (String(record.transactionId || "") !== transactionId) continue;
     if (record.state !== "PENDING") return null;
-    return record.data || null;
+    return record.data ? { ...record.data } : null;
   }
   return null;
 }
