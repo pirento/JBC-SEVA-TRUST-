@@ -2,7 +2,12 @@ const fs = require("fs");
 const path = require("path");
 
 const { renderCertificatePdf, safe, formatDate } = require("./certificateDesign");
-const { taxNote, eightyG, GENERAL_CAUSE } = require("../config/trustConfig");
+const {
+  taxNote,
+  eightyG,
+  GENERAL_CAUSE,
+  donationPages,
+} = require("../config/trustConfig");
 const { dataDir } = require("../config/appConfig");
 
 // ============================================================
@@ -26,6 +31,7 @@ function generateCertificateNumber(data) {
 
 async function generateDonationCertificate(data) {
   const cause = safe(data.cause, GENERAL_CAUSE);
+  const religious = donationPages.some((p) => p.title === cause && p.donation.religious);
   const purpose = String(data.purpose || "").trim();
   const certificateNumber = generateCertificateNumber(data);
 
@@ -35,13 +41,16 @@ async function generateDonationCertificate(data) {
     title: "Donation Certificate",
     lead: "This certificate is gratefully presented to",
     name: safe(data.donorName, "Donor"),
-    statement:
+    // Parts, so a dedication typed in Hindi is printed in a Hindi font
+    statement: [
       `for a generous contribution to ${cause}` +
-      (purpose && purpose !== "General donation" ? ` (${purpose})` : "") +
-      (data.dedicatedTo
-        ? `, ${String(data.dedicationType).toLowerCase()} ${data.dedicatedTo}`
-        : "") +
-      ". Your support helps us serve people and protect nature in our villages.",
+        (purpose && purpose !== "General donation" ? ` (${purpose})` : "") +
+        (data.dedicatedTo ? `, ${String(data.dedicationType).toLowerCase()} ` : ""),
+      data.dedicatedTo ? String(data.dedicatedTo) : "",
+      religious
+        ? ". Your offering is kept in the separate Temple Fund for the temple."
+        : ". Your support helps us serve people and protect nature in our villages.",
+    ],
     amount: data.amount,
     certificateNumber,
     date: data.paymentDate,
@@ -49,11 +58,12 @@ async function generateDonationCertificate(data) {
       ["Fund", cause],
       ["Purpose", purpose],
       ["Payment Mode", safe(data.paymentMode, "Online")],
-      ["Transaction ID", safe(data.txnid || data.transactionId, "N/A")],
       ["Payment ID", safe(data.mihpayid || data.payuPaymentId, "")],
       ["Seva Date", data.sevaDate ? formatDate(data.sevaDate) : ""],
       // Donor PAN is needed on an 80G receipt; shown only once approved
       ["Donor PAN", eightyG.approved ? data.pan : ""],
+      // Last: a long ID may wrap to a second line
+      ["Transaction ID", safe(data.txnid || data.transactionId, "N/A")],
     ],
     note: taxNote(cause) + " This is a computer-generated certificate.",
   });

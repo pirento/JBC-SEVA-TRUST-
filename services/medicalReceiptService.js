@@ -12,13 +12,7 @@ const logoPath = path.join(__dirname, "..", "public", "images", "logo-mark.png")
 // HINDI / DEVANAGARI FONT PATH
 // ========================================
 
-const devanagariFontPath = path.join(
-  __dirname,
-  "..",
-  "public",
-  "fonts",
-  "NotoSansDevanagari-Regular.ttf",
-);
+const devanagariFontPath = path.join(__dirname, "..", "public", "fonts", "FreeSans.ttf");
 
 // ========================================
 // CHECK HINDI / DEVANAGARI TEXT
@@ -320,6 +314,7 @@ function drawTwoColumn(doc, label1, value1, label2, value2) {
   doc.fontSize(10).text(value1, leftX, startY + 14, {
     width: 220,
   });
+  const leftBottom = doc.y;
 
   // ======================================
   // RIGHT LABEL
@@ -339,7 +334,9 @@ function drawTwoColumn(doc, label1, value1, label2, value2) {
     width: 220,
   });
 
-  doc.y = startY + 40;
+  // A long illness or hospital name wraps; the next row starts below it
+  doc.y = Math.max(startY + 40, leftBottom + 10, doc.y + 10);
+  doc.x = leftX;
 }
 
 // ========================================

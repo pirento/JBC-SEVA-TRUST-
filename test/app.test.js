@@ -1502,3 +1502,32 @@ test("forms posted from another website are refused, PayU callbacks are not", as
   });
   assert.notEqual(www.status, 403, "www and bare domain are the same site");
 });
+
+test("PDFs print Hindi names that used to crash the font engine", async () => {
+  const {
+    generateDonationCertificate,
+  } = require("../services/donationCertificateService");
+  const { generateMedicalReceipt } = require("../services/medicalReceiptService");
+  const name = "रामकांत चौधरी, हर्रैया";
+
+  const cert = await generateDonationCertificate({
+    donorName: name,
+    cause: "Community Temple",
+    dedicationType: "In memory of",
+    dedicatedTo: "स्वर्गीय श्री राम प्रसाद",
+    amount: 501,
+    txnid: "TXN_hindi_test",
+    paymentDate: new Date(),
+  });
+  assert.ok(cert.buffer.length > 1000);
+
+  const receipt = await generateMedicalReceipt({
+    patientName: name,
+    aadharNumber: "234123412346",
+    nameDiseases: "मोतियाबिंद",
+    hospitalName: "जिला अस्पताल बस्ती",
+    referenceRegistrationNumber: "MED-1-TEST",
+    submissionDate: new Date(),
+  });
+  assert.ok(receipt.length > 1000);
+});

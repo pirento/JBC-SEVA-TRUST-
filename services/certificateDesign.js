@@ -14,13 +14,7 @@ const trust = require("../config/trustConfig");
 
 const logoPath = path.join(__dirname, "..", "public", "images", "logo-mark.png");
 
-const devanagariFontPath = path.join(
-  __dirname,
-  "..",
-  "public",
-  "fonts",
-  "NotoSansDevanagari-Regular.ttf",
-);
+const devanagariFontPath = path.join(__dirname, "..", "public", "fonts", "FreeSans.ttf");
 
 const PAGE = { width: 841.89, height: 595.28 };
 
@@ -338,11 +332,20 @@ function drawRecipient(doc, { lead, name, statement }) {
     .fillColor(COLORS.muted)
     .text(lead, CONTENT_X, 128, { width: CONTENT_W });
 
+  // Long names shrink to fit one line instead of losing their second half
   setDonorNameFont(doc, name);
+  const fullName = truncate(name, 100);
+  let nameSize = 32;
+  while (nameSize > 16 && doc.fontSize(nameSize).widthOfString(fullName) > CONTENT_W)
+    nameSize -= 1;
   doc
-    .fontSize(32)
+    .fontSize(nameSize)
     .fillColor(COLORS.navy)
-    .text(truncate(name, 40), CONTENT_X, 148, { width: CONTENT_W, height: 40 });
+    .text(fullName, CONTENT_X, 148 + (32 - nameSize) / 2, {
+      width: CONTENT_W,
+      lineBreak: false,
+      ellipsis: true,
+    });
 
   doc
     .moveTo(CONTENT_X, 192)
@@ -350,11 +353,24 @@ function drawRecipient(doc, { lead, name, statement }) {
     .lineWidth(1.5)
     .stroke(COLORS.saffronLight);
 
-  doc
-    .font("Times-Roman")
-    .fontSize(12.5)
-    .fillColor(COLORS.text)
-    .text(statement, CONTENT_X, 206, { width: CONTENT_W - 20, lineGap: 3 });
+  // The statement may hold Hindi parts (a dedication typed in Hindi);
+  // each part gets a font that has its letters
+  const parts = [].concat(statement).filter(Boolean);
+  doc.fontSize(12.5).fillColor(COLORS.text);
+  parts.forEach((part, i) => {
+    doc.font(
+      hasDevanagari(part) && fs.existsSync(devanagariFontPath)
+        ? devanagariFontPath
+        : "Times-Roman",
+    );
+    const options = {
+      width: CONTENT_W - 20,
+      lineGap: 3,
+      continued: i < parts.length - 1,
+    };
+    if (i === 0) doc.text(part, CONTENT_X, 206, options);
+    else doc.text(part, options);
+  });
 }
 
 // Amount block on the left, detail rows in two columns on the right
@@ -405,11 +421,14 @@ function drawDetails(doc, { amount, amountWords, details }) {
       .fillColor(COLORS.muted)
       .text(label.toUpperCase(), x, y, { width: colW - 12, characterSpacing: 1 });
 
-    doc
-      .font("Helvetica-Bold")
-      .fontSize(10)
-      .fillColor(COLORS.text)
-      .text(truncate(value, 34), x, y + 11, { width: colW - 12, height: 14 });
+    // Shrink long values to one line; a value that still does not fit
+    // (a 42-character transaction ID) wraps to a second line, so callers
+    // list it last where nothing sits below it
+    const text = String(value);
+    let size = 10;
+    doc.font("Helvetica-Bold");
+    while (size > 7.5 && doc.fontSize(size).widthOfString(text) > colW - 12) size -= 0.5;
+    doc.fillColor(COLORS.text).text(text, x, y + 11, { width: colW - 12 });
   });
 }
 

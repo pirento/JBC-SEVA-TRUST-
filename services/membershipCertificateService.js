@@ -62,8 +62,9 @@ function generateMembershipCertificate(data) {
       ["Membership", membershipType],
       ["Valid Till", getValidTill(data.paymentDate, membershipType)],
       ["Payment Mode", safe(data.paymentMode, "Online")],
-      ["Transaction ID", safe(data.txnid || data.transactionId, "N/A")],
       ["Payment ID", safe(data.mihpayid || data.payuPaymentId, "")],
+      // Last: a long ID may wrap to a second line
+      ["Transaction ID", safe(data.txnid || data.transactionId, "N/A")],
     ],
     note:
       "Membership does not give ownership, voting or management rights in the Trust. " +

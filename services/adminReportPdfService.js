@@ -3,13 +3,7 @@ const path = require("path");
 const PDFDocument = require("pdfkit");
 
 // Names typed in Hindi need a Devanagari font; Helvetica has none
-const DEVANAGARI_FONT = path.join(
-  __dirname,
-  "..",
-  "public",
-  "fonts",
-  "NotoSansDevanagari-Regular.ttf",
-);
+const DEVANAGARI_FONT = path.join(__dirname, "..", "public", "fonts", "FreeSans.ttf");
 const hasDevanagari = (text) =>
   /[\u0900-\u097F]/.test(text) && fs.existsSync(DEVANAGARI_FONT);
 
