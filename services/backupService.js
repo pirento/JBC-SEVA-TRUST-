@@ -12,13 +12,29 @@ function backupRoot() {
   return process.env.BACKUP_DIR || path.join(dataDir, "backups");
 }
 
-async function copyDir(from, to) {
+// Photos and medical receipts never change once written (random or
+// unique names). A file already in the previous backup is hard-linked
+// to it instead of copied again, so each nightly backup is complete
+// but takes no extra space for those files. Links fail on some disks;
+// then the file is simply copied.
+async function copyFiles(from, to, previous, keep = () => true) {
+  const entries = await fs.readdir(from, { withFileTypes: true }).catch(() => []);
   await fs.mkdir(to, { recursive: true });
-  for (const entry of await fs.readdir(from, { withFileTypes: true })) {
+
+  for (const entry of entries) {
+    if (!entry.isFile() || !keep(entry.name)) continue;
     const src = path.join(from, entry.name);
     const dest = path.join(to, entry.name);
-    if (entry.isDirectory()) await copyDir(src, dest);
-    else await fs.copyFile(src, dest);
+
+    try {
+      if (!previous) throw new Error("no earlier backup");
+      const old = path.join(previous, entry.name);
+      const [before, now] = await Promise.all([fs.stat(old), fs.stat(src)]);
+      if (before.size !== now.size) throw new Error("changed");
+      await fs.link(old, dest);
+    } catch {
+      await fs.copyFile(src, dest);
+    }
   }
 }
 
@@ -26,17 +42,35 @@ async function runBackup() {
   const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
   const target = path.join(backupRoot(), stamp);
 
+  // Newest earlier backup, to link unchanged photos and receipts to
+  const earlier = (await fs.readdir(backupRoot()).catch(() => []))
+    .filter((name) => name !== stamp)
+    .sort();
+  const previous = earlier.length ? path.join(backupRoot(), earlier.at(-1)) : null;
+
   await fs.mkdir(target, { recursive: true });
 
   const entries = await fs.readdir(dataDir, { withFileTypes: true }).catch(() => []);
 
   for (const entry of entries) {
     const src = path.join(dataDir, entry.name);
-    // Records and uploaded photos; receipts can be regenerated
+    // Records change every day: always a fresh copy
     if (entry.isFile() && entry.name.endsWith(".txt")) {
       await fs.copyFile(src, path.join(target, entry.name));
     } else if (entry.isDirectory() && entry.name === "uploads") {
-      await copyDir(src, path.join(target, "uploads"));
+      await copyFiles(
+        src,
+        path.join(target, "uploads"),
+        previous && path.join(previous, "uploads"),
+      );
+    } else if (entry.isDirectory() && entry.name === "receipts") {
+      // Medical receipts cannot be made again; donation certificates can
+      await copyFiles(
+        src,
+        path.join(target, "receipts"),
+        previous && path.join(previous, "receipts"),
+        (name) => name.startsWith("Medical-Help-Receipt-"),
+      );
     }
   }
 

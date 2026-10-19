@@ -84,7 +84,7 @@ data/                  Runtime data (not in git): *.txt records, receipts/, uplo
 - Files are append-only. An edit appends a new version (latest wins, e.g. user accounts). A delete appends a `DELETE` record (updates, events).
 - Main files: `donations.txt`, `payment.txt` (memberships), `user.txt` (medical requests), `accounts.txt`, `volunteers.txt`, `messages.txt`, `updates.txt`, `events.txt`, `event-registrations.txt`, `pledges.txt`, `pending-payments.txt`.
 - Uploaded photos go to `data/uploads/` with random names.
-- Backups: every night at 02:30 IST to `BACKUP_DIR` (default `data/backups/`), last 30 kept. Run `npm run backup` any time. Backups are encrypted, so keep `DATA_ENCRYPTION_KEY` safe outside the server.
+- Backups: every night at 02:30 IST to `BACKUP_DIR` (default `data/backups/`), last 30 kept. Run `npm run backup` any time. Each backup holds the records, photos and medical receipts (donation certificates are remade on download). Photos and receipts already in the previous backup are hard-linked, not copied again, so 30 backups take about the space of one plus the daily records; to restore, copy one backup folder back into `DATA_DIR`. Backups are encrypted, so keep `DATA_ENCRYPTION_KEY` safe outside the server.
 
 ## 7. Common changes
 

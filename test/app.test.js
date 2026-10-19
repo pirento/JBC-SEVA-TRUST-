@@ -1044,6 +1044,34 @@ test("backup copies the data files", async () => {
   assert.ok(files.includes("donations.txt"), files.join(","));
   assert.ok(files.includes("accounts.txt"));
 
+  // Photos and medical receipts are backed up; unchanged ones are linked
+  // to the previous backup instead of copied again
+  fs.mkdirSync(path.join(dataDir, "uploads"), { recursive: true });
+  fs.mkdirSync(path.join(dataDir, "receipts"), { recursive: true });
+  fs.writeFileSync(path.join(dataDir, "uploads", "a".repeat(32) + ".jpg"), "photo");
+  fs.writeFileSync(
+    path.join(dataDir, "receipts", "Medical-Help-Receipt-MED-1.pdf"),
+    "pdf",
+  );
+  fs.writeFileSync(
+    path.join(dataDir, "receipts", "donation-certificate-TXN_1.pdf"),
+    "pdf",
+  );
+  const first = await runBackup();
+  const earlier = path.join(path.dirname(first), "0000-earlier");
+  fs.renameSync(first, earlier);
+  const second = await runBackup();
+
+  const photo = (dir) => fs.statSync(path.join(dir, "uploads", "a".repeat(32) + ".jpg"));
+  assert.equal(photo(second).ino, photo(earlier).ino, "photo linked, not copied");
+  assert.ok(
+    fs.existsSync(path.join(second, "receipts", "Medical-Help-Receipt-MED-1.pdf")),
+  );
+  assert.ok(
+    !fs.existsSync(path.join(second, "receipts", "donation-certificate-TXN_1.pdf")),
+    "donation certificates are made again on download, not backed up",
+  );
+
   const req = client();
   await req("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
   const res = await req("/admin/dashboard");
