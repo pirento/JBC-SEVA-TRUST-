@@ -45,14 +45,25 @@ test("emails: trust gets a hidden copy of receipts only", () => {
   delete require.cache[require.resolve("../services/emailService")];
   const { buildMailOptions } = require("../services/emailService");
 
-  const receipt = buildMailOptions({ to: "donor@example.com", subject: "Receipt", copyTrust: true });
+  const receipt = buildMailOptions({
+    to: "donor@example.com",
+    subject: "Receipt",
+    copyTrust: true,
+  });
   assert.equal(receipt.to, "donor@example.com");
   assert.equal(receipt.bcc, "trust@example.org", "hidden copy, not in To");
 
-  const reset = buildMailOptions({ to: "donor@example.com", subject: "Reset your password" });
+  const reset = buildMailOptions({
+    to: "donor@example.com",
+    subject: "Reset your password",
+  });
   assert.equal(reset.bcc, undefined, "password links go to the owner alone");
 
-  const notice = buildMailOptions({ to: "trust@example.org", replyTo: "volunteer@example.com", copyTrust: true });
+  const notice = buildMailOptions({
+    to: "trust@example.org",
+    replyTo: "volunteer@example.com",
+    copyTrust: true,
+  });
   assert.equal(notice.bcc, undefined, "no duplicate copy to the same inbox");
   assert.equal(notice.replyTo, "volunteer@example.com");
 });
