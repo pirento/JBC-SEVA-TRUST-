@@ -16,13 +16,15 @@ const { renderEmail } = require("./emailTemplate");
 // GET TODAY'S DATE IN INDIA
 // ============================================================
 
-function getIndiaDate() {
+// Yesterday in India. The report runs just after midnight for the day
+// that has fully ended, so a payment at 11:59:30 PM is not missed.
+function getIndiaYesterday() {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Kolkata",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(new Date());
+  }).format(new Date(Date.now() - 24 * 60 * 60 * 1000));
 }
 
 // ============================================================
@@ -56,9 +58,7 @@ async function isReportAlreadySent(reportDate) {
 // SEND DAILY REPORT
 // ============================================================
 
-async function sendDailyReport() {
-  const reportDate = getIndiaDate();
-
+async function sendDailyReport(reportDate = getIndiaYesterday()) {
   console.log("=================================");
   console.log("📊 DAILY REPORT SCHEDULER");
   console.log("📅 Report Date:", reportDate);
@@ -121,6 +121,7 @@ async function sendDailyReport() {
           "Memberships",
           `${report.summary.membershipCount} · ${money(report.summary.membershipCollection)}`,
         ],
+        ["Temple Fund (part of donations)", money(report.summary.templeCollection)],
         ["Total collection", money(report.summary.totalCollection)],
         ["Medical requests", String(report.summary.medicalCount)],
       ],
@@ -192,8 +193,9 @@ async function sendDailyReport() {
 // ============================================================
 
 function startDailyReportScheduler() {
+  // 12:10 AM India time, for the day that just ended
   cron.schedule(
-    "59 23 * * *",
+    "10 0 * * *",
 
     async () => {
       await sendDailyReport();
@@ -204,11 +206,15 @@ function startDailyReportScheduler() {
     },
   );
 
+  // If the server was down at 12:10 AM, send yesterday's report now
+  // (already-sent days are skipped)
+  sendDailyReport().catch((error) =>
+    console.error("❌ Daily report catch-up failed:", error.message),
+  );
+
   console.log("=================================");
   console.log("⏰ Daily Report Scheduler Started");
-  console.log("📅 Every day");
-  console.log("🕚 11:59 PM");
-  console.log("🇮🇳 Timezone: Asia/Kolkata");
+  console.log("📅 Every day 12:10 AM (Asia/Kolkata), for the previous day");
   console.log("=================================");
 }
 

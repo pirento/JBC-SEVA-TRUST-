@@ -1,4 +1,10 @@
 const { readRecords } = require("../models/fileStore");
+const { donationPages } = require("../config/trustConfig");
+
+// Temple gifts go to a separate fund head and are reported on their own
+const TEMPLE_CAUSES = new Set(
+  donationPages.filter((p) => p.donation.religious).map((p) => p.title),
+);
 
 // ========================================
 // GET RECORD DATE
@@ -252,6 +258,10 @@ async function getDailyReport(selectedDate) {
 
   const totalCollection = membershipCollection + donationCollection;
 
+  const templeCollection = donations
+    .filter((item) => TEMPLE_CAUSES.has(item.cause))
+    .reduce((total, item) => total + Number(item.amount || 0), 0);
+
   // ========================================
   // REPORT SUMMARY
   // ========================================
@@ -269,6 +279,8 @@ async function getDailyReport(selectedDate) {
       donationCount: donations.length,
 
       donationCollection,
+
+      templeCollection,
 
       medicalCount: medicalRecords.length,
 

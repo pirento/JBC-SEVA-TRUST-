@@ -1,4 +1,17 @@
+const fs = require("fs");
+const path = require("path");
 const PDFDocument = require("pdfkit");
+
+// Names typed in Hindi need a Devanagari font; Helvetica has none
+const DEVANAGARI_FONT = path.join(
+  __dirname,
+  "..",
+  "public",
+  "fonts",
+  "NotoSansDevanagari-Regular.ttf",
+);
+const hasDevanagari = (text) =>
+  /[\u0900-\u097F]/.test(text) && fs.existsSync(DEVANAGARI_FONT);
 
 /**
  * Generate Daily Admin Report PDF
@@ -49,6 +62,28 @@ async function generateDailyReportPdf(report) {
         return String(
           value === undefined || value === null || value === "" ? "-" : value,
         );
+      }
+
+      // One table row: each cell in its own font; the row is as tall as
+      // its tallest cell, so wrapped names never run into the next row
+      function drawRow(cells) {
+        const y = doc.y;
+        let bottom = y;
+        doc.fontSize(7);
+        // A cell may hold several lines (name, then cause), each in its own font
+        for (const [value, x, width, align] of cells) {
+          let lineY = y;
+          for (const line of [].concat(value)) {
+            const text = safe(line);
+            doc.font(hasDevanagari(text) ? DEVANAGARI_FONT : "Helvetica");
+            doc.text(text, x, lineY, { width, align });
+            lineY = doc.y;
+          }
+          bottom = Math.max(bottom, lineY);
+        }
+        doc.font("Helvetica");
+        doc.x = 40;
+        doc.y = bottom;
       }
 
       function money(value) {
@@ -152,6 +187,7 @@ async function generateDailyReportPdf(report) {
         ["Membership Collection", money(summary.membershipCollection)],
         ["Total Donations", summary.donationCount || 0],
         ["Donation Collection", money(summary.donationCollection)],
+        ["  of which Temple Fund", money(summary.templeCollection)],
         ["Medical Requests", summary.medicalCount || 0],
         ["TOTAL COLLECTION", money(summary.totalCollection)],
       ];
@@ -229,34 +265,16 @@ async function generateDailyReportPdf(report) {
         memberships.forEach((item) => {
           checkSpace(45);
 
-          const y = doc.y;
+          drawRow([
+            [item.memberName, 40, 100],
+            [item.membershipType, 145, 80],
+            [money(item.amount), 230, 60, "right"],
+            [item.paymentMode, 295, 55],
+            [`${safe(item.date)}\n${safe(item.time)}`, 355, 70],
+            [item.transactionId, 430, 120],
+          ]);
 
-          doc.fontSize(7).font("Helvetica").text(safe(item.memberName), 40, y, {
-            width: 100,
-          });
-
-          doc.text(safe(item.membershipType), 145, y, {
-            width: 80,
-          });
-
-          doc.text(money(item.amount), 230, y, {
-            width: 60,
-            align: "right",
-          });
-
-          doc.text(safe(item.paymentMode), 295, y, {
-            width: 55,
-          });
-
-          doc.text(`${safe(item.date)}\n${safe(item.time)}`, 355, y, {
-            width: 70,
-          });
-
-          doc.text(safe(item.transactionId), 430, y, {
-            width: 120,
-          });
-
-          doc.moveDown(1.8);
+          doc.moveDown(0.6);
 
           addLine(doc.y);
 
@@ -277,7 +295,7 @@ async function generateDailyReportPdf(report) {
 
         tableHeader([
           {
-            title: "Donor",
+            title: "Donor / Cause",
             x: 40,
             width: 100,
           },
@@ -312,34 +330,16 @@ async function generateDailyReportPdf(report) {
         donations.forEach((item) => {
           checkSpace(50);
 
-          const y = doc.y;
+          drawRow([
+            [[item.donorName, item.cause], 40, 100],
+            [money(item.amount), 145, 65, "right"],
+            [item.paymentMode, 215, 60],
+            [`${safe(item.date)}\n${safe(item.time)}`, 280, 75],
+            [item.email, 360, 90],
+            [item.transactionId, 455, 100],
+          ]);
 
-          doc.fontSize(7).font("Helvetica").text(safe(item.donorName), 40, y, {
-            width: 100,
-          });
-
-          doc.text(money(item.amount), 145, y, {
-            width: 65,
-            align: "right",
-          });
-
-          doc.text(safe(item.paymentMode), 215, y, {
-            width: 60,
-          });
-
-          doc.text(`${safe(item.date)}\n${safe(item.time)}`, 280, y, {
-            width: 75,
-          });
-
-          doc.text(safe(item.email), 360, y, {
-            width: 90,
-          });
-
-          doc.text(safe(item.transactionId), 455, y, {
-            width: 100,
-          });
-
-          doc.moveDown(1.8);
+          doc.moveDown(0.6);
 
           addLine(doc.y);
 
@@ -394,33 +394,16 @@ async function generateDailyReportPdf(report) {
         medicalRecords.forEach((item) => {
           checkSpace(55);
 
-          const y = doc.y;
+          drawRow([
+            [item.patientName, 40, 90],
+            [item.nameDiseases, 135, 100],
+            [item.hospitalName, 240, 100],
+            [item.patientPhoneNumber, 345, 65],
+            [item.referenceRegistrationNumber, 415, 75],
+            [`${safe(item.date)}\n${safe(item.time)}`, 495, 60],
+          ]);
 
-          doc.fontSize(7).font("Helvetica").text(safe(item.patientName), 40, y, {
-            width: 90,
-          });
-
-          doc.text(safe(item.nameDiseases), 135, y, {
-            width: 100,
-          });
-
-          doc.text(safe(item.hospitalName), 240, y, {
-            width: 100,
-          });
-
-          doc.text(safe(item.patientPhoneNumber), 345, y, {
-            width: 65,
-          });
-
-          doc.text(safe(item.referenceRegistrationNumber), 415, y, {
-            width: 75,
-          });
-
-          doc.text(`${safe(item.date)}\n${safe(item.time)}`, 495, y, {
-            width: 60,
-          });
-
-          doc.moveDown(1.8);
+          doc.moveDown(0.6);
 
           addLine(doc.y);
 
@@ -453,6 +436,10 @@ async function generateDailyReportPdf(report) {
 
       for (let i = 0; i < range.count; i++) {
         doc.switchToPage(range.start + i);
+
+        // The footer sits below the bottom margin; without this pdfkit
+        // starts a new blank page for it
+        doc.page.margins.bottom = 0;
 
         doc
           .fontSize(7)
