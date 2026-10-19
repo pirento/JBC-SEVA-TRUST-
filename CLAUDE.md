@@ -14,11 +14,16 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 - Colours from the logo: navy `#15375c`, saffron `#dd870d` (text uses darker `#d97706`/`#b86304` for contrast). Headings Noto Serif, body Noto Sans.
 - Keep the look plain and factual: no emoji, no invented numbers; plans are labelled as plans.
 
+## Naming
+- donation* = gifts to a cause (URL /donate); membership* = membership (URL /donation, kept for PayU settings); medical* = medical help.
+
 ## Code notes
 - Trust facts used by pages live in `config/trustConfig.js`; change them there, not in views.
 - Every page uses `views/partials/head|header|footer`; `res.locals` gives `trust`, `currentUser`, `isAdmin`, `trustEmail`.
 - Storage is encrypted append-only text files (`models/fileStore.js`); accounts in `accounts.txt`, latest record per email wins.
-- Run `npm test` before pushing.
+- Run `npm test` and `npm run format` before pushing.
+- Public forms: honeypot partial + middleware, rate limit, server validation, duplicate check, redirect after POST.
+- Account records need a confirmed email (`emailVerified`).
 
 ## Donations
 - Each cause has its own page `/donate/<slug>` driven by `donation` in `config/trustConfig.js` (purposes, suggested amounts, `sevaDate`, `gotra`, `religious`).

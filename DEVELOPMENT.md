@@ -58,10 +58,13 @@ config/
   payuConfig.js        PayU keys and callback URLs
 routes/                URL → controller (one file per area)
 controllers/           Read the request, call services, render a view
-services/              Business logic: donations, PayU, certificates, emails, exports,
+services/              Business logic. Naming: donation* = gifts to a cause (/donate),
+                       membership* = membership (/donation URL), medical* = medical help.
+                       Also PayU, certificates, emails, exports, admin dashboard,
                        backups, monthly pledges, updates and events
 models/                Storage on top of models/fileStore.js
-middleware/            Admin/user login checks, rate limit, uploads, Hindi, errors
+middleware/            Admin/user login checks, rate limit, bot trap (honeypot),
+                       uploads, Hindi, errors
 views/
   partials/            head, header, footer, forms, icons, cards
   pages/               Public pages
@@ -104,6 +107,12 @@ In `config/trustConfig.js`, fill `eightyG` (registration number, dates, trust PA
 2. Start the view with `<%- include('../partials/head', { title: '...' }) %>` and the header/footer partials.
 3. Add a test in `test/app.test.js`.
 
+### Add a public form
+1. Put `<%- include('../partials/honeypot', { hpId: 'name' }) %>` inside the form and `honeypot` before the controller in the route.
+2. Add a rate limiter (`middleware/rateLimit.js`) for the POST route.
+3. Validate on the server (`utils/validation.js`: `personName`, `phone`, `email`, `accepted`, `fewLinks`) and refuse obvious duplicates before saving.
+4. After a successful POST, redirect to a GET page instead of rendering.
+
 ### Add an admin CSV export
 Add an entry to `exports_` in `services/exportService.js`. It appears on the dashboard automatically at `/admin/export/<name>`.
 
@@ -117,6 +126,7 @@ Both certificates use `services/certificateDesign.js`. Donation text is in `serv
 - Throw user-facing errors with `expose = true` (see `services/userAuthService.js`) so controllers show them in the form; other errors go to the error page.
 - Never write invented numbers or claims (results, 80G, registrations) on the site. Plans must say they are plans.
 - Keep the look plain: logo colours (navy `#15375c`, saffron `#dd870d`), Noto Serif headings, Noto Sans text, line icons, no emoji.
+- Run `npm run format` before committing; Prettier keeps one style (`.prettierrc.json`).
 - Commit messages: a short summary line, then what changed and why.
 
 ## 9. Security notes
@@ -124,6 +134,9 @@ Both certificates use `services/certificateDesign.js`. Donation text is in `serv
 - Passwords: bcrypt. Reset tokens: random, stored hashed, one hour, single use.
 - Sessions: new id at every login, `httpOnly`, `sameSite=lax`, `secure` in production.
 - Login, register, password, volunteer, contact and event forms are rate limited per IP (in memory).
+- Every public form has a hidden bot-trap field; names with links are refused; repeated volunteer, message, event and medical submissions are not stored twice.
+- Account records are shown only after the email is confirmed (link sent on register; a password reset also confirms it).
+- After PayU returns, the result is saved and the browser is redirected (303) to a thank-you or payment-failed page.
 - PayU callbacks are checked by hash, amount and transaction id; cause and purpose are inside the signed fields.
 - Uploads: JPG/PNG/WebP only, checked by their first bytes, 5 MB limit, random file names.
 - CSV exports block spreadsheet formulas; medical exports show only the last 4 Aadhaar digits.
@@ -138,7 +151,8 @@ Both certificates use `services/certificateDesign.js`. Donation text is in `serv
 
 ## 11. Known limits
 
-- File storage reads whole files; move to a database (PostgreSQL) when records reach the tens of thousands.
+- File storage reads whole files (decrypted records are cached until the file changes); move to a database (PostgreSQL) when records reach the tens of thousands.
+- Measured with 5,000 donations, 2,000 accounts and 1,500 memberships (production mode, one process): public pages about 550–1,000 requests per second; admin dashboard about 7 ms per request.
 - Sessions and rate limits are in memory: a restart logs everyone out, and it supports one server process only.
 - Monthly giving sends email reminders; automatic debits need PayU standing instructions.
 - WhatsApp sharing uses links; automatic messages need the WhatsApp Business API.
