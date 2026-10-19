@@ -19,7 +19,12 @@ const photoUpload = multer({
       cb(null, crypto.randomBytes(16).toString("hex") + TYPES[file.mimetype]),
   }),
   limits: { fileSize: 5 * 1024 * 1024, files: 1 },
-  fileFilter: (req, file, cb) => cb(null, Boolean(TYPES[file.mimetype])),
+  fileFilter: (req, file, cb) => {
+    // Say so instead of silently saving the update without its photo (e.g. iPhone HEIC)
+    if (!TYPES[file.mimetype])
+      req.uploadError = "Only JPG, PNG or WebP photos are allowed.";
+    cb(null, Boolean(TYPES[file.mimetype]));
+  },
 }).single("photo");
 
 // The browser-sent type can lie; check the file's first bytes too

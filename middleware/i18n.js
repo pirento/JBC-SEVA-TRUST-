@@ -91,7 +91,8 @@ function translateHtml(html) {
           /\b(placeholder|title|aria-label|alt|content)="([^"]*)"/g,
           (whole, attr, text) => {
             const t = translateText(squash(text));
-            return t ? `${attr}="${t}"` : whole;
+            // squash() turned &#34; back into "; re-escape so it stays inside the attribute
+            return t ? `${attr}="${t.replace(/"/g, "&#34;")}"` : whole;
           },
         );
     })
@@ -102,7 +103,8 @@ function readCookie(req, name) {
   const m = String(req.headers.cookie || "").match(
     new RegExp(`(?:^|;\\s*)${name}=([^;]+)`),
   );
-  return m ? decodeURIComponent(m[1]) : "";
+  // Only compared with "hi"/"en", so no decoding (a bad "%" would throw)
+  return m ? m[1] : "";
 }
 
 function i18n(req, res, next) {

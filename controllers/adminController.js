@@ -33,8 +33,6 @@ exports.login = async (req, res) => {
     const result = await authenticateAdmin({ password });
 
     if (!result.success) {
-      req.rateLimit?.hit();
-
       return res.status(401).render("admin/login", {
         error: "Invalid admin password",
       });

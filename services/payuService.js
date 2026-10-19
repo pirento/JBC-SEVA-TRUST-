@@ -1,12 +1,6 @@
 const crypto = require("crypto");
 
-const {
-  PAYU_KEY,
-  PAYU_SALT,
-  PAYU_SUCCESS_URL,
-  PAYU_FAILURE_URL,
-  PAYU_PAYMENT_URL,
-} = require("../config/payuConfig");
+const { PAYU_KEY, PAYU_SALT, PAYU_PAYMENT_URL } = require("../config/payuConfig");
 
 // ============================================================
 // SHA512
@@ -75,11 +69,10 @@ function createPaymentData({
   udf4 = "",
   udf5 = "",
 
-  // Optional callback URLs
-  // Membership will continue using the existing URLs.
-  // Donation can pass its own URLs.
-  surl = PAYU_SUCCESS_URL,
-  furl = PAYU_FAILURE_URL,
+  // Each flow passes its own callback URLs; no fallback, so a missing
+  // donation URL can never send a donation to the membership handler
+  surl,
+  furl,
 }) {
   if (!PAYU_KEY) {
     throw new Error("PAYU_KEY is missing in .env");

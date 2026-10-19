@@ -523,6 +523,10 @@ module.exports = {
   "Thank you for your donation": "आपके दान के लिए धन्यवाद",
   "We have received your donation. Your certificate is attached to this email as a PDF.":
     "हमें आपका दान मिल गया है। आपका प्रमाण-पत्र इस ईमेल के साथ PDF में संलग्न है।",
+  "We have received your donation. You can download your certificate with the button below.":
+    "हमें आपका दान मिल गया है। नीचे दिए बटन से आप अपना प्रमाण-पत्र डाउनलोड कर सकते हैं।",
+  "Thank you for becoming a member. You can download your membership certificate with the button below.":
+    "सदस्य बनने के लिए धन्यवाद। नीचे दिए बटन से आप अपना सदस्यता प्रमाण-पत्र डाउनलोड कर सकते हैं।",
   Gotra: "गोत्र",
   "With gratitude,": "आभार सहित,",
   "Money given for a cause is used only for that cause.":

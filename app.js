@@ -1,5 +1,9 @@
 require("dotenv").config();
 
+// The trust works in India: dates on certificates, reports and the
+// financial year (April to March) follow Indian time on any host
+process.env.TZ = "Asia/Kolkata";
+
 const express = require("express");
 const session = require("express-session");
 const compression = require("compression");
@@ -42,9 +46,10 @@ const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
-// Behind a proxy (Render, Nginx, etc.) so req.ip and secure cookies work
+// Behind a proxy (Render, Nginx, etc.) so req.ip and secure cookies work.
+// TRUST_PROXY = number of proxies in front (2 for Cloudflare + Render)
 if (isProduction) {
-  app.set("trust proxy", 1);
+  app.set("trust proxy", Number(process.env.TRUST_PROXY) || 1);
 }
 
 app.disable("x-powered-by");

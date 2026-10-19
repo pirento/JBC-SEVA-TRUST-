@@ -53,7 +53,9 @@ function validateDonation(input) {
 
   const paymentMode = String(input.paymentMode || "").trim();
 
-  const message = String(input.message || "").trim();
+  const message = String(input.message || "")
+    .trim()
+    .slice(0, 500);
 
   const page = donationPages.find((p) => p.title === input.cause) || donationPages[0];
 
@@ -232,7 +234,8 @@ async function initiateDonation(input) {
 
     udf2: donation.paymentMode,
 
-    udf3: donation.message,
+    // Message stays in the pending store; PayU limits udf fields to 255 characters
+    udf3: "",
 
     udf4: donation.cause,
 
@@ -314,6 +317,11 @@ async function handlePaymentSuccess(data) {
     return {
       failure: true,
     };
+  }
+
+  // A membership payment posted here must not be saved as a donation
+  if (String(data.productinfo || "").toLowerCase() !== "donation") {
+    return { error: "Donation transaction could not be verified.", status: 400 };
   }
 
   // -------------------------------------------------------
@@ -573,7 +581,8 @@ async function handlePaymentSuccess(data) {
   let emailSent = false;
 
   // Email only once, even if PayU calls back again.
-  if (isNewDonation && certificatePath && donation.email) {
+  // Sent even if the certificate failed: the email's button makes it again
+  if (isNewDonation && donation.email) {
     emailSent = true;
 
     sendDonationCertificateEmail({

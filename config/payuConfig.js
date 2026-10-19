@@ -3,6 +3,11 @@ const PAYU_SALT = process.env.PAYU_SALT;
 
 const PAYU_ENV = String(process.env.PAYU_ENV || "test").toLowerCase();
 
+// "live" or "prod" would silently send live keys to the test gateway
+if (!["test", "production"].includes(PAYU_ENV)) {
+  throw new Error('PAYU_ENV must be "test" or "production"');
+}
+
 const PAYU_PAYMENT_URL =
   PAYU_ENV === "production"
     ? "https://secure.payu.in/_payment"

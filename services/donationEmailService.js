@@ -14,10 +14,6 @@ async function sendDonationCertificateEmail({ donation, certificatePath }) {
     throw new Error("Donation data is required.");
   }
 
-  if (!certificatePath) {
-    throw new Error("Donation certificate path is required.");
-  }
-
   const lang = donation.lang === "hi" ? "hi" : "en";
   const donorName = String(donation.donorName || "Donor").trim();
   const cause = donation.cause || "Where Most Needed";
@@ -31,7 +27,9 @@ async function sendDonationCertificateEmail({ donation, certificatePath }) {
     heading: "Thank you for your donation",
     greeting: lang === "hi" ? `नमस्ते ${donorName},` : `Dear ${donorName},`,
     paragraphs: [
-      "We have received your donation. Your certificate is attached to this email as a PDF.",
+      certificatePath
+        ? "We have received your donation. Your certificate is attached to this email as a PDF."
+        : "We have received your donation. You can download your certificate with the button below.",
     ],
     rows: [
       ["Amount", `₹${amount}`],
@@ -72,13 +70,16 @@ async function sendDonationCertificateEmail({ donation, certificatePath }) {
         : `Donation receipt - ${cause} - JBC Seva Trust`,
     text,
     html,
-    attachments: [
-      {
-        filename: path.basename(certificatePath),
-        path: certificatePath,
-        contentType: "application/pdf",
-      },
-    ],
+    // Without a PDF the email still goes, with the download button
+    attachments: certificatePath
+      ? [
+          {
+            filename: path.basename(certificatePath),
+            path: certificatePath,
+            contentType: "application/pdf",
+          },
+        ]
+      : [],
   });
 }
 

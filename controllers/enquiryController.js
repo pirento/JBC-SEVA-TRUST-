@@ -10,8 +10,6 @@ function showVolunteer(req, res) {
 }
 
 async function submitVolunteer(req, res, next) {
-  req.rateLimit?.hit();
-
   try {
     await enquiryService.registerVolunteer(req.body || {});
     return res.redirect("/volunteer?done=1");
@@ -41,8 +39,6 @@ function showContact(req, res) {
 }
 
 async function submitContact(req, res, next) {
-  req.rateLimit?.hit();
-
   try {
     await enquiryService.sendMessage(req.body || {});
     return res.redirect("/contact?done=1");

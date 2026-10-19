@@ -186,7 +186,9 @@ async function appendRecord(fileName, record) {
   // Append encrypted JSON line
   // ----------------------------------------
 
-  await fs.appendFile(filePath, encryptedRecord + "\n", "utf8");
+  // Leading newline: if a crash cut off the last line, this record
+  // still starts on its own line instead of being glued to it
+  await fs.appendFile(filePath, "\n" + encryptedRecord + "\n", "utf8");
 
   clearCache(fileName);
 
@@ -271,7 +273,7 @@ async function readRecordsFromDisk(fileName, filePath) {
 
   if (containsLegacyData) {
     // ------------------------------------
-    // Safety check
+    // Old plaintext file: migrate once
     // ------------------------------------
 
     const allLinesAreLegacy = lines.every((line) => !isEncryptedRecord(line));
@@ -281,68 +283,22 @@ async function readRecordsFromDisk(fileName, filePath) {
     }
 
     // ------------------------------------
-    // Mixed file
+    // Damaged line
     // ------------------------------------
-    // Some old + some new records.
-    // Read both and rewrite everything
-    // in encrypted format.
-    // ------------------------------------
-
-    console.log("");
-    console.log("🔄 Mixed encrypted/legacy data detected");
-
-    const records = [];
-
-    for (const line of lines) {
-      if (isEncryptedRecord(line)) {
-        records.push(decrypt(line));
-      } else {
-        // --------------------------------
-        // Legacy header is skipped
-        // --------------------------------
-
-        continue;
-      }
-    }
-
-    // ------------------------------------
-    // Find legacy header
+    // Usually a write cut off by a crash or a full disk. Skip it and
+    // keep reading; never rewrite the file here, because a record
+    // appended meanwhile would be lost.
     // ------------------------------------
 
-    const legacyLines = lines.filter((line) => !isEncryptedRecord(line));
-
-    if (legacyLines.length > 0) {
-      const legacyContent = legacyLines.join("\n");
-
-      const legacyRecords = parseLegacyContent(legacyContent);
-
-      records.push(...legacyRecords);
-    }
-
-    // ------------------------------------
-    // Backup
-    // ------------------------------------
-
-    await createBackup(filePath);
-
-    // ------------------------------------
-    // Encrypt everything again
-    // ------------------------------------
-
-    const encryptedLines = records.map((record) => encrypt(record));
-
-    await fs.writeFile(filePath, encryptedLines.join("\n") + "\n", "utf8");
-
-    console.log("✅ Mixed data migrated successfully");
-
-    return records;
+    const bad = lines.filter((line) => !isEncryptedRecord(line)).length;
+    console.error(`❌ ${fileName}: skipped ${bad} damaged line(s)`);
   }
 
   // ========================================
   // NORMAL ENCRYPTED FILE
   // ========================================
 
-  return lines.map((line) => {
+  return lines.filter(isEncryptedRecord).map((line) => {
     try {
       return decrypt(line);
     } catch (error) {

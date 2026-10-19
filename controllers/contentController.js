@@ -55,8 +55,6 @@ async function event(req, res, next) {
 }
 
 async function registerEvent(req, res, next) {
-  req.rateLimit?.hit();
-
   try {
     const item = await contentModel.findEvent(req.params.id);
     if (!item) return next();
@@ -130,7 +128,7 @@ module.exports = {
   createUpdate: adminAction((req) =>
     contentService.createUpdate(req.body || {}, req.file, req.uploadError),
   ),
-  deleteUpdate: adminAction((req) => contentModel.removeUpdate(req.params.id)),
+  deleteUpdate: adminAction((req) => contentService.deleteUpdate(req.params.id)),
   createEvent: adminAction((req) => contentService.createEvent(req.body || {})),
   deleteEvent: adminAction((req) => contentModel.removeEvent(req.params.id)),
 };

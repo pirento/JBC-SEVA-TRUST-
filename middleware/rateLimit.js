@@ -2,9 +2,10 @@
 // RATE LIMIT
 // ========================================
 //
-// Counts attempts per IP (the route calls req.rateLimit.hit());
-// after `max` hits the IP is blocked for `windowMs`. A successful
-// login calls req.rateLimit.reset() to clear the count.
+// Counts every attempt per IP as it arrives (so parallel requests
+// cannot all slip in before a failure is counted); after `max`
+// attempts the IP is blocked for `windowMs`. A successful login
+// calls req.rateLimit.reset() to clear the count.
 //
 // shortcut: in-memory, so counts reset on restart and are not
 // shared between processes. Use a shared store if the app is
@@ -43,15 +44,14 @@ function createRateLimiter({ max = 5, windowMs = 15 * 60 * 1000 } = {}) {
       res.set("Retry-After", String(minutes * 60));
       return res.status(429).render("pages/form-error", {
         title: "Too many attempts",
-        message: `Too many failed attempts. Please try again in ${minutes} minute(s).`,
+        message: `Too many attempts. Please try again in ${minutes} minute(s).`,
         backUrl: req.originalUrl,
       });
     }
 
+    entry.count += 1;
+
     req.rateLimit = {
-      hit: () => {
-        entry.count += 1;
-      },
       reset: () => attempts.delete(req.ip),
     };
 

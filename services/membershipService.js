@@ -48,7 +48,9 @@ function validateMembership(input) {
 
   const paymentMode = String(input.paymentMode || "").trim();
 
-  const message = String(input.message || "").trim();
+  const message = String(input.message || "")
+    .trim()
+    .slice(0, 500);
 
   // ----------------------------------------------------------
   // Member Name
@@ -196,7 +198,8 @@ async function initiateMembership(input) {
 
     udf2: membership.paymentMode,
 
-    udf3: membership.message,
+    // Message stays in the pending store; PayU limits udf fields to 255 characters
+    udf3: "",
 
     udf4: "",
 
@@ -293,6 +296,11 @@ async function handlePaymentSuccess(data) {
     return {
       failure: true,
     };
+  }
+
+  // A donation posted here must not be saved as a membership
+  if (String(data.productinfo || "").toLowerCase() !== "membership") {
+    return { error: "Transaction could not be verified.", status: 400 };
   }
 
   // ----------------------------------------------------------
@@ -420,23 +428,24 @@ async function handlePaymentSuccess(data) {
   // Generate Membership Certificate
   // ----------------------------------------------------------
 
-  const pdfBuffer = await generateMembershipCertificate(receiptData);
+  // The payment is already saved: a certificate failure must not show
+  // the member an error page. The download link makes it again later.
+  let pdfBuffer = null;
 
-  if (!Buffer.isBuffer(pdfBuffer) || pdfBuffer.length === 0) {
-    throw new Error("Membership certificate PDF generation failed.");
+  try {
+    pdfBuffer = await generateMembershipCertificate(receiptData);
+    if (!Buffer.isBuffer(pdfBuffer) || pdfBuffer.length === 0) pdfBuffer = null;
+  } catch (error) {
+    console.error("❌ Membership certificate generation failed:", error.message);
   }
 
-  // ----------------------------------------------------------
-  // Certificate filename
-  // ----------------------------------------------------------
-
-  const fileName = `membership-certificate-${data.txnid}.pdf`;
-
-  store.setReceipt(data.txnid, {
-    pdfBuffer,
-    fileName,
-    createdAt: Date.now(),
-  });
+  if (pdfBuffer) {
+    store.setReceipt(data.txnid, {
+      pdfBuffer,
+      fileName: `membership-certificate-${data.txnid}.pdf`,
+      createdAt: Date.now(),
+    });
+  }
 
   // Pending data no longer required.
   await store.deletePending(data.txnid);
@@ -624,7 +633,9 @@ async function sendMembershipEmail(membership, payuData, pdfBuffer) {
     heading: "Welcome to JBC Seva Trust",
     greeting: lang === "hi" ? `नमस्ते ${memberName},` : `Dear ${memberName},`,
     paragraphs: [
-      "Thank you for becoming a member. Your membership certificate is attached to this email as a PDF.",
+      pdfBuffer
+        ? "Thank you for becoming a member. Your membership certificate is attached to this email as a PDF."
+        : "Thank you for becoming a member. You can download your membership certificate with the button below.",
     ],
     rows: [
       ["Membership", t(membership.membershipType, lang)],
@@ -649,13 +660,16 @@ async function sendMembershipEmail(membership, payuData, pdfBuffer) {
         : "Membership confirmed - JBC Seva Trust",
     text,
     html,
-    attachments: [
-      {
-        filename: `membership-certificate-${payuData.txnid}.pdf`,
-        content: pdfBuffer,
-        contentType: "application/pdf",
-      },
-    ],
+    // Without a PDF the email still goes, with the download button
+    attachments: pdfBuffer
+      ? [
+          {
+            filename: `membership-certificate-${payuData.txnid}.pdf`,
+            content: pdfBuffer,
+            contentType: "application/pdf",
+          },
+        ]
+      : [],
   });
 }
 

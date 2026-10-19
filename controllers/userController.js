@@ -40,8 +40,6 @@ function showRegister(req, res) {
 async function register(req, res, next) {
   const body = req.body || {};
 
-  req.rateLimit?.hit();
-
   try {
     const user = await userAuthService.register({ ...body, lang: res.locals.lang });
     await startSession(req, user);
@@ -79,8 +77,6 @@ async function login(req, res, next) {
     return res.redirect(target);
   } catch (error) {
     if (!error.expose) return next(error);
-
-    req.rateLimit?.hit();
 
     return res.status(401).render("user/login", {
       error: error.message,
@@ -134,13 +130,15 @@ async function account(req, res, next) {
 
 async function changePassword(req, res, next) {
   try {
-    await userAuthService.changePassword(req.session.user, req.body || {});
+    // Keeps this session logged in; other sessions are logged out
+    req.session.user = await userAuthService.changePassword(
+      req.session.user,
+      req.body || {},
+    );
     req.rateLimit?.reset();
     return res.redirect("/account?password=changed#security");
   } catch (error) {
     if (!error.expose) return next(error);
-
-    req.rateLimit?.hit();
 
     try {
       const activity = await loadActivity(req.session.user.email);
@@ -164,8 +162,6 @@ function showForgot(req, res) {
 }
 
 async function forgot(req, res, next) {
-  req.rateLimit?.hit();
-
   const email = String((req.body || {}).email || "").trim();
   if (!email) {
     return res
@@ -200,8 +196,6 @@ async function reset(req, res, next) {
     return res.redirect("/login?reset=1");
   } catch (error) {
     if (!error.expose) return next(error);
-
-    req.rateLimit?.hit();
 
     return res.status(400).render("user/reset-password", {
       valid: !/invalid or has expired/.test(error.message),
@@ -248,7 +242,6 @@ async function verifyEmail(req, res, next) {
 
 async function resendVerification(req, res, next) {
   try {
-    req.rateLimit?.hit();
     await userAuthService.requestEmailVerification(req.session.user.email);
     return res.redirect("/account?verify=sent");
   } catch (error) {

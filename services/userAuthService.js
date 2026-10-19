@@ -49,6 +49,8 @@ function toSessionUser(user) {
     email: user.email,
     phone: user.phone,
     emailVerified: user.emailVerified === true,
+    // Sessions from before a password change are logged out (middleware/userAuth.js)
+    passwordChangedAt: Number(user.passwordChangedAt) || 0,
   };
 }
 
@@ -117,9 +119,12 @@ async function changePassword(sessionUser, input) {
 
   validatePassword(newPassword, String(input.confirmPassword || ""));
 
-  await userModel.updateUser(user, {
+  const updated = await userModel.updateUser(user, {
     passwordHash: await bcrypt.hash(newPassword, SALT_ROUNDS),
+    passwordChangedAt: Date.now(),
   });
+
+  return toSessionUser(updated);
 }
 
 // ============================================================
@@ -265,6 +270,7 @@ async function resetPassword(token, input) {
     passwordHash: await bcrypt.hash(password, SALT_ROUNDS),
     resetTokenHash: "",
     resetExpires: 0,
+    passwordChangedAt: Date.now(),
     // Opening the emailed link proves the address
     emailVerified: true,
   });

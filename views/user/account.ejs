@@ -72,7 +72,7 @@
                   <td><%= new Date(p.lastPaid).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
                   <td><%= new Date(p.nextDue).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
                   <td>
-                    <form action="/account/pledges/stop" method="POST" onsubmit="return confirm('Stop monthly reminders for <%= p.cause %>?')">
+                    <form action="/account/pledges/stop" method="POST" onsubmit="return confirm('Stop these monthly reminders?')">
                       <input type="hidden" name="cause" value="<%= p.cause %>" />
                       <button type="submit" class="btn secondary small-btn">Stop</button>
                     </form>

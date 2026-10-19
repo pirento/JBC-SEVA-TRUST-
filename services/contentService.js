@@ -1,4 +1,6 @@
 const fs = require("fs");
+const path = require("path");
+const { uploadDir } = require("../middleware/upload");
 
 const contentModel = require("../models/contentModel");
 const trust = require("../config/trustConfig");
@@ -28,7 +30,8 @@ function programmeSlug(value) {
   return slug;
 }
 
-const today = () => new Date().toISOString().slice(0, 10);
+// Local date (the app runs in Indian time), as YYYY-MM-DD
+const today = () => new Date().toLocaleDateString("en-CA");
 
 // ---------------- Updates ----------------
 
@@ -48,6 +51,16 @@ async function createUpdate(input, file, uploadError) {
     // Do not keep a photo whose update was rejected
     if (file) fs.unlink(file.path, () => {});
     throw error;
+  }
+}
+
+// Also removes the photo, so a picture taken down (say, for consent)
+// is no longer reachable by its link
+async function deleteUpdate(id) {
+  const update = (await contentModel.listUpdates()).find((u) => u.id === id);
+  await contentModel.removeUpdate(id);
+  if (update && update.photo) {
+    fs.unlink(path.join(uploadDir, path.basename(update.photo)), () => {});
   }
 }
 
@@ -144,4 +157,10 @@ async function registerForEvent(event, input) {
   return record;
 }
 
-module.exports = { createUpdate, createEvent, registerForEvent, isUpcoming };
+module.exports = {
+  createUpdate,
+  deleteUpdate,
+  createEvent,
+  registerForEvent,
+  isUpcoming,
+};

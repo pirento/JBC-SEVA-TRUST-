@@ -381,6 +381,14 @@ test("full user journey: register, logout, login, change password", async () => 
   assert.equal(res.status, 400);
   assert.match(res.text, /Current password is incorrect/);
 
+  // A second session (say, someone else who knew the old password)
+  const other = client();
+  await other("/login", {
+    method: "POST",
+    form: { email: user.email, password: user.password },
+  });
+  assert.equal((await other("/account")).status, 200);
+
   res = await req("/account/password", {
     method: "POST",
     form: {
@@ -390,6 +398,8 @@ test("full user journey: register, logout, login, change password", async () => 
     },
   });
   assert.equal(res.status, 302);
+  assert.equal((await req("/account")).status, 200, "this session stays logged in");
+  assert.equal((await other("/account")).status, 302, "older session is logged out");
 
   await req("/logout", { method: "POST" });
 
@@ -751,6 +761,11 @@ test("verified PayU donation is saved with its cause and listed in the account",
     form: { ...callback, hash: "0".repeat(128) },
   });
   assert.notEqual(res.status, 200);
+
+  // A signed donation posted to the membership callback is not saved as a membership
+  res = await req("/donation/success", { method: "POST", form: callback });
+  assert.equal(res.status, 400, "donation refused by membership callback");
+  assert.equal(callback.udf3, "", "free-text message is not sent to PayU");
 
   res = await req("/donate/success", { method: "POST", form: callback });
   assert.equal(res.status, 303, "redirects after saving, so a refresh never re-posts");
@@ -1122,6 +1137,7 @@ test("admin posts updates with photos and events; public can register", async ()
   const updateId = res.text.match(/\/admin\/updates\/([0-9a-f-]{36})\/delete/)[1];
   await admin(`/admin/updates/${updateId}/delete`, { method: "POST" });
   assert.doesNotMatch((await pub("/updates")).text, /120 neem saplings planted/);
+  assert.equal((await pub(`/uploads/${photo}`)).status, 404, "its photo is removed too");
 
   assert.equal((await pub("/admin/content")).status, 302, "admin only");
 });
@@ -1341,5 +1357,19 @@ test("too many failed logins are blocked with 429", async () => {
   }
 
   assert.equal(res.status, 429);
-  assert.match(res.text, /Too many failed attempts/);
+  assert.match(res.text, /Too many attempts/);
+});
+
+test("a damaged line (cut-off write) is skipped, other records still read", async () => {
+  const store = require("../models/fileStore");
+
+  await store.appendRecord("torn-test.txt", { n: 1 });
+  fs.appendFileSync(path.join(dataDir, "torn-test.txt"), '{"iv":"abc","auth');
+  await store.appendRecord("torn-test.txt", { n: 2 });
+
+  const records = await store.readRecords("torn-test.txt");
+  assert.deepEqual(
+    records.map((r) => r.n),
+    [1, 2],
+  );
 });

@@ -2,6 +2,10 @@ const router = require("express").Router();
 
 const controller = require("../controllers/donationController");
 const honeypot = require("../middleware/honeypot");
+const createRateLimiter = require("../middleware/rateLimit");
+
+// Each submit stores a pending record (or a PDF and an email); stop scripted floods
+const submitLimiter = createRateLimiter({ max: 30, windowMs: 60 * 60 * 1000 });
 
 // ========================================
 // DONATION PAGES
@@ -21,7 +25,7 @@ router.get("/:slug", controller.showCauseForm);
 // PAYMENT
 // ========================================
 
-router.post("/", honeypot, controller.submitDonation);
+router.post("/", submitLimiter, honeypot, controller.submitDonation);
 
 // PayU callbacks (browser returns here from PayU)
 router.post("/success", controller.paymentSuccess);
