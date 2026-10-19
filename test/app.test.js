@@ -993,6 +993,13 @@ test("tax note claims 80G only after approval, never for the temple", () => {
       /Eligible for deduction under Section 80G.*URN123/,
     );
     assert.match(trust.taxNote("Community Temple"), /not eligible for 80G/);
+    // A certificate printed again for a gift from before approval
+    assert.match(
+      trust.taxNote("Green Earth", "2025-12-01"),
+      /outside the Trust's 80G approval period/,
+    );
+    assert.equal(trust.eightyGCovers("2025-12-01"), false);
+    assert.equal(trust.eightyGCovers("2027-05-01"), true);
   } finally {
     trust.eightyG.approved = false;
   }
@@ -1477,6 +1484,36 @@ test("only genuine data is saved: bot trap, spam names, duplicates", async () =>
 // ------------------------------------------------------------
 // Rate limiting (last: it blocks this IP for the rest of the run)
 // ------------------------------------------------------------
+
+// A record added while a file is being read must not leave a stale cache
+test(
+  "file store: a record added during a read is seen by the next read",
+  { skip: process.env.MONGODB_URI ? "file storage only" : false },
+  async () => {
+    const store = require("../models/fileStore");
+    const fsp = require("fs/promises");
+    await store.appendRecord("race-test.txt", { id: "old" });
+
+    const realReadFile = fsp.readFile;
+    let addDuringRead = () => store.appendRecord("race-test.txt", { id: "new" });
+    fsp.readFile = async (...args) => {
+      const content = await realReadFile(...args);
+      if (addDuringRead) {
+        const add = addDuringRead;
+        addDuringRead = null;
+        await add();
+      }
+      return content;
+    };
+    try {
+      await store.readRecords("race-test.txt");
+    } finally {
+      fsp.readFile = realReadFile;
+    }
+    const ids = (await store.readRecords("race-test.txt")).map((r) => r.id);
+    assert.deepEqual(ids, ["old", "new"]);
+  },
+);
 
 // Only the file store can have a half-written line
 test(

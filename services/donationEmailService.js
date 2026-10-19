@@ -56,7 +56,7 @@ async function sendDonationCertificateEmail({ donation, certificatePath }) {
       label: "Download Certificate",
       url: `${appUrl}/donate/certificate/${encodeURIComponent(transactionId)}`,
     },
-    note: taxNote(cause),
+    note: taxNote(cause, donation.paymentDate),
     footerNote:
       page && page.donation.religious
         ? ""

@@ -185,10 +185,32 @@ const taxNotes = {
     "Kept in the separate Temple Fund. Temple donations are generally not eligible for 80G deduction.",
 };
 
-// The tax line for a receipt of the given cause title
-function taxNote(causeTitle) {
+// Indian financial year (April-March) of a date, e.g. "2026-27"
+function financialYear(dateValue) {
+  const d = new Date(dateValue);
+  const start = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
+  return `${start}-${String(start + 1).slice(-2)}`;
+}
+
+// Whether a gift made on this date falls inside the 80G approval period
+function eightyGCovers(dateValue = new Date()) {
+  if (!eightyG.approved) return false;
+  const year = financialYear(dateValue);
+  return (
+    (!eightyG.validFrom || year >= eightyG.validFrom) &&
+    (!eightyG.validTo || year <= eightyG.validTo)
+  );
+}
+
+// The tax line for a receipt of the given cause title and gift date
+// (a certificate printed again later must not claim 80G for an older gift)
+function taxNote(causeTitle, paymentDate = new Date()) {
   const page = [generalDonation, ...programmes].find((p) => p.title === causeTitle);
   if (page && page.donation.religious) return taxNotes.religious;
+
+  if (eightyG.approved && !eightyGCovers(paymentDate)) {
+    return "This gift was made outside the Trust's 80G approval period, so this is not an 80G receipt.";
+  }
 
   if (eightyG.approved) {
     return (
@@ -238,6 +260,8 @@ module.exports = {
   taxNotes,
   taxNote,
   eightyG,
+  eightyGCovers,
+  financialYear,
   // Every donation page: "Where Most Needed" first, then the programmes
   donationPages: [generalDonation, ...programmes],
   volunteerAreas: [

@@ -2,14 +2,14 @@ const { readCorrected } = require("../models/records");
 const enquiryModel = require("../models/enquiryModel");
 const contentModel = require("../models/contentModel");
 const { toCsv } = require("../utils/csv");
-const { donationPages, GENERAL_CAUSE, eightyG } = require("../config/trustConfig");
+const {
+  donationPages,
+  GENERAL_CAUSE,
+  eightyG,
+  eightyGCovers,
+  financialYear,
+} = require("../config/trustConfig");
 
-// Indian financial year (April-March) of a date, e.g. "2026-27"
-function financialYear(dateValue) {
-  const d = new Date(dateValue);
-  const start = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
-  return `${start}-${String(start + 1).slice(-2)}`;
-}
 const {
   normalizeMembership,
   normalizeDonation,
@@ -137,15 +137,17 @@ const exports_ = {
         ? query.fy
         : financialYear(new Date());
 
-    // Only gifts inside the 80G approval period count as 80G donations
-    const inApproval = (year) =>
-      (!eightyG.validFrom || year >= eightyG.validFrom) &&
-      (!eightyG.validTo || year <= eightyG.validTo);
-
     const byPan = new Map();
     for (const d of await successfulDonations()) {
       const year = financialYear(d.paymentDate);
-      if (!d.pan || religious.has(d.cause) || year !== fy || !inApproval(year)) continue;
+      // Only gifts inside the 80G approval period count as 80G donations
+      if (
+        !d.pan ||
+        religious.has(d.cause) ||
+        year !== fy ||
+        !eightyGCovers(d.paymentDate)
+      )
+        continue;
       const row = byPan.get(d.pan) || {
         pan: d.pan,
         name: d.donorName,

@@ -727,4 +727,6 @@ module.exports = {
   "Log in to confirm your email.": "अपना ईमेल पक्का करने के लिए लॉगिन करें।",
   "Something went wrong on our side. Please try again in a few minutes, or contact the trust.":
     "हमारी ओर से कुछ गड़बड़ हुई। कृपया कुछ मिनट बाद फिर से कोशिश करें, या ट्रस्ट से संपर्क करें।",
+  "This gift was made outside the Trust's 80G approval period, so this is not an 80G receipt.":
+    "यह दान ट्रस्ट की 80G स्वीकृति अवधि के बाहर किया गया था, इसलिए यह 80G रसीद नहीं है।",
 };

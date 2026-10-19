@@ -246,13 +246,9 @@ async function initiateMembership(input) {
 
   console.log("Transaction:", txnid);
 
-  console.log("Member:", membership.memberName);
-
   console.log("Membership Type:", membership.membershipType);
 
   console.log("Amount:", membership.amount);
-
-  console.log("Email:", membership.email);
 
   console.log("Success URL:", PAYU_SUCCESS_URL);
 
@@ -429,7 +425,8 @@ async function handlePaymentSuccess(data) {
 
     membershipType,
 
-    paymentDate: new Date(),
+    // A repeated callback keeps the original payment time (and Valid Till)
+    paymentDate: savedPayment.paymentDate || new Date(),
   };
 
   // ----------------------------------------------------------

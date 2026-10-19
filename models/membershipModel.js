@@ -88,6 +88,9 @@ async function create(data) {
     message: String(data.message || "").trim(),
 
     paymentDate: new Date().toISOString(),
+
+    // Emails sent later (e.g. after a correction) use the member's language
+    lang: data.lang === "hi" ? "hi" : "en",
   });
 }
 
