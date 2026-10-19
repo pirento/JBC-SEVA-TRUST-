@@ -1,3 +1,4 @@
+const userAuthService = require("./userAuthService");
 const fs = require("fs");
 const path = require("path");
 
@@ -596,6 +597,16 @@ async function handlePaymentSuccess(data) {
       .catch((error) => {
         console.error("❌ Donation certificate email failed:", error.message);
       });
+
+    // No account needed to give; one is made afterwards for this email
+    userAuthService
+      .ensureAccountForPayment({
+        name: donation.donorName,
+        email: donation.email,
+        phone: donation.phoneNumber,
+        lang: donation.lang,
+      })
+      .catch((error) => console.error("❌ Donor account failed:", error.message));
   }
 
   // =======================================================

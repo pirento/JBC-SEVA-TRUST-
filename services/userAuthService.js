@@ -49,8 +49,10 @@ function toSessionUser(user) {
     email: user.email,
     phone: user.phone,
     emailVerified: user.emailVerified === true,
-    // Sessions from before a password change are logged out (middleware/userAuth.js)
+    // Sessions from before a password change are logged out (app.js)
     passwordChangedAt: Number(user.passwordChangedAt) || 0,
+    // Logged in with an emailed temporary password: must choose their own
+    mustChangePassword: user.mustChangePassword === true,
   };
 }
 
@@ -102,7 +104,127 @@ async function login(input) {
     throw invalid("Invalid email or password.");
   }
 
+  if (user.mustChangePassword && Number(user.tempPasswordExpires) < Date.now()) {
+    throw invalid(
+      "This temporary password has expired. Use Forgot password to set a new one.",
+    );
+  }
+
+  // The temporary password was sent to this email, so logging in with it
+  // proves the address belongs to them
+  if (user.mustChangePassword && !user.emailVerified) {
+    return toSessionUser(await userModel.updateUser(user, { emailVerified: true }));
+  }
+
   return toSessionUser(user);
+}
+
+// ============================================================
+// ACCOUNT AFTER A PAYMENT
+// ============================================================
+// A donor or member does not need an account to pay. After the payment
+// is verified, an account is made for their email (if there is none)
+// and the login details go to that email. The password is temporary:
+// it works for 7 days and must be replaced at the first login.
+
+const TEMP_PASSWORD_DAYS = 7;
+// No 0/O, 1/l/I, so it can be typed from a phone screen without mistakes
+const TEMP_ALPHABET = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+function temporaryPassword() {
+  const bytes = crypto.randomBytes(10);
+  const letters = [...bytes].map((b) => TEMP_ALPHABET[b % TEMP_ALPHABET.length]);
+  // Meets the password rule (a letter and a number)
+  return `${letters.join("")}${(bytes[0] % 8) + 2}`;
+}
+
+// One account per email even if two payments for it arrive together
+const creating = new Map();
+
+async function ensureAccountForPayment({ name, email: rawEmail, phone: rawPhone, lang }) {
+  const cleanEmail = userModel.normalizeEmail(rawEmail);
+  if (!email(cleanEmail)) return null;
+  if (creating.has(cleanEmail)) return creating.get(cleanEmail);
+
+  const work = (async () => {
+    if (await userModel.findByEmail(cleanEmail)) return null;
+    return sendLoginDetails(
+      await userModel.createUser({
+        name: String(name || "").trim() || cleanEmail,
+        email: cleanEmail,
+        phone: String(rawPhone || "").trim(),
+        // Unusable until sendLoginDetails sets the temporary password
+        passwordHash: await bcrypt.hash(
+          crypto.randomBytes(32).toString("hex"),
+          SALT_ROUNDS,
+        ),
+        lang: lang === "hi" ? "hi" : "en",
+      }),
+    );
+  })().finally(() => creating.delete(cleanEmail));
+
+  creating.set(cleanEmail, work);
+  return work;
+}
+
+// Gives the account a fresh temporary password and emails it. Used after
+// a payment and by the admin ("send login details again"). Returns the
+// password too, so tests can log in without an inbox.
+async function sendLoginDetails(user) {
+  const password = temporaryPassword();
+
+  const updated = await userModel.updateUser(user, {
+    passwordHash: await bcrypt.hash(password, SALT_ROUNDS),
+    mustChangePassword: true,
+    tempPasswordExpires: Date.now() + TEMP_PASSWORD_DAYS * 24 * 60 * 60 * 1000,
+    passwordChangedAt: Date.now(),
+  });
+
+  const lang = user.lang === "hi" ? "hi" : "en";
+  const { html, text } = renderEmail({
+    lang,
+    heading: "Your JBC Seva Trust account",
+    greeting: lang === "hi" ? `नमस्ते ${user.name},` : `Namaste ${user.name},`,
+    paragraphs: [
+      "Thank you for your support. We have made an account for you, where you can see your donations and download your receipts.",
+    ],
+    rows: [
+      ["Email", user.email],
+      ["Temporary password", password],
+    ],
+    button: { label: "Log in", url: `${appUrl}/login` },
+    note: "This password works for 7 days. When you log in, you will be asked to choose your own password.",
+  });
+
+  await sendEmail({
+    to: user.email,
+    subject:
+      lang === "hi"
+        ? "आपका खाता - JBC Seva Trust"
+        : "Your account login details - JBC Seva Trust",
+    text,
+    html,
+  }).catch((error) => console.error("❌ Login details email failed:", error.message));
+
+  return { user: updated, password };
+}
+
+// First login with a temporary password: choose a password, no old one asked
+async function setOwnPassword(sessionUser, input) {
+  const user = await userModel.findByEmail(sessionUser.email);
+  if (!user) throw invalid("Account not found.");
+
+  const password = String(input.password || "");
+  validatePassword(password, String(input.confirmPassword || ""));
+
+  const updated = await userModel.updateUser(user, {
+    passwordHash: await bcrypt.hash(password, SALT_ROUNDS),
+    mustChangePassword: false,
+    tempPasswordExpires: 0,
+    passwordChangedAt: Date.now(),
+  });
+
+  return toSessionUser(updated);
 }
 
 async function changePassword(sessionUser, input) {
@@ -122,6 +244,8 @@ async function changePassword(sessionUser, input) {
   const updated = await userModel.updateUser(user, {
     passwordHash: await bcrypt.hash(newPassword, SALT_ROUNDS),
     passwordChangedAt: Date.now(),
+    mustChangePassword: false,
+    tempPasswordExpires: 0,
   });
 
   return toSessionUser(updated);
@@ -271,6 +395,8 @@ async function resetPassword(token, input) {
     resetTokenHash: "",
     resetExpires: 0,
     passwordChangedAt: Date.now(),
+    mustChangePassword: false,
+    tempPasswordExpires: 0,
     // Opening the emailed link proves the address
     emailVerified: true,
   });
@@ -279,6 +405,9 @@ async function resetPassword(token, input) {
 module.exports = {
   register,
   login,
+  ensureAccountForPayment,
+  sendLoginDetails,
+  setOwnPassword,
   changePassword,
   requestPasswordReset,
   findByResetToken,

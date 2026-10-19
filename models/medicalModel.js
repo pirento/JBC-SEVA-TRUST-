@@ -1,4 +1,5 @@
-const { appendRecord, readRecords } = require("./fileStore");
+const { readCorrected } = require("./records");
+const { appendRecord } = require("./fileStore");
 
 const {
   required,
@@ -92,7 +93,7 @@ async function create(data) {
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const hospital = String(data.hospitalName).trim().toLowerCase();
 
-  const duplicate = (await readRecords("user.txt")).find(
+  const duplicate = (await readCorrected("user.txt")).find(
     (record) =>
       record.type === "MEDICAL_HELP" &&
       record.aadharNumber === String(data.aadharNumber).trim() &&

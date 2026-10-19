@@ -1,4 +1,5 @@
-const { appendRecord, readRecords } = require("./fileStore");
+const { readCorrected } = require("./records");
+const { appendRecord } = require("./fileStore");
 
 // ========================================
 // DONATION DATA FILE
@@ -104,7 +105,7 @@ async function create(data) {
 // ========================================
 
 async function findAll() {
-  const records = await readRecords(FILE_NAME);
+  const records = await readCorrected(FILE_NAME);
 
   return records.filter(
     (record) => String(record.type || "").toUpperCase() === "DONATION",
@@ -122,7 +123,7 @@ async function findByTransactionId(transactionId) {
     return null;
   }
 
-  const records = await readRecords(FILE_NAME);
+  const records = await readCorrected(FILE_NAME);
 
   return records.find((record) => String(record.transactionId || "") === id) || null;
 }

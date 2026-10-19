@@ -1436,21 +1436,6 @@ test("only genuine data is saved: bot trap, spam names, duplicates", async () =>
 // Rate limiting (last: it blocks this IP for the rest of the run)
 // ------------------------------------------------------------
 
-test("too many failed logins are blocked with 429", async () => {
-  const req = client();
-  let res;
-
-  for (let i = 0; i < 6; i += 1) {
-    res = await req("/login", {
-      method: "POST",
-      form: { email: "nobody@example.com", password: "wrong-pass1" },
-    });
-  }
-
-  assert.equal(res.status, 429);
-  assert.match(res.text, /Too many attempts/);
-});
-
 test("a damaged line (cut-off write) is skipped, other records still read", async () => {
   const store = require("../models/fileStore");
 
@@ -1530,4 +1515,86 @@ test("PDFs print Hindi names that used to crash the font engine", async () => {
     submissionDate: new Date(),
   });
   assert.ok(receipt.length > 1000);
+});
+
+test("guest donor gets an account with a temporary password to replace", async () => {
+  const userAuthService = require("../services/userAuthService");
+  const userModel = require("../models/userModel");
+  const req = client();
+
+  // A guest donation (no account) makes one for that email afterwards
+  const callback = await startDonation(req, {
+    ...donation,
+    email: "guest.donor@example.com",
+  });
+  assert.equal(
+    (await req("/donate/success", { method: "POST", form: callback })).status,
+    303,
+  );
+  // Made in the background after the redirect; wait for it (bcrypt is slow)
+  let made = null;
+  for (let i = 0; i < 50 && !made?.mustChangePassword; i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    made = await userModel.findByEmail("guest.donor@example.com");
+  }
+  assert.ok(made, "account created after the verified payment");
+  assert.equal(made.mustChangePassword, true);
+
+  // Same for an existing account: nothing is changed
+  assert.equal(
+    await userAuthService.ensureAccountForPayment({ email: "guest.donor@example.com" }),
+    null,
+  );
+
+  // New temporary password (the email itself cannot be read in tests)
+  const { password } = await userAuthService.sendLoginDetails(made);
+  let res = await req("/login", {
+    method: "POST",
+    form: { email: "guest.donor@example.com", password },
+  });
+  assert.equal(res.location, "/account/set-password", "must choose a password first");
+  assert.equal((await req("/account")).location, "/account/set-password");
+
+  res = await req("/account/set-password", {
+    method: "POST",
+    form: { password: "mypass2026", confirmPassword: "mypass2026" },
+  });
+  assert.equal(res.location, "/account?password=changed#security");
+  res = await req("/account");
+  assert.equal(res.status, 200);
+  assert.match(
+    res.text,
+    new RegExp(callback.txnid),
+    "logging in with the emailed password verified the email",
+  );
+
+  // An expired temporary password is refused
+  const again = await userAuthService.sendLoginDetails(
+    await userModel.findByEmail("guest.donor@example.com"),
+  );
+  await userModel.updateUser(await userModel.findByEmail("guest.donor@example.com"), {
+    tempPasswordExpires: Date.now() - 1000,
+  });
+  res = await client()("/login", {
+    method: "POST",
+    form: { email: "guest.donor@example.com", password: again.password },
+  });
+  assert.equal(res.status, 401);
+  assert.match(res.text, /temporary password has expired/);
+});
+
+// Last: it leaves this IP blocked from logging in for 15 minutes
+test("too many failed logins are blocked with 429", async () => {
+  const req = client();
+  let res;
+
+  for (let i = 0; i < 6; i += 1) {
+    res = await req("/login", {
+      method: "POST",
+      form: { email: "nobody@example.com", password: "wrong-pass1" },
+    });
+  }
+
+  assert.equal(res.status, 429);
+  assert.match(res.text, /Too many attempts/);
 });

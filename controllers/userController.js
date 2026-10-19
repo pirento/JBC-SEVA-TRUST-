@@ -74,7 +74,7 @@ async function login(req, res, next) {
     const user = await userAuthService.login(body);
     req.rateLimit?.reset();
     await startSession(req, user);
-    return res.redirect(target);
+    return res.redirect(user.mustChangePassword ? "/account/set-password" : target);
   } catch (error) {
     if (!error.expose) return next(error);
 
@@ -112,6 +112,9 @@ async function loadActivity(email) {
 }
 
 async function account(req, res, next) {
+  // A temporary password must be replaced before anything else
+  if (req.session.user.mustChangePassword) return res.redirect("/account/set-password");
+
   try {
     const activity = await loadActivity(req.session.user.email);
 
@@ -125,6 +128,24 @@ async function account(req, res, next) {
     });
   } catch (error) {
     return next(error);
+  }
+}
+
+function showSetPassword(req, res) {
+  if (!req.session.user.mustChangePassword) return res.redirect("/account");
+  return res.render("user/set-password", { error: null });
+}
+
+async function setPassword(req, res, next) {
+  try {
+    req.session.user = await userAuthService.setOwnPassword(
+      req.session.user,
+      req.body || {},
+    );
+    return res.redirect("/account?password=changed#security");
+  } catch (error) {
+    if (!error.expose) return next(error);
+    return res.status(400).render("user/set-password", { error: error.message });
   }
 }
 
@@ -295,4 +316,6 @@ module.exports = {
   logout,
   account,
   changePassword,
+  showSetPassword,
+  setPassword,
 };

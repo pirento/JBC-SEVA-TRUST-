@@ -1,4 +1,4 @@
-const { readRecords } = require("../models/fileStore");
+const { readCorrected } = require("../models/records");
 const enquiryModel = require("../models/enquiryModel");
 const contentModel = require("../models/contentModel");
 const { toCsv } = require("../utils/csv");
@@ -19,7 +19,7 @@ const {
 const isSuccess = (r) => String(r.paymentStatus || "SUCCESS").toUpperCase() === "SUCCESS";
 
 async function successfulDonations() {
-  return (await readRecords("donations.txt")).filter(isSuccess);
+  return (await readCorrected("donations.txt")).filter(isSuccess);
 }
 
 // Each export: file name and a function returning CSV text
@@ -52,7 +52,7 @@ const exports_ = {
   },
 
   memberships: async () => {
-    const rows = (await readRecords("payment.txt"))
+    const rows = (await readCorrected("payment.txt"))
       .filter(isSuccess)
       .map(normalizeMembership);
     return toCsv(rows, [
@@ -69,7 +69,7 @@ const exports_ = {
   },
 
   medical: async () => {
-    const rows = (await readRecords("user.txt"))
+    const rows = (await readCorrected("user.txt"))
       .filter((r) => String(r.type || "").toUpperCase() === "MEDICAL_HELP")
       .map(normalizeMedical);
     return toCsv(rows, [

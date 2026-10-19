@@ -1,4 +1,4 @@
-const { readRecords } = require("../models/fileStore");
+const { readCorrected } = require("../models/records");
 const { donationPages } = require("../config/trustConfig");
 
 // Temple gifts go to a separate fund head and are reported on their own
@@ -200,11 +200,11 @@ async function getDailyReport(selectedDate) {
   // READ ALL DATA
   // ========================================
 
-  const paymentRecords = await readRecords("payment.txt");
+  const paymentRecords = await readCorrected("payment.txt");
 
-  const donationRecords = await readRecords("donations.txt");
+  const donationRecords = await readCorrected("donations.txt");
 
-  const medicalRecordsRaw = await readRecords("user.txt");
+  const medicalRecordsRaw = await readCorrected("user.txt");
 
   // ========================================
   // MEMBERSHIPS

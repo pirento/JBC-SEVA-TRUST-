@@ -1,3 +1,4 @@
+const { readCorrected } = require("../models/records");
 const crypto = require("crypto");
 const cron = require("node-cron");
 
@@ -24,7 +25,7 @@ const time = (value) => new Date(value || 0).getTime() || 0;
 
 async function listPledges() {
   const [donations, events] = await Promise.all([
-    readRecords("donations.txt"),
+    readCorrected("donations.txt"),
     readRecords(FILE),
   ]);
 

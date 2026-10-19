@@ -1,4 +1,4 @@
-const { readRecords } = require("../models/fileStore");
+const { readCorrected } = require("../models/records");
 
 const {
   normalizeMembership,
@@ -30,9 +30,9 @@ function newestFirst(records) {
 // Everything a logged-in user has done with the trust, matched by email
 async function getActivity(email) {
   const [payments, donations, medical] = await Promise.all([
-    readRecords("payment.txt"),
-    readRecords("donations.txt"),
-    readRecords("user.txt"),
+    readCorrected("payment.txt"),
+    readCorrected("donations.txt"),
+    readCorrected("user.txt"),
   ]);
 
   const memberships = newestFirst(

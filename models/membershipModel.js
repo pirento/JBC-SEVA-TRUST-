@@ -1,4 +1,5 @@
-const { appendRecord, readRecords } = require("./fileStore");
+const { readCorrected } = require("./records");
+const { appendRecord } = require("./fileStore");
 
 const { required, phone, positiveAmount } = require("../utils/validation");
 
@@ -108,7 +109,7 @@ async function findByTransactionId(txnid) {
   // payment.txt storage format.
   // ==========================================================
 
-  const records = await readRecords("payment.txt");
+  const records = await readCorrected("payment.txt");
 
   if (!Array.isArray(records) || records.length === 0) {
     return null;

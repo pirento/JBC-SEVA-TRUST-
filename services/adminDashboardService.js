@@ -1,5 +1,5 @@
+const { readCorrected } = require("../models/records");
 const { realDate } = require("../utils/validation");
-const { readRecords } = require("../models/fileStore");
 const enquiryModel = require("../models/enquiryModel");
 const { listUsers } = require("../models/userModel");
 const { listPledges } = require("./pledgeService");
@@ -88,9 +88,9 @@ async function getDashboard({ date = "", view = "donations", q = "", page = 1 } 
     users,
     pledges,
   ] = await Promise.all([
-    readRecords("payment.txt"),
-    readRecords("donations.txt"),
-    readRecords("user.txt"),
+    readCorrected("payment.txt"),
+    readCorrected("donations.txt"),
+    readCorrected("user.txt"),
     enquiryModel.listVolunteers(),
     enquiryModel.listMessages(),
     listUsers(),

@@ -33,5 +33,7 @@ const verifyLimiter = createRateLimiter({ max: 5, windowMs: 60 * 60 * 1000 });
 router.get("/verify-email/:token", controller.verifyEmail);
 router.post("/account/verify", userAuth, verifyLimiter, controller.resendVerification);
 router.post("/account/password", userAuth, passwordLimiter, controller.changePassword);
+router.get("/account/set-password", userAuth, controller.showSetPassword);
+router.post("/account/set-password", userAuth, passwordLimiter, controller.setPassword);
 
 module.exports = router;

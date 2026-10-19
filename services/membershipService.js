@@ -1,3 +1,4 @@
+const userAuthService = require("./userAuthService");
 const Membership = require("../models/membershipModel");
 
 const {
@@ -457,6 +458,17 @@ async function handlePaymentSuccess(data) {
   // ----------------------------------------------------------
 
   // Email only once, even if PayU calls back again.
+  // No account needed to join; one is made afterwards for this email
+  if (isNewPayment)
+    userAuthService
+      .ensureAccountForPayment({
+        name: memberName,
+        email: pending.email,
+        phone: pending.phoneNumber,
+        lang: pending.lang,
+      })
+      .catch((error) => console.error("❌ Member account failed:", error.message));
+
   if (isNewPayment)
     sendMembershipEmail(
       {
