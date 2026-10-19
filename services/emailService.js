@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const { logoAttachment, LOGO_CID, renderEmail } = require("./emailTemplate");
 const { user, pass, trustEmail } = require("../config/emailConfig");
 
 const transporter = nodemailer.createTransport({
@@ -40,6 +41,11 @@ function buildMailOptions({
 }) {
   const bcc = copyTrust && trustEmail && trustEmail !== to ? trustEmail : undefined;
 
+  // Branded emails show the logo from an attachment (cid:jbc-logo)
+  const withLogo = String(html || "").includes(`cid:${LOGO_CID}`)
+    ? [...attachments, ...logoAttachment()]
+    : attachments;
+
   return {
     from: `"JBC Seva Trust" <${user}>`,
     to,
@@ -48,7 +54,7 @@ function buildMailOptions({
     subject,
     text,
     html,
-    attachments,
+    attachments: withLogo,
   };
 }
 
@@ -78,38 +84,14 @@ async function sendEmail(options) {
 }
 
 async function sendTestEmail() {
-  return sendEmail({
-    to: user,
-    replyTo: user,
-
-    subject: "JBC Seva Trust Nodemailer Test",
-
-    text:
-      "Congratulations!\n\n" +
-      "Nodemailer is working successfully.\n\n" +
-      "This is a test email from JBC Seva Trust.",
-
-    html: `
-      <div style="
-        font-family: Arial, sans-serif;
-        max-width: 600px;
-        margin: auto;
-        padding: 30px;
-      ">
-        <h2>Nodemailer Test Successful</h2>
-
-        <p>Congratulations!</p>
-
-        <p>
-          Your Nodemailer email system is working successfully.
-        </p>
-
-        <p>
-          This is a test email from JBC Seva Trust.
-        </p>
-      </div>
-    `,
+  const { html, text } = renderEmail({
+    heading: "Email is working",
+    paragraphs: [
+      "This is a test email from the JBC Seva Trust website. Emails to donors and the trust will be sent from this address.",
+    ],
   });
+
+  return sendEmail({ to: user, subject: "Test email - JBC Seva Trust", text, html });
 }
 
 module.exports = {

@@ -518,6 +518,44 @@ module.exports = {
   "A copy of the receipt is sent to the email you gave. Keep the reference number for any follow-up.":
     "रसीद की एक प्रति आपके दिए गए ईमेल पर भेजी जाती है। आगे के लिए संदर्भ संख्या संभालकर रखें।",
 
+  // ---------- Emails ----------
+  "Public Charitable Trust": "सार्वजनिक धर्मार्थ ट्रस्ट",
+  "Thank you for your donation": "आपके दान के लिए धन्यवाद",
+  "We have received your donation. Your certificate is attached to this email as a PDF.":
+    "हमें आपका दान मिल गया है। आपका प्रमाण-पत्र इस ईमेल के साथ PDF में संलग्न है।",
+  Gotra: "गोत्र",
+  "With gratitude,": "आभार सहित,",
+  "Money given for a cause is used only for that cause.":
+    "किसी उद्देश्य के लिए दिया गया धन केवल उसी पर खर्च होता है।",
+  "Welcome to JBC Seva Trust": "जेबीसी सेवा ट्रस्ट में आपका स्वागत है",
+  "Thank you for becoming a member. Your membership certificate is attached to this email as a PDF.":
+    "सदस्य बनने के लिए धन्यवाद। आपका सदस्यता प्रमाण-पत्र इस ईमेल के साथ PDF में संलग्न है।",
+  "Membership does not give ownership, voting or management rights in the Trust.":
+    "सदस्यता से ट्रस्ट में स्वामित्व, मतदान या प्रबंधन का कोई अधिकार नहीं मिलता।",
+  "Medical help request received": "चिकित्सा सहायता अनुरोध मिला",
+  "We have received the medical help request. Our team will review it and contact you. The receipt is attached to this email as a PDF.":
+    "हमें चिकित्सा सहायता अनुरोध मिल गया है। हमारी टीम इसे देखकर आपसे संपर्क करेगी। रसीद इस ईमेल के साथ PDF में संलग्न है।",
+  "Submitting a request does not guarantee financial or medical help. Keep the reference number for any follow-up.":
+    "अनुरोध भेजने से आर्थिक या चिकित्सा सहायता की गारंटी नहीं होती। आगे के लिए संदर्भ संख्या संभालकर रखें।",
+  "Please confirm your email": "कृपया अपना ईमेल पक्का करें",
+  "Thank you for creating an account. Please confirm that this email is yours. After that you can see your donations, memberships and receipts in My Account.":
+    "खाता बनाने के लिए धन्यवाद। कृपया पक्का करें कि यह ईमेल आपका है। इसके बाद आप मेरे खाते में अपने दान, सदस्यता और रसीदें देख सकेंगे।",
+  "Confirm my email": "मेरा ईमेल पक्का करें",
+  "This link works for 7 days. If you did not create an account, you can ignore this email.":
+    "यह लिंक 7 दिन तक काम करेगा। अगर आपने खाता नहीं बनाया है, तो इस ईमेल को अनदेखा करें।",
+  "Reset your password": "अपना पासवर्ड बदलें",
+  "We received a request to set a new password for your account.":
+    "हमें आपके खाते का नया पासवर्ड बनाने का अनुरोध मिला है।",
+  "Set a new password": "नया पासवर्ड बनाएँ",
+  "This link works for one hour and only once. If you did not ask for this, ignore this email; your password stays the same.":
+    "यह लिंक एक घंटे तक और केवल एक बार काम करेगा। अगर आपने यह अनुरोध नहीं किया है, तो इस ईमेल को अनदेखा करें; आपका पासवर्ड वही रहेगा।",
+  "Your monthly gift is due": "आपका मासिक दान देय है",
+  "Thank you for giving every month. Your next gift is due; you can pay securely with the button below.":
+    "हर महीने दान देने के लिए धन्यवाद। आपका अगला दान देय है; नीचे के बटन से सुरक्षित भुगतान करें।",
+  "Give this month": "इस महीने दान करें",
+  "To stop these reminders, log in to My Account and choose Stop next to this monthly donation.":
+    "ये रिमाइंडर बंद करने के लिए मेरे खाते में लॉगिन करें और इस मासिक दान के आगे 'बंद करें' चुनें।",
+
   // ---------- Page titles ----------
   Membership: "सदस्यता",
   "Forgot Password": "पासवर्ड भूल गए",

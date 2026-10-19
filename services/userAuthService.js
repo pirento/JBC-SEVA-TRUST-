@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 
 const { sendEmail } = require("./emailService");
+const { renderEmail } = require("./emailTemplate");
 const { appUrl } = require("../config/appConfig");
 
 const userModel = require("../models/userModel");
@@ -81,6 +82,7 @@ async function register(input) {
     email: cleanEmail,
     phone: cleanPhone,
     passwordHash,
+    lang: input.lang === "hi" ? "hi" : "en",
   });
 
   await requestEmailVerification(user.email);
@@ -140,12 +142,27 @@ async function requestEmailVerification(email) {
   });
 
   const link = `${appUrl}/verify-email/${token}`;
+  const lang = user.lang === "hi" ? "hi" : "en";
+
+  const { html, text } = renderEmail({
+    lang,
+    heading: "Please confirm your email",
+    greeting: lang === "hi" ? `नमस्ते ${user.name},` : `Namaste ${user.name},`,
+    paragraphs: [
+      "Thank you for creating an account. Please confirm that this email is yours. After that you can see your donations, memberships and receipts in My Account.",
+    ],
+    button: { label: "Confirm my email", url: link },
+    note: "This link works for 7 days. If you did not create an account, you can ignore this email.",
+  });
 
   sendEmail({
     to: user.email,
-    subject: "Confirm your email - JBC Seva Trust",
-    text: `Namaste ${user.name},\n\nPlease confirm your email by opening this link:\n${link}\n\nAfter that you can see your donations and receipts in My Account.\n\nJBC Seva Trust`,
-    html: `<p>Namaste ${user.name.replace(/[<>&"]/g, "")},</p><p>Please confirm your email by opening this link:</p><p><a href="${link}">${link}</a></p><p>After that you can see your donations and receipts in My Account.</p><p>JBC Seva Trust</p>`,
+    subject:
+      lang === "hi"
+        ? "अपना ईमेल पक्का करें - JBC Seva Trust"
+        : "Confirm your email - JBC Seva Trust",
+    text,
+    html,
   }).catch((error) => console.error("❌ Verification email failed:", error.message));
 
   return token;
@@ -200,12 +217,25 @@ async function requestPasswordReset(email) {
   });
 
   const link = `${appUrl}/reset-password/${token}`;
+  const lang = user.lang === "hi" ? "hi" : "en";
+
+  const { html, text } = renderEmail({
+    lang,
+    heading: "Reset your password",
+    greeting: lang === "hi" ? `नमस्ते ${user.name},` : `Namaste ${user.name},`,
+    paragraphs: ["We received a request to set a new password for your account."],
+    button: { label: "Set a new password", url: link },
+    note: "This link works for one hour and only once. If you did not ask for this, ignore this email; your password stays the same.",
+  });
 
   sendEmail({
     to: user.email,
-    subject: "Reset your password - JBC Seva Trust",
-    text: `Namaste ${user.name},\n\nOpen this link within one hour to set a new password:\n${link}\n\nIf you did not ask for this, ignore this email.\n\nJBC Seva Trust`,
-    html: `<p>Namaste ${user.name.replace(/[<>&"]/g, "")},</p><p>Open this link within one hour to set a new password:</p><p><a href="${link}">${link}</a></p><p>If you did not ask for this, ignore this email.</p><p>JBC Seva Trust</p>`,
+    subject:
+      lang === "hi"
+        ? "पासवर्ड बदलें - JBC Seva Trust"
+        : "Reset your password - JBC Seva Trust",
+    text,
+    html,
   }).catch((error) => console.error("❌ Reset email failed:", error.message));
 
   return token;

@@ -2,7 +2,8 @@ const enquiryModel = require("../models/enquiryModel");
 const { sendEmail } = require("./emailService");
 const { trustEmail } = require("../config/emailConfig");
 const trust = require("../config/trustConfig");
-const escapeHtml = require("../utils/escapeHtml");
+const { renderEmail } = require("./emailTemplate");
+const { appUrl } = require("../config/appConfig");
 const {
   required,
   phone,
@@ -47,21 +48,19 @@ function contact(input) {
 function notifyTrust(subject, rows, replyTo) {
   if (!trustEmail) return;
 
-  const html =
-    `<h2 style="color:#14365d">${escapeHtml(subject)}</h2><table>` +
-    rows
-      .map(
-        ([k, v]) =>
-          `<tr><td style="padding:4px 12px 4px 0"><strong>${escapeHtml(k)}</strong></td><td>${escapeHtml(v)}</td></tr>`,
-      )
-      .join("") +
-    "</table>";
+  const { html, text } = renderEmail({
+    heading: subject,
+    paragraphs: ["Reply to this email to answer the person directly."],
+    rows,
+    button: { label: "Open admin dashboard", url: `${appUrl}/admin/dashboard` },
+    closing: "Sent by the website",
+  });
 
   sendEmail({
     to: trustEmail,
     replyTo,
     subject: `${subject} - ${trust.name}`,
-    text: rows.map(([k, v]) => `${k}: ${v}`).join("\n"),
+    text,
     html,
   }).catch((error) => console.error("❌ Enquiry email failed:", error.message));
 }

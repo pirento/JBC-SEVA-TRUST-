@@ -17,7 +17,10 @@ async function submitMembership(req, res) {
 
   try {
     // The service checks every field (name, phone, email, amount, consent)
-    const result = await membershipService.initiateMembership(body);
+    const result = await membershipService.initiateMembership({
+      ...body,
+      lang: res.locals.lang,
+    });
 
     return res.render("pages/payu-redirect", { ...result, kind: "Membership" });
   } catch (error) {

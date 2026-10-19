@@ -40,7 +40,7 @@ async function findByEmail(value) {
   return users.find((user) => user.email === email) || null;
 }
 
-async function createUser({ name, email, phone, passwordHash }) {
+async function createUser({ name, email, phone, passwordHash, lang = "en" }) {
   const now = new Date().toISOString();
 
   const user = {
@@ -50,6 +50,7 @@ async function createUser({ name, email, phone, passwordHash }) {
     email: normalizeEmail(email),
     phone,
     passwordHash,
+    lang,
     // Records are matched by email, so they stay hidden until the
     // owner proves the address is theirs
     emailVerified: false,

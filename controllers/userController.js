@@ -43,7 +43,7 @@ async function register(req, res, next) {
   req.rateLimit?.hit();
 
   try {
-    const user = await userAuthService.register(body);
+    const user = await userAuthService.register({ ...body, lang: res.locals.lang });
     await startSession(req, user);
     return res.redirect("/account?welcome=1");
   } catch (error) {

@@ -71,7 +71,10 @@ async function submitDonation(req, res) {
   const body = req.body || {};
 
   try {
-    const result = await donationService.initiateDonation(body);
+    const result = await donationService.initiateDonation({
+      ...body,
+      lang: res.locals.lang,
+    });
 
     return res.render("pages/payu-redirect", { ...result, kind: "Donation" });
   } catch (error) {

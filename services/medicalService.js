@@ -5,7 +5,7 @@ const { create } = require("../models/medicalModel");
 const { sendEmail } = require("./emailService");
 const { generateMedicalReceipt } = require("./medicalReceiptService");
 const { dataDir } = require("../config/appConfig");
-const escapeHtml = require("../utils/escapeHtml");
+const { renderEmail } = require("./emailTemplate");
 
 const receiptsDir = path.join(dataDir, "receipts");
 
@@ -36,14 +36,36 @@ async function submitMedical(data) {
 }
 
 async function sendMedicalEmail(data, referenceNumber, fileName, pdfBuffer) {
-  const { patientName, dateBirth, patientEmail, nameDiseases, hospitalName } = data;
+  const lang = data.lang === "hi" ? "hi" : "en";
+  const name = String(data.patientName || "").trim();
+
+  const { html, text } = renderEmail({
+    lang,
+    preheader: `Reference number ${referenceNumber}`,
+    heading: "Medical help request received",
+    greeting: lang === "hi" ? `नमस्ते,` : `Hello,`,
+    paragraphs: [
+      "We have received the medical help request. Our team will review it and contact you. The receipt is attached to this email as a PDF.",
+    ],
+    rows: [
+      ["Reference number", referenceNumber],
+      ["Patient", name],
+      ["Illness", data.nameDiseases],
+      ["Hospital", data.hospitalName],
+    ],
+    note: "Submitting a request does not guarantee financial or medical help. Keep the reference number for any follow-up.",
+  });
+
   await sendEmail({
-    to: patientEmail,
+    to: data.patientEmail,
     // Receipt: the trust keeps a hidden copy
     copyTrust: true,
-    subject: "Medical Help Request Received - JBC Seva Trust",
-    text: `Hello ${patientName},\n\nThank you for contacting JBC Seva Trust.\n\nYour medical help request has been successfully received.\n\nReference Number:\n${referenceNumber}\n\nPatient Name:\n${patientName}\n\nDate of Birth:\n${dateBirth}\n\nPhone Number:\n${data.patientPhoneNumber}\n\nDisease:\n${nameDiseases}\n\nHospital:\n${hospitalName}\n\nYour official medical help receipt is attached to this email as a PDF.\n\nOur team will review your request and contact you soon.\n\nRegards,\nJBC Seva Trust`,
-    html: `<div style="font-family:Arial,sans-serif;max-width:650px;margin:auto;padding:30px;background:#ffffff;border:1px solid #dddddd;border-radius:10px"><h2 style="color:#14365d">JBC Seva Trust</h2><h3>Medical Help Request Received</h3><p>Hello <strong>${escapeHtml(patientName)}</strong>,</p><p>Thank you for contacting <strong>JBC Seva Trust</strong>.</p><p>Your medical help request has been successfully received.</p><div style="background:#f5f5f5;padding:15px;border-radius:6px;margin:20px 0"><strong>Reference Number:</strong><br>${referenceNumber}</div><table style="width:100%;border-collapse:collapse"><tr><td style="padding:8px;border-bottom:1px solid #eee"><strong>Patient Name</strong></td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(patientName)}</td></tr><tr><td style="padding:8px;border-bottom:1px solid #eee"><strong>Disease</strong></td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(nameDiseases)}</td></tr><tr><td style="padding:8px;border-bottom:1px solid #eee"><strong>Hospital</strong></td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(hospitalName)}</td></tr></table><p>📎 Your official medical help receipt is attached to this email.</p><p>Our team will review your request and contact you soon.</p><p>Regards,<br><strong>JBC Seva Trust</strong></p></div>`,
+    subject:
+      lang === "hi"
+        ? `चिकित्सा सहायता अनुरोध मिला (${referenceNumber}) - JBC Seva Trust`
+        : `Medical help request received (${referenceNumber}) - JBC Seva Trust`,
+    text,
+    html,
     attachments: [
       { filename: fileName, content: pdfBuffer, contentType: "application/pdf" },
     ],

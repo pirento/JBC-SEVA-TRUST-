@@ -4,6 +4,8 @@ const contentModel = require("../models/contentModel");
 const trust = require("../config/trustConfig");
 const { sendEmail } = require("./emailService");
 const { trustEmail } = require("../config/emailConfig");
+const { appUrl } = require("../config/appConfig");
+const { renderEmail } = require("./emailTemplate");
 const { required, phone, email, accepted, personName } = require("../utils/validation");
 
 function invalid(message) {
@@ -115,11 +117,27 @@ async function registerForEvent(event, input) {
   });
 
   if (trustEmail) {
+    const { html, text } = renderEmail({
+      heading: "New event registration",
+      paragraphs: ["Reply to this email to answer the person directly."],
+      rows: [
+        ["Event", `${event.title} (${event.date})`],
+        ["Name", record.name],
+        ["Mobile", record.phone],
+        ["Email", record.email],
+        ["People", String(people)],
+        ["Role", role],
+      ],
+      button: { label: "Open Updates & Events", url: `${appUrl}/admin/content` },
+      closing: "Sent by the website",
+    });
+
     sendEmail({
       to: trustEmail,
       replyTo: record.email,
       subject: `Event registration: ${event.title} - ${trust.name}`,
-      text: `${record.name} (${record.phone}, ${record.email}) registered for ${event.title} on ${event.date}: ${people} person(s), ${role}.`,
+      text,
+      html,
     }).catch((error) => console.error("❌ Event email failed:", error.message));
   }
 

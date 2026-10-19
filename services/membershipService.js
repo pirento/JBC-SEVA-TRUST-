@@ -1,6 +1,3 @@
-const fs = require("fs");
-const path = require("path");
-
 const Membership = require("../models/membershipModel");
 
 const {
@@ -33,9 +30,8 @@ const {
   fewLinks,
 } = require("../utils/validation");
 
-const escapeHtml = require("../utils/escapeHtml");
-
-const logoPath = path.join(__dirname, "..", "public", "images", "logo.jpeg");
+const { renderEmail, t } = require("./emailTemplate");
+const { appUrl } = require("../config/appConfig");
 
 // ============================================================
 // MEMBERSHIP VALIDATION
@@ -153,6 +149,9 @@ function validateMembership(input) {
     phoneNumber: cleanPhone,
     email: cleanEmail,
     amount,
+
+    // Language of the emails sent to this member
+    lang: input.lang === "hi" ? "hi" : "en",
 
     membershipType,
 
@@ -615,404 +614,50 @@ async function getReceipt(transactionId) {
 // ============================================================
 
 async function sendMembershipEmail(membership, payuData, pdfBuffer) {
+  const lang = membership.lang === "hi" ? "hi" : "en";
   const memberName = String(membership.memberName || membership.donorName || "").trim();
+  const amount = Number(membership.amount || 0).toFixed(2);
 
-  const fileName = `membership-certificate-${payuData.txnid}.pdf`;
-
-  const attachments = [
-    {
-      filename: fileName,
-      content: pdfBuffer,
-      contentType: "application/pdf",
+  const { html, text } = renderEmail({
+    lang,
+    preheader: `Your ${membership.membershipType} membership is confirmed`,
+    heading: "Welcome to JBC Seva Trust",
+    greeting: lang === "hi" ? `नमस्ते ${memberName},` : `Dear ${memberName},`,
+    paragraphs: [
+      "Thank you for becoming a member. Your membership certificate is attached to this email as a PDF.",
+    ],
+    rows: [
+      ["Membership", t(membership.membershipType, lang)],
+      ["Amount", `₹${amount}`],
+      ["Payment mode", membership.paymentMode],
+      ["Transaction ID", payuData.txnid],
+    ],
+    button: {
+      label: "Download Membership Certificate",
+      url: `${appUrl}/donation/receipt/${encodeURIComponent(payuData.txnid)}`,
     },
-  ];
-
-  if (fs.existsSync(logoPath)) {
-    attachments.push({
-      filename: "jbc-seva-logo.jpeg",
-      path: logoPath,
-      cid: "jbc-seva-trust-logo",
-    });
-  }
+    note: "Membership does not give ownership, voting or management rights in the Trust.",
+  });
 
   await sendEmail({
     to: membership.email,
-
     // Receipt: the trust keeps a hidden copy
     copyTrust: true,
-
-    subject: "Membership Confirmation - JBC Seva Trust",
-
-    text:
-      `Dear ${memberName},\n\n` +
-      `Thank you for becoming a member of JBC Seva Trust.\n\n` +
-      `Your membership has been successfully processed.\n\n` +
-      `Member Name: ${memberName}\n` +
-      `Membership Amount: ₹${Number(membership.amount).toFixed(2)}\n` +
-      `Membership Type: ${membership.membershipType}\n` +
-      `Transaction ID: ${payuData.txnid}\n` +
-      `Payment ID: ${payuData.mihpayid || "N/A"}\n\n` +
-      `Your official membership certificate is attached to this email as a PDF.\n\n` +
-      `Regards,\n` +
-      `JBC Seva Trust`,
-
-    html: createMembershipEmailHtml(
+    subject:
+      lang === "hi"
+        ? "सदस्यता की पुष्टि - JBC Seva Trust"
+        : "Membership confirmed - JBC Seva Trust",
+    text,
+    html,
+    attachments: [
       {
-        ...membership,
-        memberName,
+        filename: `membership-certificate-${payuData.txnid}.pdf`,
+        content: pdfBuffer,
+        contentType: "application/pdf",
       },
-      payuData,
-    ),
-
-    attachments,
+    ],
   });
 }
-
-// ============================================================
-// MEMBERSHIP EMAIL HTML
-// ============================================================
-
-function createMembershipEmailHtml(membership, payuData) {
-  const memberName = String(membership.memberName || membership.donorName || "").trim();
-
-  return `
-<!DOCTYPE html>
-<html>
-
-<head>
-  <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1.0"
-  >
-
-  <title>Membership Confirmation</title>
-</head>
-
-<body
-  style="
-    margin:0;
-    padding:0;
-    background:#f4f6f8;
-    font-family:Arial,Helvetica,sans-serif;
-  "
->
-
-<table
-  width="100%"
-  cellpadding="0"
-  cellspacing="0"
-  border="0"
-  style="background:#f4f6f8"
->
-
-<tr>
-<td align="center" style="padding:30px 15px">
-
-<table
-  width="600"
-  cellpadding="0"
-  cellspacing="0"
-  border="0"
-  style="
-    max-width:600px;
-    width:100%;
-    background:#ffffff;
-    border-radius:10px;
-    overflow:hidden;
-  "
->
-
-<!-- ======================================================
-     HEADER
-======================================================= -->
-
-<tr>
-<td
-  align="center"
-  style="
-    padding:30px 20px;
-    border-bottom:1px solid #eeeeee;
-  "
->
-
-<img
-  src="cid:jbc-seva-trust-logo"
-  alt="JBC Seva Trust"
-  width="110"
-  style="
-    display:block;
-    width:110px;
-    max-width:110px;
-    height:auto;
-    margin:0 auto 15px;
-  "
->
-
-<h2
-  style="
-    margin:0 0 6px;
-    font-size:22px;
-    color:#222222;
-  "
->
-  JBC Seva Trust
-</h2>
-
-<p
-  style="
-    margin:0;
-    font-size:14px;
-    color:#777777;
-  "
->
-  Membership Confirmation
-</p>
-
-</td>
-</tr>
-
-<!-- ======================================================
-     BODY
-======================================================= -->
-
-<tr>
-<td
-  style="
-    padding:30px 25px;
-    color:#333333;
-    font-size:15px;
-    line-height:1.6;
-  "
->
-
-<p>
-  Dear
-  <strong>
-    ${escapeHtml(memberName)}
-  </strong>,
-</p>
-
-<p>
-  Thank you for becoming a member of
-  <strong>
-    JBC Seva Trust
-  </strong>.
-</p>
-
-<p>
-  Your membership has been successfully processed.
-</p>
-
-<table
-  width="100%"
-  cellpadding="10"
-  cellspacing="0"
-  border="0"
-  style="
-    border-collapse:collapse;
-    margin-top:20px;
-  "
->
-
-<!-- MEMBER NAME -->
-
-<tr>
-<td
-  style="
-    border-bottom:1px solid #eeeeee;
-    font-weight:bold;
-  "
->
-  Member Name
-</td>
-
-<td
-  align="right"
-  style="
-    border-bottom:1px solid #eeeeee;
-  "
->
-  ${escapeHtml(memberName)}
-</td>
-</tr>
-
-<!-- MEMBERSHIP AMOUNT -->
-
-<tr>
-<td
-  style="
-    border-bottom:1px solid #eeeeee;
-    font-weight:bold;
-  "
->
-  Membership Amount
-</td>
-
-<td
-  align="right"
-  style="
-    border-bottom:1px solid #eeeeee;
-  "
->
-  ₹${Number(membership.amount).toFixed(2)}
-</td>
-</tr>
-
-<!-- MEMBERSHIP TYPE -->
-
-<tr>
-<td
-  style="
-    border-bottom:1px solid #eeeeee;
-    font-weight:bold;
-  "
->
-  Membership Type
-</td>
-
-<td
-  align="right"
-  style="
-    border-bottom:1px solid #eeeeee;
-  "
->
-  ${escapeHtml(membership.membershipType)}
-</td>
-</tr>
-
-<!-- TRANSACTION ID -->
-
-<tr>
-<td
-  style="
-    border-bottom:1px solid #eeeeee;
-    font-weight:bold;
-  "
->
-  Transaction ID
-</td>
-
-<td
-  align="right"
-  style="
-    border-bottom:1px solid #eeeeee;
-    word-break:break-all;
-  "
->
-  ${escapeHtml(payuData.txnid)}
-</td>
-</tr>
-
-<!-- PAYMENT ID -->
-
-<tr>
-<td
-  style="
-    border-bottom:1px solid #eeeeee;
-    font-weight:bold;
-  "
->
-  Payment ID
-</td>
-
-<td
-  align="right"
-  style="
-    border-bottom:1px solid #eeeeee;
-    word-break:break-all;
-  "
->
-  ${escapeHtml(payuData.mihpayid || "N/A")}
-</td>
-</tr>
-
-<!-- PAYMENT MODE -->
-
-<tr>
-<td style="font-weight:bold">
-  Payment Mode
-</td>
-
-<td align="right">
-  ${escapeHtml(membership.paymentMode)}
-</td>
-</tr>
-
-</table>
-
-<!-- CERTIFICATE NOTICE -->
-
-<div
-  style="
-    margin-top:25px;
-    padding:15px;
-    background:#f5f8fb;
-    border-radius:7px;
-  "
->
-
-<p
-  style="
-    margin:0;
-    font-size:14px;
-    color:#444444;
-  "
->
-  📎 Your official membership certificate
-  is attached to this email as a PDF.
-</p>
-
-</div>
-
-<p style="margin-top:25px">
-  Please keep this certificate for your records.
-</p>
-
-<p>
-  Regards,<br>
-  <strong>
-    JBC Seva Trust
-  </strong>
-</p>
-
-</td>
-</tr>
-
-<!-- ======================================================
-     FOOTER
-======================================================= -->
-
-<tr>
-<td
-  align="center"
-  style="
-    padding:18px;
-    background:#f4f4f4;
-    font-size:12px;
-    color:#777777;
-  "
->
-  This is an automated membership confirmation.
-</td>
-</tr>
-
-</table>
-
-</td>
-</tr>
-
-</table>
-
-</body>
-</html>
-`;
-}
-
-// ============================================================
-// EXPORTS
-// ============================================================
 
 // ============================================================
 // FIND A SAVED MEMBERSHIP

@@ -9,6 +9,8 @@ const { sendEmail } = require("./emailService");
 const { appendRecord, readRecords } = require("../models/fileStore");
 
 const { trustEmail: REPORT_EMAIL } = require("../config/emailConfig");
+const { appUrl } = require("../config/appConfig");
+const { renderEmail } = require("./emailTemplate");
 
 // ============================================================
 // GET TODAY'S DATE IN INDIA
@@ -106,89 +108,37 @@ async function sendDailyReport() {
     // EMAIL
     // --------------------------------------------------------
 
+    const money = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
+    const { html, text } = renderEmail({
+      heading: `Daily report: ${reportDate}`,
+      paragraphs: ["Today's summary is below. The detailed report is attached as a PDF."],
+      rows: [
+        [
+          "Donations",
+          `${report.summary.donationCount} · ${money(report.summary.donationCollection)}`,
+        ],
+        [
+          "Memberships",
+          `${report.summary.membershipCount} · ${money(report.summary.membershipCollection)}`,
+        ],
+        ["Total collection", money(report.summary.totalCollection)],
+        ["Medical requests", String(report.summary.medicalCount)],
+      ],
+      button: {
+        label: "Open admin dashboard",
+        url: `${appUrl}/admin/dashboard?date=${reportDate}`,
+      },
+      closing: "Sent by the website",
+    });
+
     await sendEmail({
       to: REPORT_EMAIL,
 
-      subject: `JBC Seva Trust - Daily Report - ${reportDate}`,
+      subject: `Daily report ${reportDate} - JBC Seva Trust`,
 
-      text: `Dear Admin,
+      text,
 
-Please find attached the daily administrative report for ${reportDate}.
-
-Memberships: ${report.summary.membershipCount}
-Membership Collection: Rs. ${report.summary.membershipCollection}
-
-Donations: ${report.summary.donationCount}
-Donation Collection: Rs. ${report.summary.donationCollection}
-
-Medical Help Requests: ${report.summary.medicalCount}
-
-Total Collection: Rs. ${report.summary.totalCollection}
-
-This is an automatically generated report.
-
-Regards,
-JBC Seva Trust`,
-
-      html: `
-        <h2>JBC Seva Trust</h2>
-
-        <h3>Daily Administrative Report</h3>
-
-        <p>
-          <strong>Report Date:</strong>
-          ${reportDate}
-        </p>
-
-        <hr>
-
-        <h3>Report Summary</h3>
-
-        <p>
-          <strong>Total Memberships:</strong>
-          ${report.summary.membershipCount}
-        </p>
-
-        <p>
-          <strong>Membership Collection:</strong>
-          Rs. ${Number(report.summary.membershipCollection || 0).toLocaleString("en-IN")}
-        </p>
-
-        <p>
-          <strong>Total Donations:</strong>
-          ${report.summary.donationCount}
-        </p>
-
-        <p>
-          <strong>Donation Collection:</strong>
-          Rs. ${Number(report.summary.donationCollection || 0).toLocaleString("en-IN")}
-        </p>
-
-        <p>
-          <strong>Medical Help Requests:</strong>
-          ${report.summary.medicalCount}
-        </p>
-
-        <p>
-          <strong>Total Collection:</strong>
-          Rs. ${Number(report.summary.totalCollection || 0).toLocaleString("en-IN")}
-        </p>
-
-        <hr>
-
-        <p>
-          The complete detailed report is attached as a PDF.
-        </p>
-
-        <p>
-          This is an automatically generated email.
-        </p>
-
-        <p>
-          Regards,<br>
-          <strong>JBC Seva Trust</strong>
-        </p>
-      `,
+      html,
 
       attachments: [
         {

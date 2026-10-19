@@ -201,6 +201,8 @@ function validateDonationDetails(page, input) {
     pan,
     address,
     monthly: input.monthly === "on" || input.monthly === "true",
+    // Language of the emails sent to this donor
+    lang: input.lang === "hi" ? "hi" : "en",
   };
 }
 

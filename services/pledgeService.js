@@ -2,6 +2,7 @@ const cron = require("node-cron");
 
 const { appendRecord, readRecords } = require("../models/fileStore");
 const { sendEmail } = require("./emailService");
+const { renderEmail, t } = require("./emailTemplate");
 const { appUrl } = require("../config/appConfig");
 const { donationPages, GENERAL_CAUSE } = require("../config/trustConfig");
 
@@ -43,6 +44,7 @@ async function listPledges() {
         name: d.donorName,
         cause: d.cause || GENERAL_CAUSE,
         purpose: d.purpose || "",
+        lang: d.lang || "en",
         amount: Number(d.amount),
         lastPaid: d.paymentDate,
       });
@@ -106,13 +108,31 @@ async function sendDueReminders(now = Date.now()) {
   for (const pledge of due) {
     const link = payLink(pledge);
     try {
+      const lang = pledge.lang === "hi" ? "hi" : "en";
+      const { html, text } = renderEmail({
+        lang,
+        heading: "Your monthly gift is due",
+        greeting: lang === "hi" ? `नमस्ते ${pledge.name},` : `Namaste ${pledge.name},`,
+        paragraphs: [
+          "Thank you for giving every month. Your next gift is due; you can pay securely with the button below.",
+        ],
+        rows: [
+          ["Donated for", t(pledge.cause, lang)],
+          ["Purpose", t(pledge.purpose, lang)],
+          ["Amount", `₹${Number(pledge.amount).toFixed(2)}`],
+        ],
+        button: { label: "Give this month", url: link },
+        note: "To stop these reminders, log in to My Account and choose Stop next to this monthly donation.",
+      });
+
       await sendEmail({
         to: pledge.email,
-        subject: `Your monthly gift to ${pledge.cause} - JBC Seva Trust`,
-        text:
-          `Namaste ${pledge.name},\n\nThank you for giving to ${pledge.cause} every month. ` +
-          `Your next gift of Rs. ${pledge.amount} is due. Pay securely here:\n${link}\n\n` +
-          `To stop these reminders, log in at ${appUrl}/account and choose "Stop".\n\nJBC Seva Trust`,
+        subject:
+          lang === "hi"
+            ? `${t(pledge.cause, lang)} के लिए आपका मासिक दान - JBC Seva Trust`
+            : `Your monthly gift to ${pledge.cause} - JBC Seva Trust`,
+        text,
+        html,
       });
     } catch (error) {
       // Still record it, so a broken mail setup does not resend daily

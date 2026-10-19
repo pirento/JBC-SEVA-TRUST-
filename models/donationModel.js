@@ -87,6 +87,7 @@ async function create(data) {
     pan: String(data.pan || "").trim(),
     address: String(data.address || "").trim(),
     monthly: data.monthly === true,
+    lang: data.lang === "hi" ? "hi" : "en",
 
     paymentDate: data.paymentDate || new Date().toISOString(),
   };

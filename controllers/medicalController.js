@@ -9,7 +9,10 @@ async function submitMedical(req, res) {
     console.log(
       "\n=================================\n📥 Medical form submitted\n=================================",
     );
-    const result = await medicalService.submitMedical(req.body || {});
+    const result = await medicalService.submitMedical({
+      ...req.body,
+      lang: res.locals.lang,
+    });
     console.log("🚀 Redirecting to success page...");
     return res.redirect(
       `/medical/success?reference=${encodeURIComponent(result.reference)}&file=${encodeURIComponent(result.file)}`,
