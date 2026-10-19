@@ -2,71 +2,244 @@ const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
 
+const trust = require("../config/trustConfig");
+
 // ========================================
-// LOGO PATH
+// MEDICAL HELP REQUEST RECEIPT
+// ========================================
+//
+// A4 portrait in the trust's look: navy band with the logo, saffron
+// accents, the reference number up front, the request in two columns,
+// and what happens next. Aadhaar is never printed in full.
 // ========================================
 
 const logoPath = path.join(__dirname, "..", "public", "images", "logo-mark.png");
+// Has both Devanagari and Latin letters (see CLAUDE.md for why not Noto)
+const hindiFontPath = path.join(__dirname, "..", "public", "fonts", "FreeSans.ttf");
 
-// ========================================
-// HINDI / DEVANAGARI FONT PATH
-// ========================================
+const COLORS = {
+  navy: "#15375c",
+  saffron: "#d97706",
+  saffronLight: "#dd870d",
+  cream: "#faf3e3",
+  text: "#1d2733",
+  muted: "#5b6676",
+  line: "#e6dcc8",
+};
 
-const devanagariFontPath = path.join(__dirname, "..", "public", "fonts", "FreeSans.ttf");
-
-// ========================================
-// CHECK HINDI / DEVANAGARI TEXT
-// ========================================
+const PAGE_W = 595.28;
+const MARGIN = 48;
+const CONTENT_W = PAGE_W - MARGIN * 2;
 
 function hasDevanagari(text) {
-  return /[\u0900-\u097F]/.test(String(text || ""));
+  return /[ऀ-ॿ]/.test(String(text || ""));
 }
 
-// ========================================
-// SET DYNAMIC TEXT FONT
-// ========================================
-
-function setDynamicTextFont(doc, value, fallbackFont = "Helvetica") {
-  const text = String(value || "");
-
-  // Hindi / Mixed Hindi + English
-  if (hasDevanagari(text) && fs.existsSync(devanagariFontPath)) {
-    try {
-      doc.font(devanagariFontPath);
-      return;
-    } catch (error) {
-      console.error("⚠️ Devanagari font loading failed:", error.message);
-    }
-  }
-
-  // Normal English
-  doc.font(fallbackFont);
+// Hindi text gets a font that has its letters
+function setValueFont(doc, value, fallback = "Helvetica-Bold") {
+  doc.font(
+    hasDevanagari(value) && fs.existsSync(hindiFontPath) ? hindiFontPath : fallback,
+  );
 }
-
-// ========================================
-// MASK AADHAR NUMBER
-// ========================================
 
 function maskAadhar(aadharNumber) {
   const value = String(aadharNumber || "").replace(/\D/g, "");
+  return value.length === 12 ? `XXXX-XXXX-${value.slice(-4)}` : "Not available";
+}
 
-  if (value.length !== 12) {
-    return "Not Available";
-  }
+function safe(value) {
+  return value === null || value === undefined || value === ""
+    ? "Not provided"
+    : String(value);
+}
 
-  return `XXXX-XXXX-${value.slice(-4)}`;
+function formatDateTime(value) {
+  const date = new Date(value || Date.now());
+  return (Number.isNaN(date.getTime()) ? new Date() : date).toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 // ========================================
-// ESCAPE / SAFE TEXT
+// DRAWING
 // ========================================
 
-function safe(value) {
-  if (value === null || value === undefined || value === "") {
-    return "Not Provided";
+function drawHeader(doc) {
+  doc.rect(0, 0, PAGE_W, 112).fill(COLORS.navy);
+  doc.rect(0, 112, PAGE_W, 4).fill(COLORS.saffronLight);
+
+  if (fs.existsSync(logoPath)) {
+    doc.image(logoPath, MARGIN, 26, { width: 60, height: 60 });
   }
 
-  return String(value);
+  doc
+    .font("Times-Bold")
+    .fontSize(26)
+    .fillColor("#ffffff")
+    .text("JBC", MARGIN + 74, 34);
+  doc
+    .font("Times-Bold")
+    .fontSize(10)
+    .fillColor(COLORS.saffronLight)
+    .text("SEVA TRUST", MARGIN + 75, 64, { characterSpacing: 3 });
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(8.5)
+    .fillColor(COLORS.saffronLight)
+    .text("MEDICAL HELP REQUEST", MARGIN, 40, {
+      width: CONTENT_W,
+      align: "right",
+      characterSpacing: 2,
+    });
+  doc
+    .font("Times-Bold")
+    .fontSize(24)
+    .fillColor("#ffffff")
+    .text("Receipt", MARGIN, 54, { width: CONTENT_W, align: "right" });
+}
+
+function drawReference(doc, reference, submitted) {
+  const y = 140;
+  doc.roundedRect(MARGIN, y, CONTENT_W, 62, 6).fill(COLORS.cream);
+  doc.rect(MARGIN, y, 4, 62).fill(COLORS.saffronLight);
+
+  doc
+    .font("Helvetica")
+    .fontSize(7.5)
+    .fillColor(COLORS.muted)
+    .text("REFERENCE NUMBER", MARGIN + 18, y + 13, { characterSpacing: 1.5 });
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(15)
+    .fillColor(COLORS.navy)
+    .text(reference, MARGIN + 18, y + 28, { width: 300, lineBreak: false });
+
+  doc
+    .font("Helvetica")
+    .fontSize(7.5)
+    .fillColor(COLORS.muted)
+    .text("SUBMITTED ON", MARGIN + 330, y + 13, { characterSpacing: 1.5 });
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(10.5)
+    .fillColor(COLORS.text)
+    .text(submitted, MARGIN + 330, y + 30, { width: CONTENT_W - 346 });
+
+  doc.y = y + 84;
+}
+
+function drawSection(doc, title) {
+  doc.font("Times-Bold").fontSize(14).fillColor(COLORS.navy).text(title, MARGIN, doc.y);
+  doc
+    .moveTo(MARGIN, doc.y + 4)
+    .lineTo(MARGIN + CONTENT_W, doc.y + 4)
+    .lineWidth(1)
+    .stroke(COLORS.line);
+  doc.y += 14;
+}
+
+// Label/value pairs in two columns; each row is as tall as its taller value
+function drawFields(doc, pairs) {
+  const colW = (CONTENT_W - 24) / 2;
+
+  for (let i = 0; i < pairs.length; i += 2) {
+    const top = doc.y;
+    let bottom = top;
+
+    pairs.slice(i, i + 2).forEach(([label, value], col) => {
+      const x = MARGIN + col * (colW + 24);
+      doc
+        .font("Helvetica")
+        .fontSize(7.5)
+        .fillColor(COLORS.muted)
+        .text(label.toUpperCase(), x, top, { width: colW, characterSpacing: 1 });
+      setValueFont(doc, value);
+      doc
+        .fontSize(10.5)
+        .fillColor(COLORS.text)
+        .text(safe(value), x, top + 12, { width: colW });
+      bottom = Math.max(bottom, doc.y);
+    });
+
+    doc.y = bottom + 12;
+  }
+  doc.x = MARGIN;
+  doc.y += 8;
+}
+
+function drawNextSteps(doc) {
+  const steps = [
+    "Our team will check the details and may call you or ask for hospital papers.",
+    "The trustees decide on each request based on need and the funds available.",
+    "Submitting a request does not guarantee help. Keep this reference number for any follow-up.",
+  ];
+  const y = doc.y + 4;
+  const height = 96;
+
+  doc.roundedRect(MARGIN, y, CONTENT_W, height, 6).fill(COLORS.cream);
+  doc.rect(MARGIN, y, 4, height).fill(COLORS.saffronLight);
+  doc
+    .font("Times-Bold")
+    .fontSize(12)
+    .fillColor(COLORS.navy)
+    .text("What happens next", MARGIN + 18, y + 12);
+
+  let lineY = y + 32;
+  steps.forEach((step, i) => {
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(9.5)
+      .fillColor(COLORS.saffron)
+      .text(`${i + 1}.`, MARGIN + 18, lineY);
+    doc
+      .font("Helvetica")
+      .fontSize(9.5)
+      .fillColor(COLORS.text)
+      .text(step, MARGIN + 34, lineY, { width: CONTENT_W - 52 });
+    lineY = doc.y + 4;
+  });
+}
+
+function drawFooter(doc) {
+  const y = 770;
+  // The footer sits below the bottom margin; do not let pdfkit add a page
+  doc.page.margins.bottom = 0;
+
+  doc
+    .moveTo(MARGIN, y)
+    .lineTo(MARGIN + CONTENT_W, y)
+    .lineWidth(1)
+    .stroke(COLORS.saffronLight);
+  doc
+    .font("Times-Bold")
+    .fontSize(10)
+    .fillColor(COLORS.navy)
+    .text(trust.name, MARGIN, y + 10, { width: CONTENT_W, align: "center" });
+  doc
+    .font("Helvetica")
+    .fontSize(8)
+    .fillColor(COLORS.muted)
+    .text(
+      `${trust.legalForm} · ${trust.location} · ${trust.email} · ${trust.phoneDisplay}`,
+      MARGIN,
+      y + 25,
+      { width: CONTENT_W, align: "center" },
+    )
+    .text(
+      "This is a computer-generated receipt and needs no signature.",
+      MARGIN,
+      y + 37,
+      {
+        width: CONTENT_W,
+        align: "center",
+      },
+    );
 }
 
 // ========================================
@@ -78,193 +251,39 @@ function generateMedicalReceipt(data) {
     try {
       const doc = new PDFDocument({
         size: "A4",
-
-        margins: {
-          top: 45,
-          bottom: 45,
-          left: 50,
-          right: 50,
-        },
-
-        info: {
-          Title: "Medical Help Request Receipt",
-
-          Author: "JBC Seva Trust",
-
-          Subject: "Medical Help Request",
-        },
+        margin: MARGIN,
+        info: { Title: "Medical Help Request Receipt", Author: trust.name },
       });
-
-      // ========================================
-      // PDF BUFFER
-      // ========================================
-
       const chunks = [];
+      doc.on("data", (chunk) => chunks.push(chunk));
+      doc.on("end", () => resolve(Buffer.concat(chunks)));
+      doc.on("error", reject);
 
-      doc.on("data", (chunk) => {
-        chunks.push(chunk);
-      });
-
-      doc.on("end", () => {
-        resolve(Buffer.concat(chunks));
-      });
-
-      doc.on("error", (error) => {
-        reject(error);
-      });
-
-      // ========================================
-      // PAGE HEADER
-      // ========================================
-
-      if (fs.existsSync(logoPath)) {
-        doc.image(logoPath, 50, 40, {
-          fit: [75, 75],
-        });
-      }
-
-      doc.fontSize(20).font("Helvetica-Bold").text("JBC SEVA TRUST", 135, 48, {
-        width: 400,
-      });
-
-      doc.fontSize(10).font("Helvetica").text("Medical Help & Social Welfare", 135, 73);
-
-      // ========================================
-      // HEADER LINE
-      // ========================================
-
-      doc.moveTo(50, 125).lineTo(545, 125).lineWidth(1).stroke();
-
-      // ========================================
-      // TITLE
-      // ========================================
-
-      doc
-        .moveDown(2)
-        .fontSize(18)
-        .font("Helvetica-Bold")
-        .text("MEDICAL HELP REQUEST RECEIPT", {
-          align: "center",
-        });
-
-      doc
-        .moveDown(0.5)
-        .fontSize(10)
-        .font("Helvetica")
-        .text("This receipt confirms that your medical help request has been received.", {
-          align: "center",
-        });
-
-      // ========================================
-      // REFERENCE INFORMATION
-      // ========================================
-
-      doc.moveDown(1.5);
-
-      const referenceNumber = safe(data.referenceRegistrationNumber);
-
-      const submissionDate = data.submissionDate
-        ? new Date(data.submissionDate).toLocaleString("en-IN")
-        : new Date().toLocaleString("en-IN");
-
-      drawInfoBox(doc, "Reference Number", referenceNumber);
-
-      drawInfoBox(doc, "Submission Date", submissionDate);
-
-      // ========================================
-      // PATIENT DETAILS
-      // ========================================
-
-      drawSectionTitle(doc, "PATIENT DETAILS");
-
-      drawTwoColumn(
+      drawHeader(doc);
+      drawReference(
         doc,
-        "Patient Name",
-        safe(data.patientName),
-
-        "Aadhar Number",
-        maskAadhar(data.aadharNumber),
+        safe(data.referenceRegistrationNumber),
+        formatDateTime(data.submissionDate),
       );
 
-      drawTwoColumn(
-        doc,
-        "Date of Birth",
-        safe(data.dateBirth),
+      drawSection(doc, "Patient");
+      drawFields(doc, [
+        ["Patient name", data.patientName],
+        ["Aadhaar", maskAadhar(data.aadharNumber)],
+        ["Date of birth", data.dateBirth],
+        ["Mobile number", data.patientPhoneNumber],
+        ["Email", data.patientEmail],
+        ["Referred by", data.patientReferenceName],
+      ]);
 
-        "Reference Name",
-        safe(data.patientReferenceName),
-      );
+      drawSection(doc, "Help asked for");
+      drawFields(doc, [
+        ["Illness", data.nameDiseases],
+        ["Hospital", data.hospitalName],
+      ]);
 
-      drawTwoColumn(
-        doc,
-        "Phone Number",
-        safe(data.patientPhoneNumber),
-
-        "Email",
-        safe(data.patientEmail),
-      );
-
-      // ========================================
-      // MEDICAL DETAILS
-      // ========================================
-
-      drawSectionTitle(doc, "MEDICAL DETAILS");
-
-      drawTwoColumn(
-        doc,
-        "Disease",
-        safe(data.nameDiseases),
-
-        "Hospital",
-        safe(data.hospitalName),
-      );
-
-      // ========================================
-      // IMPORTANT NOTE
-      // ========================================
-
-      doc.moveDown(1.5);
-
-      doc.fontSize(11).font("Helvetica-Bold").text("Important Note");
-
-      doc
-        .moveDown(0.3)
-        .fontSize(9.5)
-        .font("Helvetica")
-        .text(
-          "This receipt only confirms submission of the medical help request. " +
-            "Approval or financial assistance is subject to verification " +
-            "and the Trust's applicable process.",
-        );
-
-      // ========================================
-      // FOOTER
-      // ========================================
-
-      const footerY = doc.page.height - 90;
-
-      doc
-        .moveTo(50, footerY - 15)
-        .lineTo(545, footerY - 15)
-        .lineWidth(0.5)
-        .stroke();
-
-      doc.fontSize(9).font("Helvetica").text("JBC Seva Trust", 50, footerY, {
-        align: "center",
-        width: 495,
-      });
-
-      doc
-        .fontSize(8)
-        .font("Helvetica")
-        .text("Thank you for contacting JBC Seva Trust.", 50, footerY + 16, {
-          align: "center",
-          width: 495,
-        });
-
-      // ========================================
-      // FINALIZE PDF
-      // ========================================
+      drawNextSteps(doc);
+      drawFooter(doc);
 
       doc.end();
     } catch (error) {
@@ -272,101 +291,6 @@ function generateMedicalReceipt(data) {
     }
   });
 }
-
-// ========================================
-// SECTION TITLE
-// ========================================
-
-function drawSectionTitle(doc, title) {
-  doc.moveDown(1.2);
-
-  doc.fontSize(12).font("Helvetica-Bold").text(title);
-
-  doc.moveDown(0.3).moveTo(50, doc.y).lineTo(545, doc.y).lineWidth(0.5).stroke();
-
-  doc.moveDown(0.5);
-}
-
-// ========================================
-// TWO COLUMN ROW
-// ========================================
-
-function drawTwoColumn(doc, label1, value1, label2, value2) {
-  const leftX = 50;
-  const rightX = 300;
-
-  const startY = doc.y;
-
-  // ======================================
-  // LEFT LABEL
-  // ======================================
-
-  doc.fontSize(8.5).font("Helvetica-Bold").text(label1, leftX, startY, {
-    width: 220,
-  });
-
-  // ======================================
-  // LEFT VALUE
-  // ======================================
-
-  setDynamicTextFont(doc, value1, "Helvetica");
-
-  doc.fontSize(10).text(value1, leftX, startY + 14, {
-    width: 220,
-  });
-  const leftBottom = doc.y;
-
-  // ======================================
-  // RIGHT LABEL
-  // ======================================
-
-  doc.fontSize(8.5).font("Helvetica-Bold").text(label2, rightX, startY, {
-    width: 220,
-  });
-
-  // ======================================
-  // RIGHT VALUE
-  // ======================================
-
-  setDynamicTextFont(doc, value2, "Helvetica");
-
-  doc.fontSize(10).text(value2, rightX, startY + 14, {
-    width: 220,
-  });
-
-  // A long illness or hospital name wraps; the next row starts below it
-  doc.y = Math.max(startY + 40, leftBottom + 10, doc.y + 10);
-  doc.x = leftX;
-}
-
-// ========================================
-// INFORMATION BOX
-// ========================================
-
-function drawInfoBox(doc, label, value) {
-  const y = doc.y;
-
-  doc.roundedRect(50, y, 495, 42, 5).lineWidth(0.5).stroke();
-
-  doc
-    .fontSize(8)
-    .font("Helvetica-Bold")
-    .text(label, 65, y + 8);
-
-  // ======================================
-  // DYNAMIC VALUE
-  // ======================================
-
-  setDynamicTextFont(doc, value, "Helvetica");
-
-  doc.fontSize(10).text(value, 65, y + 21);
-
-  doc.y = y + 55;
-}
-
-// ========================================
-// EXPORT
-// ========================================
 
 module.exports = {
   generateMedicalReceipt,
