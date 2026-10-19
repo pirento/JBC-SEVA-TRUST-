@@ -2327,6 +2327,11 @@ fieldset.field {
   gap: 20px;
 }
 
+/* Let wide tables scroll inside their panel instead of widening the page */
+.admin-two > * {
+  min-width: 0;
+}
+
 .small-btn {
   padding: 6px 12px;
   font-size: 13.5px;

@@ -131,6 +131,10 @@ Both certificates use `services/certificateDesign.js`. Donation text is in `serv
 
 ## 9. Security notes
 
+- Accounts after payment: temporary password emailed, valid 7 days, must be changed at first login.
+- Google login: state value in the session checked on return; only Google-verified emails accepted.
+- Admin corrections never change amount, cause or payment fields; old values and the reason stay in the record history.
+
 - Passwords: bcrypt. Reset tokens: random, stored hashed, one hour, single use.
 - Sessions: new id at every login, `httpOnly`, `sameSite=lax`, `secure` in production.
 - Login, register, password, volunteer, contact and event forms are rate limited per IP (in memory).
