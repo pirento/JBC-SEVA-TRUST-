@@ -51,10 +51,12 @@
                       <input type="hidden" name="email" value="<%= u.email %>" />
                       <button type="submit" class="btn secondary small-btn">Send reset link</button>
                     </form>
-                    <form method="POST" action="/admin/users/login-details" class="inline-form" onsubmit="return confirm('This replaces their current password with a new temporary one and emails it. Continue?')">
-                      <input type="hidden" name="email" value="<%= u.email %>" />
-                      <button type="submit" class="btn secondary small-btn">Send new login details</button>
-                    </form>
+                    <% if (u.mustChangePassword) { %>
+                      <form method="POST" action="/admin/users/login-details" class="inline-form" onsubmit="return confirm('This replaces their temporary password with a new one and emails it. Continue?')">
+                        <input type="hidden" name="email" value="<%= u.email %>" />
+                        <button type="submit" class="btn secondary small-btn">Send new login details</button>
+                      </form>
+                    <% } %>
                   </td>
                 </tr>
               <% }) %>

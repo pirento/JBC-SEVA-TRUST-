@@ -233,11 +233,25 @@ async function loginWithGoogle({ googleId, email: googleEmail, name, lang }) {
     });
   }
 
+  // A password nobody has proven to own this email with must stop working:
+  // someone may have registered this address first (it was never
+  // confirmed), or a temporary password may still be in the inbox. Google
+  // has proven the email, so those passwords are replaced and their
+  // sessions logged out; the owner can set one with Forgot password.
+  const untrusted = !user.googleId && (!user.emailVerified || user.mustChangePassword);
+
   const updated = await userModel.updateUser(user, {
     googleId,
     emailVerified: true,
-    // Google proved the email; no need to replace a pending temporary password
     mustChangePassword: false,
+    tempPasswordExpires: 0,
+    ...(untrusted && {
+      passwordHash: await bcrypt.hash(
+        crypto.randomBytes(32).toString("hex"),
+        SALT_ROUNDS,
+      ),
+      passwordChangedAt: Date.now(),
+    }),
   });
   return toSessionUser(updated);
 }
@@ -246,6 +260,10 @@ async function loginWithGoogle({ googleId, email: googleEmail, name, lang }) {
 async function setOwnPassword(sessionUser, input) {
   const user = await userModel.findByEmail(sessionUser.email);
   if (!user) throw invalid("Account not found.");
+  // Only after a temporary password; otherwise the current password is asked
+  if (!user.mustChangePassword) {
+    throw invalid("Please use Change password on your account page.");
+  }
 
   const password = String(input.password || "");
   validatePassword(password, String(input.confirmPassword || ""));

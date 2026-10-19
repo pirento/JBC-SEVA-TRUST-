@@ -727,4 +727,6 @@ module.exports = {
   "Temporary password": "अस्थायी पासवर्ड",
   "This password works for 7 days. When you log in, you will be asked to choose your own password.":
     "यह पासवर्ड 7 दिन चलेगा। लॉगिन करने पर आपसे अपना पासवर्ड चुनने को कहा जाएगा।",
+  "Please use Change password on your account page.":
+    "कृपया अपने खाते के पेज पर 'पासवर्ड बदलें' का उपयोग करें।",
 };

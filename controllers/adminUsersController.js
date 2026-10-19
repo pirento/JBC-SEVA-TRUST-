@@ -64,6 +64,13 @@ module.exports = {
   list,
   // A link to choose a new password; the current password keeps working until then
   sendReset: action((user) => userAuthService.requestPasswordReset(user.email), "reset"),
-  // A new temporary password replaces the current one
-  sendLoginDetails: action((user) => userAuthService.sendLoginDetails(user), "login"),
+  // A new temporary password replaces the current one, so only for accounts
+  // still on a temporary password; others get a reset link instead
+  sendLoginDetails: action(
+    (user) =>
+      user.mustChangePassword
+        ? userAuthService.sendLoginDetails(user)
+        : userAuthService.requestPasswordReset(user.email),
+    "login",
+  ),
 };

@@ -1560,6 +1560,13 @@ test("guest donor gets an account with a temporary password to replace", async (
     form: { password: "mypass2026", confirmPassword: "mypass2026" },
   });
   assert.equal(res.location, "/account?password=changed#security");
+
+  // Without a temporary password, this page cannot change the password
+  res = await req("/account/set-password", {
+    method: "POST",
+    form: { password: "other2026x", confirmPassword: "other2026x" },
+  });
+  assert.equal(res.status, 400);
   res = await req("/account");
   assert.equal(res.status, 200);
   assert.match(
@@ -1728,6 +1735,19 @@ test("Google login: set up in admin settings, verified email logs in", async () 
   assert.doesNotMatch(res.text, /secret-1/, "the secret is never shown again");
   assert.match(res.text, /\/auth\/google\/callback/);
 
+  // Someone registers the Googler's address first (never confirmed)
+  const attacker = client();
+  await attacker("/register", {
+    method: "POST",
+    form: {
+      ...user,
+      email: "googler@example.com",
+      password: "taken2026",
+      confirmPassword: "taken2026",
+    },
+  });
+  assert.equal((await attacker("/account")).status, 200);
+
   const req = client();
   assert.match((await req("/login")).text, /Continue with Google/);
 
@@ -1777,6 +1797,14 @@ test("Google login: set up in admin settings, verified email logs in", async () 
     const user = await userModel.findByEmail("googler@example.com");
     assert.equal(user.emailVerified, true);
     assert.equal(user.googleId, "g-1");
+
+    // The unconfirmed password and its session stop working
+    assert.equal((await attacker("/account")).status, 302, "squatter logged out");
+    res = await client()("/login", {
+      method: "POST",
+      form: { email: "googler@example.com", password: "taken2026" },
+    });
+    assert.equal(res.status, 401, "squatter's password no longer works");
   } finally {
     globalThis.fetch = realFetch;
     await admin("/admin/settings", {
