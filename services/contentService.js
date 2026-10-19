@@ -4,7 +4,7 @@ const contentModel = require("../models/contentModel");
 const trust = require("../config/trustConfig");
 const { sendEmail } = require("./emailService");
 const { trustEmail } = require("../config/emailConfig");
-const { required, phone, email, accepted } = require("../utils/validation");
+const { required, phone, email, accepted, personName } = require("../utils/validation");
 
 function invalid(message) {
   const error = new Error(message);
@@ -86,11 +86,20 @@ async function registerForEvent(event, input) {
   if (!accepted(input.consent)) throw invalid("Please accept the Terms and Privacy Policy.");
 
   const role = event.volunteersNeeded && input.role === "Volunteer" ? "Volunteer" : "Attend";
+  const name = text(input.name, 100, "Name");
+
+  if (!personName(name)) throw invalid("Please enter a valid name.");
+
+  const already = (await contentModel.listRegistrations(event.id)).some(
+    (r) => r.phone === cleanPhone || r.email === cleanEmail,
+  );
+
+  if (already) throw invalid("You are already registered for this event.");
 
   const record = await contentModel.addRegistration({
     eventId: event.id,
     eventTitle: event.title,
-    name: text(input.name, 100, "Name"),
+    name,
     phone: cleanPhone,
     email: cleanEmail,
     people,

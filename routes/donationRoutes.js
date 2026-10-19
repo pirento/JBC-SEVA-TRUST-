@@ -1,6 +1,7 @@
 const router = require("express").Router();
 
 const controller = require("../controllers/donationController");
+const honeypot = require("../middleware/honeypot");
 
 // ========================================
 // DONATION PAGES
@@ -20,7 +21,7 @@ router.get("/:slug", controller.showCauseForm);
 // PAYMENT
 // ========================================
 
-router.post("/", controller.submitDonation);
+router.post("/", honeypot, controller.submitDonation);
 
 // PayU callbacks (browser returns here from PayU)
 router.post("/success", controller.paymentSuccess);

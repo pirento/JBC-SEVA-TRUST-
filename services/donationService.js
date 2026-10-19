@@ -24,6 +24,8 @@ const {
   email,
   positiveAmount,
   accepted,
+  personName,
+  fewLinks,
 } = require("../utils/validation");
 
 const {
@@ -77,6 +79,14 @@ function validateDonation(input) {
     throw new Error(
       "Donor name cannot exceed 100 characters."
     );
+  }
+
+  if (!personName(donorName)) {
+    throw new Error("Please enter a valid name.");
+  }
+
+  if (!fewLinks(input.message, 0)) {
+    throw new Error("Links are not allowed in the message.");
   }
 
   if (!phone(phoneNumber)) {

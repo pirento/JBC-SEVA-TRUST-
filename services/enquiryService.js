@@ -3,7 +3,10 @@ const { sendEmail } = require("./emailService");
 const { trustEmail } = require("../config/emailConfig");
 const trust = require("../config/trustConfig");
 const escapeHtml = require("../utils/escapeHtml");
-const { required, phone, email, accepted } = require("../utils/validation");
+const { required, phone, email, accepted, personName, fewLinks } = require("../utils/validation");
+
+const DAY = 24 * 60 * 60 * 1000;
+const recent = (record, ms) => Date.now() - new Date(record.createdAt).getTime() < ms;
 
 // User-facing errors; anything else is a server fault
 function invalid(message) {
@@ -60,8 +63,19 @@ async function registerVolunteer(input) {
     message: text(input.message, 1000, "Message", { optional: true }),
   };
 
+  if (!personName(record.name)) throw invalid("Please enter a valid name.");
+  if (!fewLinks(record.message, 0)) throw invalid("Links are not allowed in the message.");
   if (areas.length === 0) throw invalid("Please choose at least one area you would like to help with.");
   if (!availability) throw invalid("Please choose when you are available.");
+
+  // The same person registering again within 30 days is not saved twice
+  const existing = (await enquiryModel.listVolunteers()).find(
+    (v) => (v.phone === record.phone || v.email === record.email) && recent(v, 30 * DAY),
+  );
+
+  if (existing) {
+    return { ...existing, duplicate: true };
+  }
 
   await enquiryModel.addVolunteer(record);
 
@@ -89,6 +103,18 @@ async function sendMessage(input) {
     enquiryType,
     message: text(input.message, 2000, "Message"),
   };
+
+  if (!personName(record.name)) throw invalid("Please enter a valid name.");
+  if (!fewLinks(record.message)) throw invalid("Please include no more than two links in your message.");
+
+  // The same message sent again (double click, refresh) is kept once
+  const existing = (await enquiryModel.listMessages()).find(
+    (m) => m.email === record.email && m.message === record.message && recent(m, DAY),
+  );
+
+  if (existing) {
+    return { ...existing, duplicate: true };
+  }
 
   await enquiryModel.addMessage(record);
 

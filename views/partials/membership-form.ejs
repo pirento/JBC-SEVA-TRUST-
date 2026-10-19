@@ -44,6 +44,7 @@
       placeholder="Any message for the trust"><%= v.message || '' %></textarea>
   </div>
 
+  <%- include('honeypot', { hpId: 'member' }) %>
   <%- include('consent', { withRefund: true }) %>
 
   <div class="actions">

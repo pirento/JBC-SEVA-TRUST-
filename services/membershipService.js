@@ -34,6 +34,8 @@ const {
   email,
   positiveAmount,
   accepted,
+  personName,
+  fewLinks,
 } = require("../utils/validation");
 
 const escapeHtml = require("../utils/escapeHtml");
@@ -87,6 +89,14 @@ function validateMembership(input) {
     throw new Error(
       "Member name cannot exceed 100 characters."
     );
+  }
+
+  if (!personName(memberName)) {
+    throw new Error("Please enter a valid name.");
+  }
+
+  if (!fewLinks(input.message, 0)) {
+    throw new Error("Links are not allowed in the message.");
   }
 
   // ----------------------------------------------------------

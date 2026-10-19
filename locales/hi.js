@@ -475,5 +475,13 @@ module.exports = {
   "Phone number must be 10 digits": "फ़ोन नंबर 10 अंकों का होना चाहिए",
   "Please accept the Terms and Privacy Policy": "कृपया नियम और गोपनीयता नीति स्वीकार करें",
   "Please wait…": "कृपया प्रतीक्षा करें…",
+  "Please enter a valid name.": "कृपया सही नाम लिखें।",
+  "Please enter a valid patient name": "कृपया मरीज़ का सही नाम लिखें",
+  "Links are not allowed in the message.": "संदेश में लिंक की अनुमति नहीं है।",
+  "Please include no more than two links in your message.": "संदेश में दो से ज़्यादा लिंक न डालें।",
+  "You are already registered for this event.": "आप इस कार्यक्रम के लिए पहले से रजिस्टर हैं।",
+  "A request for this patient and hospital was already received in the last 7 days. Our team will contact you.": "इस मरीज़ और अस्पताल के लिए पिछले 7 दिनों में अनुरोध पहले ही मिल चुका है। हमारी टीम आपसे संपर्क करेगी।",
+  "Your submission could not be accepted. Please try again.": "आपकी जानकारी स्वीकार नहीं हो सकी। कृपया फिर से कोशिश करें।",
+  "Leave this empty": "इसे खाली छोड़ें",
   "Legal pages": "कानूनी पेज",
 };

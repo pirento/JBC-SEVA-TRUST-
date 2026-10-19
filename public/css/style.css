@@ -2605,3 +2605,12 @@ html[lang="hi"] body {
 .button-row.center {
   justify-content: center;
 }
+
+/* Bot trap: off-screen, never shown to people */
+.hp-field {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

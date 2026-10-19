@@ -63,6 +63,7 @@
                     </div>
                   </fieldset>
                 <% } %>
+                <%- include('../partials/honeypot', { hpId: 'event' }) %>
                 <%- include('../partials/consent') %>
                 <button type="submit" class="btn orange full">Register</button>
               </form>

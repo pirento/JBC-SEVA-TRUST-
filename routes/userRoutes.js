@@ -3,6 +3,7 @@ const router = require("express").Router();
 const controller = require("../controllers/userController");
 const userAuth = require("../middleware/userAuth");
 const createRateLimiter = require("../middleware/rateLimit");
+const honeypot = require("../middleware/honeypot");
 
 const loginLimiter = createRateLimiter();
 const passwordLimiter = createRateLimiter();
@@ -10,7 +11,7 @@ const passwordLimiter = createRateLimiter();
 const registerLimiter = createRateLimiter({ max: 20, windowMs: 60 * 60 * 1000 });
 
 router.get("/register", controller.showRegister);
-router.post("/register", registerLimiter, controller.register);
+router.post("/register", registerLimiter, honeypot, controller.register);
 
 router.get("/login", controller.showLogin);
 router.post("/login", loginLimiter, controller.login);

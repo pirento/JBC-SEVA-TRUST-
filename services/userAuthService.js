@@ -5,7 +5,7 @@ const { sendEmail } = require("./emailService");
 const { appUrl } = require("../config/appConfig");
 
 const userModel = require("../models/userModel");
-const { required, phone, email, accepted } = require("../utils/validation");
+const { required, phone, email, accepted, personName } = require("../utils/validation");
 
 const SALT_ROUNDS = 12;
 
@@ -59,6 +59,7 @@ async function register(input) {
 
   if (!required(name)) throw invalid("Name is required.");
   if (name.length > 100) throw invalid("Name cannot exceed 100 characters.");
+  if (!personName(name)) throw invalid("Please enter a valid name.");
   if (!email(cleanEmail)) throw invalid("Please enter a valid email address.");
   if (!phone(cleanPhone)) throw invalid("Please enter a valid 10 digit mobile number.");
 

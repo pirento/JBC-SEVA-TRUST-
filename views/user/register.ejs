@@ -53,6 +53,7 @@
         </div>
         <small id="passwordHelp" class="block-help">At least 8 characters, with a letter and a number.</small>
 
+        <%- include('../partials/honeypot', { hpId: 'register' }) %>
         <%- include('../partials/consent') %>
 
         <div class="actions">

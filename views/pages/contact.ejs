@@ -75,6 +75,7 @@
             <textarea id="cMessage" name="message" rows="5" maxlength="2000" required><%= values.message || '' %></textarea>
           </div>
 
+          <%- include('../partials/honeypot', { hpId: 'contact' }) %>
           <%- include('../partials/consent') %>
 
           <div class="actions">

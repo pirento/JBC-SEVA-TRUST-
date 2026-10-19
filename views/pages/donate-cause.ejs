@@ -135,6 +135,7 @@
             <textarea id="dMessage" name="message" rows="3" maxlength="500"><%= v.message || '' %></textarea>
           </div>
 
+          <%- include('../partials/honeypot', { hpId: 'donate' }) %>
           <%- include('../partials/consent', { withRefund: true }) %>
 
           <div class="actions">

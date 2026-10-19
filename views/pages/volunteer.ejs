@@ -76,6 +76,7 @@
             placeholder="Skills, languages, how you heard about us"><%= values.message || '' %></textarea>
         </div>
 
+        <%- include('../partials/honeypot', { hpId: 'volunteer' }) %>
         <%- include('../partials/consent') %>
 
         <div class="actions">

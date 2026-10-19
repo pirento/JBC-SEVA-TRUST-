@@ -1,11 +1,12 @@
 const router = require("express").Router();
 
 const controller = require("../controllers/membershipController");
+const honeypot = require("../middleware/honeypot");
 
 // Membership lives under /donation (URL kept for PayU callback settings)
 
 router.get("/", controller.showMembershipForm);
-router.post("/", controller.submitMembership);
+router.post("/", honeypot, controller.submitMembership);
 
 // PayU callbacks
 router.post("/success", controller.paymentSuccess);

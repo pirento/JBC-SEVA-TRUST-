@@ -61,12 +61,7 @@ async function sendEmail({
 
   console.log("=================================");
   console.log("✅ Email sent successfully");
-  console.log("📧 From:", user);
-  console.log(
-    "📧 To:",
-    [to, trustEmail].filter(Boolean).join(", ")
-  );
-  console.log("↩️ Reply-To:", replyTo || to);
+  // Addresses are personal data; the log keeps only what was sent
   console.log("📝 Subject:", subject);
   console.log("📎 Attachments:", attachments.length);
   console.log("🆔 Message ID:", info.messageId);

@@ -38,4 +38,25 @@ function accepted(value) {
   return value === "on" || value === "true" || value === true;
 }
 
-module.exports = { required, phone, email, aadhar, positiveAmount, pastDate, accepted };
+// A person's name: has a letter, no links or markup (common in spam)
+function personName(value) {
+  const text = String(value ?? "").trim();
+  return /\p{L}/u.test(text) && !/https?:|www\.|[<>]|\.(com|net|org|ru|xyz)\b/i.test(text);
+}
+
+// Free text with at most a couple of links
+function fewLinks(value, max = 2) {
+  return (String(value ?? "").match(/https?:\/\/|www\./gi) || []).length <= max;
+}
+
+module.exports = {
+  required,
+  phone,
+  email,
+  aadhar,
+  positiveAmount,
+  pastDate,
+  accepted,
+  personName,
+  fewLinks,
+};

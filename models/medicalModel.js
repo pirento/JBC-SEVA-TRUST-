@@ -1,4 +1,4 @@
-const { appendRecord } = require("./fileStore");
+const { appendRecord, readRecords } = require("./fileStore");
 
 const {
   required,
@@ -7,6 +7,7 @@ const {
   aadhar,
   pastDate,
   accepted,
+  personName,
 } = require("../utils/validation");
 
 // ============================================================
@@ -48,6 +49,12 @@ async function create(data) {
     }
   }
 
+  if (!personName(data.patientName)) {
+    throw new Error(
+      "Please enter a valid patient name"
+    );
+  }
+
   if (!pastDate(data.dateBirth)) {
     throw new Error(
       "Please enter a valid date of birth"
@@ -87,6 +94,29 @@ async function create(data) {
   if (!email(data.patientEmail)) {
     throw new Error(
       "Please enter a valid email address"
+    );
+  }
+
+  // ----------------------------------------------------------
+  // DUPLICATE CHECK
+  // ----------------------------------------------------------
+  // One request per patient and hospital in 7 days is enough;
+  // repeats are usually double clicks or impatience.
+
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const hospital = String(data.hospitalName).trim().toLowerCase();
+
+  const duplicate = (await readRecords("user.txt")).find(
+    (record) =>
+      record.type === "MEDICAL_HELP" &&
+      record.aadharNumber === String(data.aadharNumber).trim() &&
+      String(record.hospitalName).trim().toLowerCase() === hospital &&
+      new Date(record.submittedAt).getTime() > weekAgo,
+  );
+
+  if (duplicate) {
+    throw new Error(
+      "A request for this patient and hospital was already received in the last 7 days. Our team will contact you."
     );
   }
 

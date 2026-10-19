@@ -896,6 +896,46 @@ test("membership: errors keep typed values, success redirects to thank-you", asy
   assert.match(pdf.headers.get("content-type"), /pdf/);
 });
 
+test("only genuine data is saved: bot trap, spam names, duplicates", async () => {
+  const req = client();
+
+  // Bot fills the hidden field
+  let res = await req("/contact", { method: "POST", form: { ...message, website: "http://spam.example" } });
+  assert.equal(res.status, 400);
+  res = await req("/volunteer", { method: "POST", form: { ...volunteer, email: "bot@example.com", website: "x" } });
+  assert.equal(res.status, 400);
+
+  // Links in names are refused
+  res = await req("/volunteer", { method: "POST", form: { ...volunteer, name: "Buy now www.cheap.ru" } });
+  assert.equal(res.status, 400);
+  assert.match(res.text, /valid name/);
+  res = await req("/donate", { method: "POST", form: { ...donation, donorName: "http://spam.example" } });
+  assert.equal(res.status, 400);
+
+  // The same volunteer, message and event registration are stored once
+  const enquiryModel = require("../models/enquiryModel");
+  const contentModel = require("../models/contentModel");
+  const volunteersBefore = (await enquiryModel.listVolunteers()).length;
+  await req("/volunteer", { method: "POST", form: volunteer });
+  assert.equal((await enquiryModel.listVolunteers()).length, volunteersBefore, "repeat volunteer not stored again");
+
+  const messagesBefore = (await enquiryModel.listMessages()).length;
+  await req("/contact", { method: "POST", form: message });
+  assert.equal((await enquiryModel.listMessages()).length, messagesBefore, "same message not stored again");
+
+  const [event] = await contentModel.listEvents();
+  if (event) {
+    res = await req(`/events/${event.id}/register`, { method: "POST", form: { name: "Sunita Devi", phone: "9012345678", email: "sunita@example.com", people: "1", consent: "on" } });
+    assert.equal(res.status, 400);
+    assert.match(res.text, /already registered/);
+  }
+
+  // The same patient at the same hospital within a week
+  res = await req("/medical", { method: "POST", form: medical });
+  assert.equal(res.status, 400);
+  assert.match(res.text, /already received in the last 7 days/);
+});
+
 // ------------------------------------------------------------
 // Rate limiting (last: it blocks this IP for the rest of the run)
 // ------------------------------------------------------------
