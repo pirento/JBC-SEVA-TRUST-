@@ -38,7 +38,9 @@ async function generateDonationCertificate(data) {
     statement:
       `for a generous contribution to ${cause}` +
       (purpose && purpose !== "General donation" ? ` (${purpose})` : "") +
-      (data.dedicatedTo ? `, ${String(data.dedicationType).toLowerCase()} ${data.dedicatedTo}` : "") +
+      (data.dedicatedTo
+        ? `, ${String(data.dedicationType).toLowerCase()} ${data.dedicatedTo}`
+        : "") +
       ". Your support helps us serve people and protect nature in our villages.",
     amount: data.amount,
     certificateNumber,
@@ -53,15 +55,16 @@ async function generateDonationCertificate(data) {
       // Donor PAN is needed on an 80G receipt; shown only once approved
       ["Donor PAN", eightyG.approved ? data.pan : ""],
     ],
-    note:
-      taxNote(cause) +
-      " This is a computer-generated certificate.",
+    note: taxNote(cause) + " This is a computer-generated certificate.",
   });
 
   const receiptsDir = path.join(dataDir, "receipts");
   fs.mkdirSync(receiptsDir, { recursive: true });
 
-  const transactionId = String(data.txnid || data.transactionId || Date.now()).replace(/[^A-Za-z0-9_-]/g, "_");
+  const transactionId = String(data.txnid || data.transactionId || Date.now()).replace(
+    /[^A-Za-z0-9_-]/g,
+    "_",
+  );
   const fileName = `donation-certificate-${transactionId}.pdf`;
   const filePath = path.join(receiptsDir, fileName);
 

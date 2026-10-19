@@ -15,27 +15,17 @@ async function create(data) {
     throw new Error("Donation data is required.");
   }
 
-  const transactionId = String(
-    data.transactionId || data.txnid || ""
-  ).trim();
+  const transactionId = String(data.transactionId || data.txnid || "").trim();
 
-  const donorName = String(
-    data.donorName || ""
-  ).trim();
+  const donorName = String(data.donorName || "").trim();
 
-  const phoneNumber = String(
-    data.phoneNumber || ""
-  ).trim();
+  const phoneNumber = String(data.phoneNumber || "").trim();
 
-  const email = String(
-    data.email || ""
-  ).trim();
+  const email = String(data.email || "").trim();
 
   const amount = Number(data.amount);
 
-  const paymentMode = String(
-    data.paymentMode || ""
-  ).trim();
+  const paymentMode = String(data.paymentMode || "").trim();
 
   if (!transactionId) {
     throw new Error("Transaction ID is required.");
@@ -50,17 +40,14 @@ async function create(data) {
   }
 
   if (!paymentMode || paymentMode === "Cash") {
-    throw new Error(
-      "Valid online payment mode is required."
-    );
+    throw new Error("Valid online payment mode is required.");
   }
 
   // ----------------------------------------
   // Prevent duplicate transaction
   // ----------------------------------------
 
-  const existing =
-    await findByTransactionId(transactionId);
+  const existing = await findByTransactionId(transactionId);
 
   if (existing) {
     return existing;
@@ -77,11 +64,7 @@ async function create(data) {
 
     transactionId,
 
-    payuPaymentId: String(
-      data.payuPaymentId ||
-      data.mihpayid ||
-      ""
-    ).trim(),
+    payuPaymentId: String(data.payuPaymentId || data.mihpayid || "").trim(),
 
     donorName,
 
@@ -93,13 +76,9 @@ async function create(data) {
 
     paymentMode,
 
-    message: String(
-      data.message || ""
-    ).trim(),
+    message: String(data.message || "").trim(),
 
-    cause: String(
-      data.cause || ""
-    ).trim(),
+    cause: String(data.cause || "").trim(),
     purpose: String(data.purpose || "").trim(),
     dedicationType: String(data.dedicationType || "").trim(),
     dedicatedTo: String(data.dedicatedTo || "").trim(),
@@ -109,19 +88,12 @@ async function create(data) {
     address: String(data.address || "").trim(),
     monthly: data.monthly === true,
 
-    paymentDate:
-      data.paymentDate ||
-      new Date().toISOString(),
+    paymentDate: data.paymentDate || new Date().toISOString(),
   };
 
-  await appendRecord(
-    FILE_NAME,
-    record
-  );
+  await appendRecord(FILE_NAME, record);
 
-  console.log(
-    "✅ Donation payment saved to donations.txt"
-  );
+  console.log("✅ Donation payment saved to donations.txt");
 
   return record;
 }
@@ -131,13 +103,10 @@ async function create(data) {
 // ========================================
 
 async function findAll() {
-  const records =
-    await readRecords(FILE_NAME);
+  const records = await readRecords(FILE_NAME);
 
   return records.filter(
-    (record) =>
-      String(record.type || "")
-        .toUpperCase() === "DONATION"
+    (record) => String(record.type || "").toUpperCase() === "DONATION",
   );
 }
 
@@ -145,28 +114,16 @@ async function findAll() {
 // FIND BY TRANSACTION ID
 // ========================================
 
-async function findByTransactionId(
-  transactionId
-) {
-  const id = String(
-    transactionId || ""
-  ).trim();
+async function findByTransactionId(transactionId) {
+  const id = String(transactionId || "").trim();
 
   if (!id) {
     return null;
   }
 
-  const records =
-    await readRecords(FILE_NAME);
+  const records = await readRecords(FILE_NAME);
 
-  return (
-    records.find(
-      (record) =>
-        String(
-          record.transactionId || ""
-        ) === id
-    ) || null
-  );
+  return records.find((record) => String(record.transactionId || "") === id) || null;
 }
 
 // ========================================

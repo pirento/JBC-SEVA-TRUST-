@@ -7,9 +7,7 @@ function userAuth(req, res, next) {
     return next();
   }
 
-  return res.redirect(
-    `/login?next=${encodeURIComponent(req.originalUrl)}`
-  );
+  return res.redirect(`/login?next=${encodeURIComponent(req.originalUrl)}`);
 }
 
 module.exports = userAuth;

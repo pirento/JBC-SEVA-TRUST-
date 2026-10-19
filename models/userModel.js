@@ -16,7 +16,9 @@ const FILE_NAME = "accounts.txt";
 // ============================================================
 
 function normalizeEmail(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 async function listUsers() {

@@ -4,10 +4,7 @@ const { sendEmail } = require("./emailService");
 const escapeHtml = require("../utils/escapeHtml");
 const { taxNote: taxNoteFor } = require("../config/trustConfig");
 
-async function sendDonationCertificateEmail({
-  donation,
-  certificatePath,
-}) {
+async function sendDonationCertificateEmail({ donation, certificatePath }) {
   if (!donation) {
     throw new Error("Donation data is required.");
   }
@@ -16,33 +13,29 @@ async function sendDonationCertificateEmail({
     throw new Error("Donation certificate path is required.");
   }
 
-  const donorName = String(
-    donation.donorName || "Donor"
-  ).trim();
+  const donorName = String(donation.donorName || "Donor").trim();
 
   const amount = Number(donation.amount || 0).toFixed(2);
 
-  const transactionId = String(
-    donation.transactionId || donation.txnid || ""
-  ).trim();
+  const transactionId = String(donation.transactionId || donation.txnid || "").trim();
 
-  const paymentMode = String(
-    donation.paymentMode || "Online Payment"
-  ).trim();
+  const paymentMode = String(donation.paymentMode || "Online Payment").trim();
 
   // Cause-specific lines; empty ones are left out
   const details = [
     ["Donated For", donation.cause],
     ["Purpose", donation.purpose],
-    ["Dedication", donation.dedicatedTo ? `${donation.dedicationType} ${donation.dedicatedTo}` : ""],
+    [
+      "Dedication",
+      donation.dedicatedTo ? `${donation.dedicationType} ${donation.dedicatedTo}` : "",
+    ],
     ["Preferred Seva Date", donation.sevaDate],
     ["Gotra", donation.gotra],
   ].filter(([, value]) => value);
 
   const taxNote = taxNoteFor(donation.cause);
 
-  const subject =
-    `Donation Receipt - ${donation.cause || "JBC Seva Trust"} - JBC Seva Trust`;
+  const subject = `Donation Receipt - ${donation.cause || "JBC Seva Trust"} - JBC Seva Trust`;
 
   const text = `
 Dear ${donorName},

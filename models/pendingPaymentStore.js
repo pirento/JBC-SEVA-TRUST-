@@ -15,7 +15,7 @@ async function setPending(id, data) {
     transactionId,
     state: "PENDING",
     createdAt: Date.now(),
-    data: { ...data, txnid: transactionId }
+    data: { ...data, txnid: transactionId },
   });
 }
 
@@ -40,13 +40,19 @@ async function deletePending(id) {
   await appendRecord(PENDING_FILE, {
     transactionId,
     state: "CLOSED",
-    createdAt: Date.now()
+    createdAt: Date.now(),
   });
 }
 
-function setReceipt(id, receipt) { receipts.set(String(id), receipt); }
-function getReceipt(id) { return receipts.get(String(id)); }
-function deleteReceipt(id) { receipts.delete(String(id)); }
+function setReceipt(id, receipt) {
+  receipts.set(String(id), receipt);
+}
+function getReceipt(id) {
+  return receipts.get(String(id));
+}
+function deleteReceipt(id) {
+  receipts.delete(String(id));
+}
 
 // Kept for compatibility with existing services. Persistent records are
 // retained as an audit trail; old pending records are not automatically deleted.
@@ -63,12 +69,22 @@ function withTxnLock(id, fn) {
   const key = String(id || "");
   const run = (inFlight.get(key) || Promise.resolve()).catch(() => {}).then(fn);
   inFlight.set(key, run);
-  run.catch(() => {}).finally(() => { if (inFlight.get(key) === run) inFlight.delete(key); });
+  run
+    .catch(() => {})
+    .finally(() => {
+      if (inFlight.get(key) === run) inFlight.delete(key);
+    });
   return run;
 }
 
 module.exports = {
   withTxnLock,
-  MAX_AGE, setPending, getPending, deletePending,
-  setReceipt, getReceipt, deleteReceipt, cleanup
+  MAX_AGE,
+  setPending,
+  getPending,
+  deletePending,
+  setReceipt,
+  getReceipt,
+  deleteReceipt,
+  cleanup,
 };

@@ -41,7 +41,9 @@ function accepted(value) {
 // A person's name: has a letter, no links or markup (common in spam)
 function personName(value) {
   const text = String(value ?? "").trim();
-  return /\p{L}/u.test(text) && !/https?:|www\.|[<>]|\.(com|net|org|ru|xyz)\b/i.test(text);
+  return (
+    /\p{L}/u.test(text) && !/https?:|www\.|[<>]|\.(com|net|org|ru|xyz)\b/i.test(text)
+  );
 }
 
 // Free text with at most a couple of links

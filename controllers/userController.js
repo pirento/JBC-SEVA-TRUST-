@@ -63,7 +63,8 @@ function showLogin(req, res) {
     error: null,
     values: {},
     next: safeNext(req.query.next),
-    notice: req.query.reset === "1" ? "Your password has been changed. Please log in." : null,
+    notice:
+      req.query.reset === "1" ? "Your password has been changed. Please log in." : null,
   });
 }
 
@@ -98,7 +99,14 @@ function logout(req, res) {
 // Records are matched by email; show them only once the email is proven
 async function loadActivity(email) {
   if (!(await userAuthService.isEmailVerified(email))) {
-    return { verified: false, memberships: [], donations: [], medicalRequests: [], pledges: [], totalGiven: 0 };
+    return {
+      verified: false,
+      memberships: [],
+      donations: [],
+      medicalRequests: [],
+      pledges: [],
+      totalGiven: 0,
+    };
   }
 
   const activity = await accountService.getActivity(email);
@@ -160,7 +168,9 @@ async function forgot(req, res, next) {
 
   const email = String((req.body || {}).email || "").trim();
   if (!email) {
-    return res.status(400).render("user/forgot-password", { sent: false, error: "Please enter your email." });
+    return res
+      .status(400)
+      .render("user/forgot-password", { sent: false, error: "Please enter your email." });
   }
 
   try {
@@ -203,7 +213,10 @@ async function reset(req, res, next) {
 
 async function stopPledge(req, res, next) {
   try {
-    await pledgeService.cancelPledge(req.session.user.email, String((req.body || {}).cause || ""));
+    await pledgeService.cancelPledge(
+      req.session.user.email,
+      String((req.body || {}).cause || ""),
+    );
     return res.redirect("/account?pledge=stopped#monthly");
   } catch (error) {
     return next(error);
@@ -217,7 +230,8 @@ async function verifyEmail(req, res, next) {
     if (!user) {
       return res.status(400).render("pages/form-error", {
         title: "Link expired",
-        message: "This confirmation link is invalid or has expired. Log in and ask for a new one from My Account.",
+        message:
+          "This confirmation link is invalid or has expired. Log in and ask for a new one from My Account.",
         backUrl: "/account",
       });
     }

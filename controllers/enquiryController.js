@@ -2,7 +2,11 @@ const enquiryService = require("../services/enquiryService");
 const trust = require("../config/trustConfig");
 
 function showVolunteer(req, res) {
-  res.render("pages/volunteer", { error: null, values: {}, done: req.query.done === "1" });
+  res.render("pages/volunteer", {
+    error: null,
+    values: {},
+    done: req.query.done === "1",
+  });
 }
 
 async function submitVolunteer(req, res, next) {
@@ -23,7 +27,11 @@ async function submitVolunteer(req, res, next) {
 }
 
 function showContact(req, res) {
-  const type = { csr: "CSR or major donation", volunteer: "Volunteer interest", event: "Event support" }[req.query.type];
+  const type = {
+    csr: "CSR or major donation",
+    volunteer: "Volunteer interest",
+    event: "Event support",
+  }[req.query.type];
 
   res.render("pages/contact", {
     error: null,

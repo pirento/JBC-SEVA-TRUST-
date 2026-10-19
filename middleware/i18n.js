@@ -11,12 +11,21 @@ const hi = require("../locales/hi");
 // ============================================================
 
 const escape = (s) =>
-  String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&#34;").replace(/'/g, "&#39;");
+  String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&#34;")
+    .replace(/'/g, "&#39;");
 
 // Quotes may reach the page raw (template text) or escaped (EJS output);
 // compare in one form
 const squash = (s) =>
-  s.replace(/\s+/g, " ").trim().replace(/&#0?39;|&apos;/g, "'").replace(/&#34;|&quot;/g, '"');
+  s
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/&#0?39;|&apos;/g, "'")
+    .replace(/&#34;|&quot;/g, '"');
 const keyOf = (en) => squash(escape(en));
 
 const dict = new Map(Object.entries(hi).map(([en, h]) => [keyOf(en), escape(h)]));
@@ -27,14 +36,24 @@ const patterns = [
   [/^Donate to (.+)$/, (m) => `${tr(m[1]) || m[1]} के लिए दान करें`],
   [/^Support (.+)$/, (m) => `${tr(m[1]) || m[1]} को सहयोग दें`],
   [/^Wherever (.+) needs it$/, (m) => `जहाँ ${tr(m[1]) || m[1]} को ज़रूरत हो`],
-  [/^Money given for (.+) is used only for \1\.$/, (m) => `${tr(m[1]) || m[1]} के लिए दिया गया धन केवल उसी पर खर्च होता है।`],
-  [/^No updates yet for (.+)\. Photos and news will appear here as the work happens\.$/, (m) => `${tr(m[1]) || m[1]} के लिए अभी कोई अपडेट नहीं। काम होने पर फ़ोटो और खबरें यहाँ दिखेंगी।`],
+  [
+    /^Money given for (.+) is used only for \1\.$/,
+    (m) => `${tr(m[1]) || m[1]} के लिए दिया गया धन केवल उसी पर खर्च होता है।`,
+  ],
+  [
+    /^No updates yet for (.+)\. Photos and news will appear here as the work happens\.$/,
+    (m) =>
+      `${tr(m[1]) || m[1]} के लिए अभी कोई अपडेट नहीं। काम होने पर फ़ोटो और खबरें यहाँ दिखेंगी।`,
+  ],
   [/^All (.+) updates →$/, (m) => `${tr(m[1]) || m[1]} के सभी अपडेट →`],
   [/^(.+): updates$/, (m) => `${tr(m[1]) || m[1]}: अपडेट`],
   [/^Part of$/, () => "इसका हिस्सा:"],
   [/^Namaste, (.+)$/, (m) => `नमस्ते, ${m[1]}`],
   [/^Thank you, (.+)!$/, (m) => `धन्यवाद, ${m[1]}!`],
-  [/^Your donation to (.+) has been received\.$/, (m) => `${tr(m[1]) || m[1]} के लिए आपका दान मिल गया है।`],
+  [
+    /^Your donation to (.+) has been received\.$/,
+    (m) => `${tr(m[1]) || m[1]} के लिए आपका दान मिल गया है।`,
+  ],
   [/^(.+) - JBC Seva Trust$/, (m) => `${translateText(m[1]) || m[1]} - JBC Seva Trust`],
   [/^Last updated: (.+)$/, (m) => `अंतिम अपडेट: ${m[1]}`],
 ];
@@ -66,16 +85,21 @@ function translateHtml(html) {
           const trail = text.match(/\s*$/)[0];
           return `>${lead}${t}${trail}<`;
         })
-        .replace(/\b(placeholder|title|aria-label|alt|content)="([^"]*)"/g, (whole, attr, text) => {
-          const t = translateText(squash(text));
-          return t ? `${attr}="${t}"` : whole;
-        });
+        .replace(
+          /\b(placeholder|title|aria-label|alt|content)="([^"]*)"/g,
+          (whole, attr, text) => {
+            const t = translateText(squash(text));
+            return t ? `${attr}="${t}"` : whole;
+          },
+        );
     })
     .join("");
 }
 
 function readCookie(req, name) {
-  const m = String(req.headers.cookie || "").match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
+  const m = String(req.headers.cookie || "").match(
+    new RegExp(`(?:^|;\\s*)${name}=([^;]+)`),
+  );
   return m ? decodeURIComponent(m[1]) : "";
 }
 
@@ -85,7 +109,11 @@ function i18n(req, res, next) {
   // ?lang=hi or ?lang=en switches and remembers the choice for a year
   if (req.query.lang === "hi" || req.query.lang === "en") {
     lang = req.query.lang;
-    res.cookie("lang", lang, { maxAge: 365 * 24 * 60 * 60 * 1000, sameSite: "lax", httpOnly: true });
+    res.cookie("lang", lang, {
+      maxAge: 365 * 24 * 60 * 60 * 1000,
+      sameSite: "lax",
+      httpOnly: true,
+    });
   }
 
   res.locals.lang = lang;

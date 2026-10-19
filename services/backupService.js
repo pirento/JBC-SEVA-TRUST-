@@ -52,9 +52,13 @@ async function runBackup() {
 
 function startBackupScheduler() {
   // Every day at 02:30 India time
-  cron.schedule("30 2 * * *", () => {
-    runBackup().catch((error) => console.error("❌ Backup failed:", error.message));
-  }, { timezone: "Asia/Kolkata" });
+  cron.schedule(
+    "30 2 * * *",
+    () => {
+      runBackup().catch((error) => console.error("❌ Backup failed:", error.message));
+    },
+    { timezone: "Asia/Kolkata" },
+  );
 }
 
 module.exports = { runBackup, startBackupScheduler, backupRoot };

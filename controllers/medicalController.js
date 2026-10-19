@@ -32,9 +32,7 @@ function showMedicalSuccess(req, res) {
 
 async function downloadReceipt(req, res) {
   try {
-    const receipt = await medicalService.getMedicalReceipt(
-      req.params.fileName || "",
-    );
+    const receipt = await medicalService.getMedicalReceipt(req.params.fileName || "");
     return res.download(receipt.filePath, receipt.fileName);
   } catch (error) {
     console.error("❌ Receipt download failed:", error.message);

@@ -109,7 +109,10 @@ async function paymentSuccess(req, res) {
       });
     }
 
-    return res.redirect(303, `/donate/thank-you/${encodeURIComponent(result.transactionId)}`);
+    return res.redirect(
+      303,
+      `/donate/thank-you/${encodeURIComponent(result.transactionId)}`,
+    );
   } catch (error) {
     console.error("❌ Donation payment processing failed:", error.message);
 
@@ -163,7 +166,12 @@ async function showThankYou(req, res, next) {
         ["Amount", `₹${amount}`],
         ["Donated for", donation.cause],
         ["Purpose", donation.purpose],
-        ["Dedication", donation.dedicatedTo ? `${donation.dedicationType} ${donation.dedicatedTo}` : ""],
+        [
+          "Dedication",
+          donation.dedicatedTo
+            ? `${donation.dedicationType} ${donation.dedicatedTo}`
+            : "",
+        ],
         ["Preferred seva date", donation.sevaDate],
         ["Monthly", donation.monthly ? "Yes, we will remind you each month" : ""],
         ["Payment mode", donation.paymentMode],

@@ -7,7 +7,14 @@ const {
 } = require("./adminReportService");
 
 function sameEmail(a, b) {
-  return String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
+  return (
+    String(a || "")
+      .trim()
+      .toLowerCase() ===
+    String(b || "")
+      .trim()
+      .toLowerCase()
+  );
 }
 
 function isSuccess(record) {
@@ -15,7 +22,8 @@ function isSuccess(record) {
 }
 
 function newestFirst(records) {
-  const time = (r) => new Date(r.paymentDate || r.submittedAt || r.createdAt || 0).getTime() || 0;
+  const time = (r) =>
+    new Date(r.paymentDate || r.submittedAt || r.createdAt || 0).getTime() || 0;
   return [...records].sort((a, b) => time(b) - time(a));
 }
 
@@ -37,11 +45,14 @@ async function getActivity(email) {
 
   const medicalRequests = newestFirst(
     medical.filter(
-      (r) => String(r.type || "").toUpperCase() === "MEDICAL_HELP" && sameEmail(r.patientEmail, email),
+      (r) =>
+        String(r.type || "").toUpperCase() === "MEDICAL_HELP" &&
+        sameEmail(r.patientEmail, email),
     ),
   ).map(normalizeMedical);
 
-  const sum = (items) => items.reduce((total, item) => total + Number(item.amount || 0), 0);
+  const sum = (items) =>
+    items.reduce((total, item) => total + Number(item.amount || 0), 0);
 
   return {
     memberships,

@@ -19,7 +19,7 @@ const devanagariFontPath = path.join(
   "..",
   "public",
   "fonts",
-  "NotoSansDevanagari-Regular.ttf"
+  "NotoSansDevanagari-Regular.ttf",
 );
 
 const PAGE = { width: 841.89, height: 595.28 };
@@ -41,17 +41,12 @@ const COLORS = {
 // ============================================================
 
 function safe(value, fallback = "Not Provided") {
-  if (
-    value === undefined ||
-    value === null ||
-    String(value).trim() === ""
-  ) {
+  if (value === undefined || value === null || String(value).trim() === "") {
     return fallback;
   }
 
   return String(value).trim();
 }
-
 
 // ============================================================
 // TRUNCATE
@@ -67,17 +62,13 @@ function truncate(value, maxLength) {
   return text.substring(0, maxLength - 3) + "...";
 }
 
-
 // ============================================================
 // DEVANAGARI CHECK
 // ============================================================
 
 function hasDevanagari(text) {
-  return /[\u0900-\u097F]/.test(
-    String(text || "")
-  );
+  return /[\u0900-\u097F]/.test(String(text || ""));
 }
-
 
 // ============================================================
 // DONOR NAME FONT
@@ -86,24 +77,17 @@ function hasDevanagari(text) {
 function setDonorNameFont(doc, value) {
   const text = String(value || "");
 
-  if (
-    hasDevanagari(text) &&
-    fs.existsSync(devanagariFontPath)
-  ) {
+  if (hasDevanagari(text) && fs.existsSync(devanagariFontPath)) {
     try {
       doc.font(devanagariFontPath);
       return;
     } catch (error) {
-      console.error(
-        "⚠️ Devanagari font loading failed:",
-        error.message
-      );
+      console.error("⚠️ Devanagari font loading failed:", error.message);
     }
   }
 
   doc.font("Times-BoldItalic");
 }
-
 
 // ============================================================
 // DATE
@@ -119,18 +103,13 @@ function getDate(value) {
   return date;
 }
 
-
 function formatDate(value) {
-  return getDate(value).toLocaleDateString(
-    "en-IN",
-    {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    }
-  );
+  return getDate(value).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
 }
-
 
 // ============================================================
 // AMOUNT
@@ -143,15 +122,11 @@ function formatAmount(value) {
     return "0.00";
   }
 
-  return amount.toLocaleString(
-    "en-IN",
-    {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }
-  );
+  return amount.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
-
 
 // ============================================================
 // NUMBER TO WORDS
@@ -205,43 +180,32 @@ function numberToWordsIndian(number) {
       return ones[n];
     }
 
-    return (
-      tens[Math.floor(n / 10)] +
-      (n % 10 ? " " + ones[n % 10] : "")
-    );
+    return tens[Math.floor(n / 10)] + (n % 10 ? " " + ones[n % 10] : "");
   }
 
   function convert(n) {
     let result = "";
 
     if (n >= 10000000) {
-      result +=
-        convert(Math.floor(n / 10000000)) +
-        " Crore ";
+      result += convert(Math.floor(n / 10000000)) + " Crore ";
 
       n %= 10000000;
     }
 
     if (n >= 100000) {
-      result +=
-        convert(Math.floor(n / 100000)) +
-        " Lakh ";
+      result += convert(Math.floor(n / 100000)) + " Lakh ";
 
       n %= 100000;
     }
 
     if (n >= 1000) {
-      result +=
-        convert(Math.floor(n / 1000)) +
-        " Thousand ";
+      result += convert(Math.floor(n / 1000)) + " Thousand ";
 
       n %= 1000;
     }
 
     if (n >= 100) {
-      result +=
-        ones[Math.floor(n / 100)] +
-        " Hundred ";
+      result += ones[Math.floor(n / 100)] + " Hundred ";
 
       n %= 100;
     }
@@ -284,7 +248,9 @@ function drawFrame(doc) {
   if (fs.existsSync(logoPath)) {
     doc.save();
     doc.opacity(0.035);
-    doc.image(logoPath, CONTENT_X + CONTENT_W / 2 - 150, PAGE.height / 2 - 150, { width: 300 });
+    doc.image(logoPath, CONTENT_X + CONTENT_W / 2 - 150, PAGE.height / 2 - 150, {
+      width: 300,
+    });
     doc.restore();
   }
 }
@@ -330,10 +296,16 @@ function drawPanel(doc, { certificateNumber, issuedOn }) {
 
   // Certificate number and date at the bottom of the panel
   const label = (text, y) =>
-    doc.font("Helvetica").fontSize(7.5).fillColor("#93a6bd")
+    doc
+      .font("Helvetica")
+      .fontSize(7.5)
+      .fillColor("#93a6bd")
       .text(text, 24, y, { width: PANEL - 48, characterSpacing: 1 });
   const value = (text, y) =>
-    doc.font("Helvetica-Bold").fontSize(10).fillColor("#ffffff")
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(10)
+      .fillColor("#ffffff")
       .text(text, 24, y, { width: PANEL - 48 });
 
   label("CERTIFICATE NO.", 470);
@@ -347,7 +319,10 @@ function drawHeading(doc, { eyebrow, title }) {
     .font("Helvetica-Bold")
     .fontSize(9.5)
     .fillColor(COLORS.saffron)
-    .text(eyebrow.toUpperCase(), CONTENT_X, 50, { width: CONTENT_W, characterSpacing: 2.5 });
+    .text(eyebrow.toUpperCase(), CONTENT_X, 50, {
+      width: CONTENT_W,
+      characterSpacing: 2.5,
+    });
 
   doc
     .font("Times-Bold")
@@ -405,7 +380,10 @@ function drawDetails(doc, { amount, amountWords, details }) {
   doc
     .fontSize(size)
     .fillColor(COLORS.navy)
-    .text(amountText, CONTENT_X + 16, top + 28 + (26 - size) / 2, { width: boxW - 24, lineBreak: false });
+    .text(amountText, CONTENT_X + 16, top + 28 + (26 - size) / 2, {
+      width: boxW - 24,
+      lineBreak: false,
+    });
 
   doc
     .font("Times-Italic")
@@ -449,13 +427,19 @@ function drawFooter(doc, { note }) {
     .font("Helvetica-Bold")
     .fontSize(9.5)
     .fillColor(COLORS.navy)
-    .text(`For ${trust.name}`, PAGE.width - 46 - 190, y + 34, { width: 190, align: "center" });
+    .text(`For ${trust.name}`, PAGE.width - 46 - 190, y + 34, {
+      width: 190,
+      align: "center",
+    });
 
   doc
     .font("Helvetica")
     .fontSize(8)
     .fillColor(COLORS.muted)
-    .text("Authorised Trustee", PAGE.width - 46 - 190, y + 47, { width: 190, align: "center" });
+    .text("Authorised Trustee", PAGE.width - 46 - 190, y + 47, {
+      width: 190,
+      align: "center",
+    });
 
   doc
     .font("Times-Italic")
@@ -501,7 +485,10 @@ function renderCertificatePdf(opts) {
       doc.on("error", reject);
 
       drawFrame(doc);
-      drawPanel(doc, { certificateNumber: opts.certificateNumber, issuedOn: formatDate(opts.date) });
+      drawPanel(doc, {
+        certificateNumber: opts.certificateNumber,
+        issuedOn: formatDate(opts.date),
+      });
       drawHeading(doc, opts);
       drawRecipient(doc, opts);
       drawDetails(doc, {

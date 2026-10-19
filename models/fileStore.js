@@ -50,11 +50,7 @@ function isEncryptedRecord(line) {
     const parsed = JSON.parse(line);
 
     return Boolean(
-      parsed &&
-      typeof parsed === "object" &&
-      parsed.iv &&
-      parsed.authTag &&
-      parsed.data,
+      parsed && typeof parsed === "object" && parsed.iv && parsed.authTag && parsed.data,
     );
   } catch {
     return false;
@@ -242,7 +238,6 @@ async function readRecords(fileName) {
 }
 
 async function readRecordsFromDisk(fileName, filePath) {
-
   let content;
 
   // ----------------------------------------

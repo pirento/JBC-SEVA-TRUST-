@@ -21,7 +21,8 @@ function text(value, max, label, { optional = false } = {}) {
 
 function programmeSlug(value) {
   const slug = String(value || "");
-  if (slug && !trust.programmes.some((p) => p.slug === slug)) throw invalid("Unknown programme.");
+  if (slug && !trust.programmes.some((p) => p.slug === slug))
+    throw invalid("Unknown programme.");
   return slug;
 }
 
@@ -52,7 +53,8 @@ async function createUpdate(input, file, uploadError) {
 
 async function createEvent(input) {
   const date = String(input.date || "");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) throw invalid("Please enter a valid event date.");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date)))
+    throw invalid("Please enter a valid event date.");
   if (date < today()) throw invalid("Event date cannot be in the past.");
 
   const time = String(input.time || "");
@@ -74,18 +76,24 @@ function isUpcoming(event) {
 }
 
 async function registerForEvent(event, input) {
-  if (!event || !isUpcoming(event)) throw invalid("Registration for this event is closed.");
+  if (!event || !isUpcoming(event))
+    throw invalid("Registration for this event is closed.");
 
-  const cleanEmail = String(input.email || "").trim().toLowerCase();
+  const cleanEmail = String(input.email || "")
+    .trim()
+    .toLowerCase();
   const cleanPhone = String(input.phone || "").trim();
   const people = Number(input.people || 1);
 
   if (!email(cleanEmail)) throw invalid("Please enter a valid email address.");
   if (!phone(cleanPhone)) throw invalid("Please enter a valid 10 digit mobile number.");
-  if (!Number.isInteger(people) || people < 1 || people > 20) throw invalid("Number of people must be between 1 and 20.");
-  if (!accepted(input.consent)) throw invalid("Please accept the Terms and Privacy Policy.");
+  if (!Number.isInteger(people) || people < 1 || people > 20)
+    throw invalid("Number of people must be between 1 and 20.");
+  if (!accepted(input.consent))
+    throw invalid("Please accept the Terms and Privacy Policy.");
 
-  const role = event.volunteersNeeded && input.role === "Volunteer" ? "Volunteer" : "Attend";
+  const role =
+    event.volunteersNeeded && input.role === "Volunteer" ? "Volunteer" : "Attend";
   const name = text(input.name, 100, "Name");
 
   if (!personName(name)) throw invalid("Please enter a valid name.");

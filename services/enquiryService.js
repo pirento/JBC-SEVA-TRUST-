@@ -3,7 +3,14 @@ const { sendEmail } = require("./emailService");
 const { trustEmail } = require("../config/emailConfig");
 const trust = require("../config/trustConfig");
 const escapeHtml = require("../utils/escapeHtml");
-const { required, phone, email, accepted, personName, fewLinks } = require("../utils/validation");
+const {
+  required,
+  phone,
+  email,
+  accepted,
+  personName,
+  fewLinks,
+} = require("../utils/validation");
 
 const DAY = 24 * 60 * 60 * 1000;
 const recent = (record, ms) => Date.now() - new Date(record.createdAt).getTime() < ms;
@@ -23,12 +30,15 @@ function text(value, max, label, { optional = false } = {}) {
 }
 
 function contact(input) {
-  const cleanEmail = String(input.email || "").trim().toLowerCase();
+  const cleanEmail = String(input.email || "")
+    .trim()
+    .toLowerCase();
   const cleanPhone = String(input.phone || "").trim();
 
   if (!email(cleanEmail)) throw invalid("Please enter a valid email address.");
   if (!phone(cleanPhone)) throw invalid("Please enter a valid 10 digit mobile number.");
-  if (!accepted(input.consent)) throw invalid("Please accept the Terms and Privacy Policy.");
+  if (!accepted(input.consent))
+    throw invalid("Please accept the Terms and Privacy Policy.");
 
   return { email: cleanEmail, phone: cleanPhone };
 }
@@ -39,7 +49,12 @@ function notifyTrust(subject, rows) {
 
   const html =
     `<h2 style="color:#14365d">${escapeHtml(subject)}</h2><table>` +
-    rows.map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0"><strong>${escapeHtml(k)}</strong></td><td>${escapeHtml(v)}</td></tr>`).join("") +
+    rows
+      .map(
+        ([k, v]) =>
+          `<tr><td style="padding:4px 12px 4px 0"><strong>${escapeHtml(k)}</strong></td><td>${escapeHtml(v)}</td></tr>`,
+      )
+      .join("") +
     "</table>";
 
   sendEmail({
@@ -51,8 +66,12 @@ function notifyTrust(subject, rows) {
 }
 
 async function registerVolunteer(input) {
-  const areas = [].concat(input.areas || []).filter((area) => trust.volunteerAreas.includes(area));
-  const availability = trust.volunteerAvailability.includes(input.availability) ? input.availability : "";
+  const areas = []
+    .concat(input.areas || [])
+    .filter((area) => trust.volunteerAreas.includes(area));
+  const availability = trust.volunteerAvailability.includes(input.availability)
+    ? input.availability
+    : "";
 
   const record = {
     name: text(input.name, 100, "Name"),
@@ -64,8 +83,10 @@ async function registerVolunteer(input) {
   };
 
   if (!personName(record.name)) throw invalid("Please enter a valid name.");
-  if (!fewLinks(record.message, 0)) throw invalid("Links are not allowed in the message.");
-  if (areas.length === 0) throw invalid("Please choose at least one area you would like to help with.");
+  if (!fewLinks(record.message, 0))
+    throw invalid("Links are not allowed in the message.");
+  if (areas.length === 0)
+    throw invalid("Please choose at least one area you would like to help with.");
   if (!availability) throw invalid("Please choose when you are available.");
 
   // The same person registering again within 30 days is not saved twice
@@ -93,7 +114,9 @@ async function registerVolunteer(input) {
 }
 
 async function sendMessage(input) {
-  const enquiryType = trust.enquiryTypes.includes(input.enquiryType) ? input.enquiryType : "";
+  const enquiryType = trust.enquiryTypes.includes(input.enquiryType)
+    ? input.enquiryType
+    : "";
   if (!enquiryType) throw invalid("Please choose what your message is about.");
 
   const record = {
@@ -105,7 +128,8 @@ async function sendMessage(input) {
   };
 
   if (!personName(record.name)) throw invalid("Please enter a valid name.");
-  if (!fewLinks(record.message)) throw invalid("Please include no more than two links in your message.");
+  if (!fewLinks(record.message))
+    throw invalid("Please include no more than two links in your message.");
 
   // The same message sent again (double click, refresh) is kept once
   const existing = (await enquiryModel.listMessages()).find(

@@ -33,5 +33,8 @@ test("aadhar, email, consent", () => {
 });
 
 test("escapeHtml neutralises markup", () => {
-  assert.equal(escapeHtml(`<img src=x onerror="a">'`), "&lt;img src=x onerror=&quot;a&quot;&gt;&#039;");
+  assert.equal(
+    escapeHtml(`<img src=x onerror="a">'`),
+    "&lt;img src=x onerror=&quot;a&quot;&gt;&#039;",
+  );
 });

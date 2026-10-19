@@ -6,7 +6,9 @@ const VOLUNTEER_FILE = "volunteers.txt";
 const MESSAGE_FILE = "messages.txt";
 
 function newestFirst(records) {
-  return [...records].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+  return [...records].sort((a, b) =>
+    String(b.createdAt).localeCompare(String(a.createdAt)),
+  );
 }
 
 async function addVolunteer(data) {

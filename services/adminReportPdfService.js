@@ -33,20 +33,13 @@ async function generateDailyReportPdf(report) {
 
       const summary = report?.summary || {};
 
-      const memberships =
-        Array.isArray(report?.memberships)
-          ? report.memberships
-          : [];
+      const memberships = Array.isArray(report?.memberships) ? report.memberships : [];
 
-      const donations =
-        Array.isArray(report?.donations)
-          ? report.donations
-          : [];
+      const donations = Array.isArray(report?.donations) ? report.donations : [];
 
-      const medicalRecords =
-        Array.isArray(report?.medicalRecords)
-          ? report.medicalRecords
-          : [];
+      const medicalRecords = Array.isArray(report?.medicalRecords)
+        ? report.medicalRecords
+        : [];
 
       // ========================================
       // HELPER FUNCTIONS
@@ -54,79 +47,48 @@ async function generateDailyReportPdf(report) {
 
       function safe(value) {
         return String(
-          value === undefined ||
-          value === null ||
-          value === ""
-            ? "-"
-            : value
+          value === undefined || value === null || value === "" ? "-" : value,
         );
       }
 
       function money(value) {
-        return `Rs. ${Number(value || 0).toLocaleString(
-          "en-IN",
-          {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          }
-        )}`;
+        return `Rs. ${Number(value || 0).toLocaleString("en-IN", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`;
       }
 
       function addLine(y) {
-        doc
-          .moveTo(40, y)
-          .lineTo(555, y)
-          .stroke();
+        doc.moveTo(40, y).lineTo(555, y).stroke();
       }
 
       function addPageHeader() {
-        doc
-          .fontSize(17)
-          .font("Helvetica-Bold")
-          .text(
-            "JBC SEVA TRUST",
-            {
-              align: "center",
-            }
-          );
+        doc.fontSize(17).font("Helvetica-Bold").text("JBC SEVA TRUST", {
+          align: "center",
+        });
 
         doc
           .moveDown(0.3)
           .fontSize(11)
           .font("Helvetica")
-          .text(
-            "Daily Administrative Report",
-            {
-              align: "center",
-            }
-          );
+          .text("Daily Administrative Report", {
+            align: "center",
+          });
 
         doc.moveDown(0.4);
 
-        doc
-          .fontSize(10)
-          .text(
-            `Report Date: ${safe(
-              report?.reportDate
-            )}`,
-            {
-              align: "center",
-            }
-          );
+        doc.fontSize(10).text(`Report Date: ${safe(report?.reportDate)}`, {
+          align: "center",
+        });
 
         doc.moveDown(0.3);
 
         doc
           .fontSize(8)
           .fillColor("#666666")
-          .text(
-            `Generated: ${new Date().toLocaleString(
-              "en-IN"
-            )}`,
-            {
-              align: "center",
-            }
-          );
+          .text(`Generated: ${new Date().toLocaleString("en-IN")}`, {
+            align: "center",
+          });
 
         doc.fillColor("#000000");
 
@@ -143,10 +105,7 @@ async function generateDailyReportPdf(report) {
           addPageHeader();
         }
 
-        doc
-          .fontSize(12)
-          .font("Helvetica-Bold")
-          .text(title);
+        doc.fontSize(12).font("Helvetica-Bold").text(title);
 
         doc.moveDown(0.5);
       }
@@ -154,21 +113,13 @@ async function generateDailyReportPdf(report) {
       function tableHeader(columns) {
         const y = doc.y;
 
-        doc
-          .fontSize(8)
-          .font("Helvetica-Bold");
+        doc.fontSize(8).font("Helvetica-Bold");
 
         columns.forEach((column) => {
-          doc.text(
-            column.title,
-            column.x,
-            y,
-            {
-              width: column.width,
-              align:
-                column.align || "left",
-            }
-          );
+          doc.text(column.title, column.x, y, {
+            width: column.width,
+            align: column.align || "left",
+          });
         });
 
         doc.moveDown(0.6);
@@ -178,10 +129,7 @@ async function generateDailyReportPdf(report) {
       }
 
       function checkSpace(requiredHeight = 60) {
-        if (
-          doc.y + requiredHeight >
-          760
-        ) {
+        if (doc.y + requiredHeight > 760) {
           doc.addPage();
           addPageHeader();
         }
@@ -200,80 +148,36 @@ async function generateDailyReportPdf(report) {
       sectionTitle("REPORT SUMMARY");
 
       const summaryRows = [
-        [
-          "Total Memberships",
-          summary.membershipCount || 0,
-        ],
-        [
-          "Membership Collection",
-          money(
-            summary.membershipCollection
-          ),
-        ],
-        [
-          "Total Donations",
-          summary.donationCount || 0,
-        ],
-        [
-          "Donation Collection",
-          money(
-            summary.donationCollection
-          ),
-        ],
-        [
-          "Medical Requests",
-          summary.medicalCount || 0,
-        ],
-        [
-          "TOTAL COLLECTION",
-          money(
-            summary.totalCollection
-          ),
-        ],
+        ["Total Memberships", summary.membershipCount || 0],
+        ["Membership Collection", money(summary.membershipCollection)],
+        ["Total Donations", summary.donationCount || 0],
+        ["Donation Collection", money(summary.donationCollection)],
+        ["Medical Requests", summary.medicalCount || 0],
+        ["TOTAL COLLECTION", money(summary.totalCollection)],
       ];
 
-      summaryRows.forEach(
-        ([label, value]) => {
-          checkSpace(25);
+      summaryRows.forEach(([label, value]) => {
+        checkSpace(25);
 
-          const y = doc.y;
+        const y = doc.y;
 
-          doc
-            .fontSize(9)
-            .font(
-              label === "TOTAL COLLECTION"
-                ? "Helvetica-Bold"
-                : "Helvetica"
-            )
-            .text(
-              label,
-              45,
-              y,
-              {
-                width: 300,
-              }
-            );
+        doc
+          .fontSize(9)
+          .font(label === "TOTAL COLLECTION" ? "Helvetica-Bold" : "Helvetica")
+          .text(label, 45, y, {
+            width: 300,
+          });
 
-          doc
-            .fontSize(9)
-            .font(
-              label === "TOTAL COLLECTION"
-                ? "Helvetica-Bold"
-                : "Helvetica"
-            )
-            .text(
-              safe(value),
-              360,
-              y,
-              {
-                width: 180,
-                align: "right",
-              }
-            );
+        doc
+          .fontSize(9)
+          .font(label === "TOTAL COLLECTION" ? "Helvetica-Bold" : "Helvetica")
+          .text(safe(value), 360, y, {
+            width: 180,
+            align: "right",
+          });
 
-          doc.moveDown(0.7);
-        }
-      );
+        doc.moveDown(0.7);
+      });
 
       doc.moveDown(0.5);
 
@@ -286,9 +190,7 @@ async function generateDailyReportPdf(report) {
 
         addPageHeader();
 
-        sectionTitle(
-          `MEMBERSHIPS (${memberships.length})`
-        );
+        sectionTitle(`MEMBERSHIPS (${memberships.length})`);
 
         tableHeader([
           {
@@ -324,79 +226,42 @@ async function generateDailyReportPdf(report) {
           },
         ]);
 
-        memberships.forEach(
-          (item) => {
-            checkSpace(45);
+        memberships.forEach((item) => {
+          checkSpace(45);
 
-            const y = doc.y;
+          const y = doc.y;
 
-            doc
-              .fontSize(7)
-              .font("Helvetica")
-              .text(
-                safe(item.memberName),
-                40,
-                y,
-                {
-                  width: 100,
-                }
-              );
+          doc.fontSize(7).font("Helvetica").text(safe(item.memberName), 40, y, {
+            width: 100,
+          });
 
-            doc.text(
-              safe(item.membershipType),
-              145,
-              y,
-              {
-                width: 80,
-              }
-            );
+          doc.text(safe(item.membershipType), 145, y, {
+            width: 80,
+          });
 
-            doc.text(
-              money(item.amount),
-              230,
-              y,
-              {
-                width: 60,
-                align: "right",
-              }
-            );
+          doc.text(money(item.amount), 230, y, {
+            width: 60,
+            align: "right",
+          });
 
-            doc.text(
-              safe(item.paymentMode),
-              295,
-              y,
-              {
-                width: 55,
-              }
-            );
+          doc.text(safe(item.paymentMode), 295, y, {
+            width: 55,
+          });
 
-            doc.text(
-              `${safe(item.date)}\n${safe(
-                item.time
-              )}`,
-              355,
-              y,
-              {
-                width: 70,
-              }
-            );
+          doc.text(`${safe(item.date)}\n${safe(item.time)}`, 355, y, {
+            width: 70,
+          });
 
-            doc.text(
-              safe(item.transactionId),
-              430,
-              y,
-              {
-                width: 120,
-              }
-            );
+          doc.text(safe(item.transactionId), 430, y, {
+            width: 120,
+          });
 
-            doc.moveDown(1.8);
+          doc.moveDown(1.8);
 
-            addLine(doc.y);
+          addLine(doc.y);
 
-            doc.moveDown(0.5);
-          }
-        );
+          doc.moveDown(0.5);
+        });
       }
 
       // ========================================
@@ -408,9 +273,7 @@ async function generateDailyReportPdf(report) {
 
         addPageHeader();
 
-        sectionTitle(
-          `DONATIONS (${donations.length})`
-        );
+        sectionTitle(`DONATIONS (${donations.length})`);
 
         tableHeader([
           {
@@ -446,79 +309,42 @@ async function generateDailyReportPdf(report) {
           },
         ]);
 
-        donations.forEach(
-          (item) => {
-            checkSpace(50);
+        donations.forEach((item) => {
+          checkSpace(50);
 
-            const y = doc.y;
+          const y = doc.y;
 
-            doc
-              .fontSize(7)
-              .font("Helvetica")
-              .text(
-                safe(item.donorName),
-                40,
-                y,
-                {
-                  width: 100,
-                }
-              );
+          doc.fontSize(7).font("Helvetica").text(safe(item.donorName), 40, y, {
+            width: 100,
+          });
 
-            doc.text(
-              money(item.amount),
-              145,
-              y,
-              {
-                width: 65,
-                align: "right",
-              }
-            );
+          doc.text(money(item.amount), 145, y, {
+            width: 65,
+            align: "right",
+          });
 
-            doc.text(
-              safe(item.paymentMode),
-              215,
-              y,
-              {
-                width: 60,
-              }
-            );
+          doc.text(safe(item.paymentMode), 215, y, {
+            width: 60,
+          });
 
-            doc.text(
-              `${safe(item.date)}\n${safe(
-                item.time
-              )}`,
-              280,
-              y,
-              {
-                width: 75,
-              }
-            );
+          doc.text(`${safe(item.date)}\n${safe(item.time)}`, 280, y, {
+            width: 75,
+          });
 
-            doc.text(
-              safe(item.email),
-              360,
-              y,
-              {
-                width: 90,
-              }
-            );
+          doc.text(safe(item.email), 360, y, {
+            width: 90,
+          });
 
-            doc.text(
-              safe(item.transactionId),
-              455,
-              y,
-              {
-                width: 100,
-              }
-            );
+          doc.text(safe(item.transactionId), 455, y, {
+            width: 100,
+          });
 
-            doc.moveDown(1.8);
+          doc.moveDown(1.8);
 
-            addLine(doc.y);
+          addLine(doc.y);
 
-            doc.moveDown(0.5);
-          }
-        );
+          doc.moveDown(0.5);
+        });
       }
 
       // ========================================
@@ -530,9 +356,7 @@ async function generateDailyReportPdf(report) {
 
         addPageHeader();
 
-        sectionTitle(
-          `MEDICAL HELP REQUESTS (${medicalRecords.length})`
-        );
+        sectionTitle(`MEDICAL HELP REQUESTS (${medicalRecords.length})`);
 
         tableHeader([
           {
@@ -567,82 +391,41 @@ async function generateDailyReportPdf(report) {
           },
         ]);
 
-        medicalRecords.forEach(
-          (item) => {
-            checkSpace(55);
+        medicalRecords.forEach((item) => {
+          checkSpace(55);
 
-            const y = doc.y;
+          const y = doc.y;
 
-            doc
-              .fontSize(7)
-              .font("Helvetica")
-              .text(
-                safe(item.patientName),
-                40,
-                y,
-                {
-                  width: 90,
-                }
-              );
+          doc.fontSize(7).font("Helvetica").text(safe(item.patientName), 40, y, {
+            width: 90,
+          });
 
-            doc.text(
-              safe(item.nameDiseases),
-              135,
-              y,
-              {
-                width: 100,
-              }
-            );
+          doc.text(safe(item.nameDiseases), 135, y, {
+            width: 100,
+          });
 
-            doc.text(
-              safe(item.hospitalName),
-              240,
-              y,
-              {
-                width: 100,
-              }
-            );
+          doc.text(safe(item.hospitalName), 240, y, {
+            width: 100,
+          });
 
-            doc.text(
-              safe(
-                item.patientPhoneNumber
-              ),
-              345,
-              y,
-              {
-                width: 65,
-              }
-            );
+          doc.text(safe(item.patientPhoneNumber), 345, y, {
+            width: 65,
+          });
 
-            doc.text(
-              safe(
-                item.referenceRegistrationNumber
-              ),
-              415,
-              y,
-              {
-                width: 75,
-              }
-            );
+          doc.text(safe(item.referenceRegistrationNumber), 415, y, {
+            width: 75,
+          });
 
-            doc.text(
-              `${safe(item.date)}\n${safe(
-                item.time
-              )}`,
-              495,
-              y,
-              {
-                width: 60,
-              }
-            );
+          doc.text(`${safe(item.date)}\n${safe(item.time)}`, 495, y, {
+            width: 60,
+          });
 
-            doc.moveDown(1.8);
+          doc.moveDown(1.8);
 
-            addLine(doc.y);
+          addLine(doc.y);
 
-            doc.moveDown(0.5);
-          }
-        );
+          doc.moveDown(0.5);
+        });
       }
 
       // ========================================
@@ -657,44 +440,32 @@ async function generateDailyReportPdf(report) {
         doc
           .fontSize(10)
           .font("Helvetica")
-          .text(
-            "No records found for the selected date.",
-            {
-              align: "center",
-            }
-          );
+          .text("No records found for the selected date.", {
+            align: "center",
+          });
       }
 
       // ========================================
       // FOOTER ON ALL PAGES
       // ========================================
 
-      const range =
-        doc.bufferedPageRange();
+      const range = doc.bufferedPageRange();
 
-      for (
-        let i = 0;
-        i < range.count;
-        i++
-      ) {
-        doc.switchToPage(
-          range.start + i
-        );
+      for (let i = 0; i < range.count; i++) {
+        doc.switchToPage(range.start + i);
 
         doc
           .fontSize(7)
           .font("Helvetica")
           .fillColor("#666666")
           .text(
-            `JBC Seva Trust | Daily Report | Page ${
-              i + 1
-            } of ${range.count}`,
+            `JBC Seva Trust | Daily Report | Page ${i + 1} of ${range.count}`,
             40,
             805,
             {
               width: 515,
               align: "center",
-            }
+            },
           );
       }
 

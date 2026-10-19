@@ -15,7 +15,10 @@ const { isUpcoming } = require("../services/contentService");
 
 async function home(req, res, next) {
   try {
-    const [updates, events] = await Promise.all([contentModel.listUpdates(), contentModel.listEvents()]);
+    const [updates, events] = await Promise.all([
+      contentModel.listUpdates(),
+      contentModel.listEvents(),
+    ]);
     res.render("pages/index", {
       latestUpdates: updates.slice(0, 3),
       upcomingEvents: events.filter(isUpcoming).slice(0, 3),
@@ -30,8 +33,14 @@ async function programme(req, res, next) {
     const item = trust.programmes.find((p) => p.slug === req.params.slug);
     if (!item) return next();
 
-    const updates = (await contentModel.listUpdates()).filter((u) => u.programme === item.slug);
-    return res.render("pages/programme", { programme: item, title: item.title, updates: updates.slice(0, 4) });
+    const updates = (await contentModel.listUpdates()).filter(
+      (u) => u.programme === item.slug,
+    );
+    return res.render("pages/programme", {
+      programme: item,
+      title: item.title,
+      updates: updates.slice(0, 4),
+    });
   } catch (error) {
     return next(error);
   }

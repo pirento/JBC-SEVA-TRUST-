@@ -5,13 +5,7 @@ const session = require("express-session");
 const compression = require("compression");
 const MemoryStore = require("memorystore")(session);
 
-const {
-  port,
-  nodeEnv,
-  appUrl,
-  viewsDir,
-  publicDir,
-} = require("./config/appConfig");
+const { port, nodeEnv, appUrl, viewsDir, publicDir } = require("./config/appConfig");
 
 const { trustEmail } = require("./config/emailConfig");
 
@@ -23,13 +17,9 @@ if (!process.env.SESSION_SECRET) {
 
 const isProduction = nodeEnv === "production";
 
-const {
-  verifyEmailConnection,
-} = require("./services/emailService");
+const { verifyEmailConnection } = require("./services/emailService");
 
-const {
-  startDailyReportScheduler,
-} = require("./services/dailyReportScheduler");
+const { startDailyReportScheduler } = require("./services/dailyReportScheduler");
 
 const { startBackupScheduler } = require("./services/backupService");
 
@@ -163,7 +153,9 @@ app.use((req, res, next) => {
   res.locals.trustEmail = trustEmail || "";
   res.locals.appUrl = appUrl;
   // 10-digit Indian number for a "chat on WhatsApp" link, if set
-  res.locals.trustWhatsapp = /^[6-9]\d{9}$/.test(process.env.TRUST_WHATSAPP || "") ? process.env.TRUST_WHATSAPP : "";
+  res.locals.trustWhatsapp = /^[6-9]\d{9}$/.test(process.env.TRUST_WHATSAPP || "")
+    ? process.env.TRUST_WHATSAPP
+    : "";
   res.locals.year = new Date().getFullYear();
   next();
 });
@@ -262,9 +254,7 @@ if (require.main === module) {
 
     console.log("=================================");
 
-    console.log(
-      `🚀 Server running at http://localhost:${port}`,
-    );
+    console.log(`🚀 Server running at http://localhost:${port}`);
 
     console.log("=================================");
 

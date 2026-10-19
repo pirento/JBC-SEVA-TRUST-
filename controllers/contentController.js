@@ -6,7 +6,8 @@ const trust = require("../config/trustConfig");
 
 async function updates(req, res, next) {
   try {
-    const programme = trust.programmes.find((p) => p.slug === req.query.programme) || null;
+    const programme =
+      trust.programmes.find((p) => p.slug === req.query.programme) || null;
     const all = await contentModel.listUpdates();
     res.render("pages/updates", {
       title: "Updates from the Field",
@@ -65,7 +66,12 @@ async function registerEvent(req, res, next) {
       return res.redirect(`/events/${item.id}?done=1`);
     } catch (error) {
       if (!error.expose) throw error;
-      return renderEvent(res, item, { error: error.message, values: req.body || {} }, 400);
+      return renderEvent(
+        res,
+        item,
+        { error: error.message, values: req.body || {} },
+        400,
+      );
     }
   } catch (error) {
     return next(error);
@@ -104,7 +110,13 @@ function adminAction(action) {
       return res.redirect("/admin/content?saved=1");
     } catch (error) {
       if (!error.expose) return next(error);
-      return adminContent(req, res, next, { error: error.message, values: req.body || {} }, 400);
+      return adminContent(
+        req,
+        res,
+        next,
+        { error: error.message, values: req.body || {} },
+        400,
+      );
     }
   };
 }
@@ -115,7 +127,9 @@ module.exports = {
   event,
   registerEvent,
   adminContent: (req, res, next) => adminContent(req, res, next),
-  createUpdate: adminAction((req) => contentService.createUpdate(req.body || {}, req.file, req.uploadError)),
+  createUpdate: adminAction((req) =>
+    contentService.createUpdate(req.body || {}, req.file, req.uploadError),
+  ),
   deleteUpdate: adminAction((req) => contentModel.removeUpdate(req.params.id)),
   createEvent: adminAction((req) => contentService.createEvent(req.body || {})),
   deleteEvent: adminAction((req) => contentModel.removeEvent(req.params.id)),

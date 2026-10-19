@@ -5,11 +5,7 @@ const { readRecords } = require("../models/fileStore");
 // ========================================
 
 function getRecordDate(record) {
-  const dateValue =
-    record.paymentDate ||
-    record.submittedAt ||
-    record.createdAt ||
-    null;
+  const dateValue = record.paymentDate || record.submittedAt || record.createdAt || null;
 
   if (!dateValue) {
     return null;
@@ -85,50 +81,27 @@ function normalizeMembership(record) {
 
   const memberName = String(
     record.memberName ||
-    record.donorName ||
-    (
-      Array.isArray(record.memberNames)
-        ? record.memberNames[0]
-        : ""
-    ) ||
-    ""
+      record.donorName ||
+      (Array.isArray(record.memberNames) ? record.memberNames[0] : "") ||
+      "",
   ).trim();
 
-  const amount =
-    Number(record.amount) || 0;
+  const amount = Number(record.amount) || 0;
 
   const membershipType =
     String(record.membershipType || "").trim() ||
-    (
-      amount >= 11000
-        ? "Lifetime Member"
-        : "1 Year Member"
-    );
+    (amount >= 11000 ? "Lifetime Member" : "1 Year Member");
 
   return {
     memberName,
     membershipType,
     amount,
-    paymentMode:
-      String(record.paymentMode || "Online").trim(),
-    paymentStatus:
-      String(record.paymentStatus || "SUCCESS").trim(),
-    transactionId:
-      String(
-        record.transactionId ||
-        record.txnid ||
-        ""
-      ).trim(),
-    payuPaymentId:
-      String(
-        record.payuPaymentId ||
-        record.mihpayid ||
-        ""
-      ).trim(),
-    phoneNumber:
-      String(record.phoneNumber || "").trim(),
-    email:
-      String(record.email || "").trim(),
+    paymentMode: String(record.paymentMode || "Online").trim(),
+    paymentStatus: String(record.paymentStatus || "SUCCESS").trim(),
+    transactionId: String(record.transactionId || record.txnid || "").trim(),
+    payuPaymentId: String(record.payuPaymentId || record.mihpayid || "").trim(),
+    phoneNumber: String(record.phoneNumber || "").trim(),
+    email: String(record.email || "").trim(),
     date: date ? formatDate(date) : "-",
     time: date ? formatTime(date) : "-",
   };
@@ -142,54 +115,33 @@ function normalizeDonation(record) {
   const date = getRecordDate(record);
 
   return {
-    donorName:
-      String(record.donorName || "").trim(),
+    donorName: String(record.donorName || "").trim(),
 
-    phoneNumber:
-      String(record.phoneNumber || "").trim(),
+    phoneNumber: String(record.phoneNumber || "").trim(),
 
-    email:
-      String(record.email || "").trim(),
+    email: String(record.email || "").trim(),
 
-    amount:
-      Number(record.amount) || 0,
+    amount: Number(record.amount) || 0,
 
-    paymentMode:
-      String(record.paymentMode || "Online").trim(),
+    paymentMode: String(record.paymentMode || "Online").trim(),
 
-    paymentStatus:
-      String(record.paymentStatus || "SUCCESS").trim(),
+    paymentStatus: String(record.paymentStatus || "SUCCESS").trim(),
 
-    transactionId:
-      String(
-        record.transactionId ||
-        record.txnid ||
-        ""
-      ).trim(),
+    transactionId: String(record.transactionId || record.txnid || "").trim(),
 
-    payuPaymentId:
-      String(
-        record.payuPaymentId ||
-        record.mihpayid ||
-        ""
-      ).trim(),
+    payuPaymentId: String(record.payuPaymentId || record.mihpayid || "").trim(),
 
-    message:
-      String(record.message || "").trim(),
+    message: String(record.message || "").trim(),
 
-    cause:
-      String(record.cause || "").trim(),
+    cause: String(record.cause || "").trim(),
 
-    purpose:
-      String(record.purpose || "").trim(),
+    purpose: String(record.purpose || "").trim(),
 
-    dedication:
-      record.dedicatedTo
-        ? `${record.dedicationType} ${record.dedicatedTo}`.trim()
-        : "",
+    dedication: record.dedicatedTo
+      ? `${record.dedicationType} ${record.dedicatedTo}`.trim()
+      : "",
 
-    sevaDate:
-      String(record.sevaDate || "").trim(),
+    sevaDate: String(record.sevaDate || "").trim(),
 
     date: date ? formatDate(date) : "-",
     time: date ? formatTime(date) : "-",
@@ -204,44 +156,23 @@ function normalizeMedical(record) {
   const date = getRecordDate(record);
 
   return {
-    patientName:
-      String(record.patientName || "").trim(),
+    patientName: String(record.patientName || "").trim(),
 
-    aadharNumber:
-      String(record.aadharNumber || "").trim(),
+    aadharNumber: String(record.aadharNumber || "").trim(),
 
-    dateBirth:
-      String(record.dateBirth || "").trim(),
+    dateBirth: String(record.dateBirth || "").trim(),
 
-    patientReferenceName:
-      String(
-        record.patientReferenceName || ""
-      ).trim(),
+    patientReferenceName: String(record.patientReferenceName || "").trim(),
 
-    patientPhoneNumber:
-      String(
-        record.patientPhoneNumber || ""
-      ).trim(),
+    patientPhoneNumber: String(record.patientPhoneNumber || "").trim(),
 
-    patientEmail:
-      String(
-        record.patientEmail || ""
-      ).trim(),
+    patientEmail: String(record.patientEmail || "").trim(),
 
-    nameDiseases:
-      String(
-        record.nameDiseases || ""
-      ).trim(),
+    nameDiseases: String(record.nameDiseases || "").trim(),
 
-    hospitalName:
-      String(
-        record.hospitalName || ""
-      ).trim(),
+    hospitalName: String(record.hospitalName || "").trim(),
 
-    referenceRegistrationNumber:
-      String(
-        record.referenceRegistrationNumber || ""
-      ).trim(),
+    referenceRegistrationNumber: String(record.referenceRegistrationNumber || "").trim(),
 
     date: date ? formatDate(date) : "-",
     time: date ? formatTime(date) : "-",
@@ -261,93 +192,63 @@ async function getDailyReport(selectedDate) {
   // READ ALL DATA
   // ========================================
 
-  const paymentRecords =
-    await readRecords("payment.txt");
+  const paymentRecords = await readRecords("payment.txt");
 
-  const donationRecords =
-    await readRecords("donations.txt");
+  const donationRecords = await readRecords("donations.txt");
 
-  const medicalRecordsRaw =
-    await readRecords("user.txt");
+  const medicalRecordsRaw = await readRecords("user.txt");
 
   // ========================================
   // MEMBERSHIPS
   // ========================================
 
-  const memberships =
-    paymentRecords
-      .filter((record) => {
-        const status =
-          String(
-            record.paymentStatus || "SUCCESS"
-          ).toUpperCase();
+  const memberships = paymentRecords
+    .filter((record) => {
+      const status = String(record.paymentStatus || "SUCCESS").toUpperCase();
 
-        return (
-          status === "SUCCESS" &&
-          isSameDate(record, selectedDate)
-        );
-      })
-      .map(normalizeMembership);
+      return status === "SUCCESS" && isSameDate(record, selectedDate);
+    })
+    .map(normalizeMembership);
 
   // ========================================
   // DONATIONS
   // ========================================
 
-  const donations =
-    donationRecords
-      .filter((record) => {
-        const status =
-          String(
-            record.paymentStatus || "SUCCESS"
-          ).toUpperCase();
+  const donations = donationRecords
+    .filter((record) => {
+      const status = String(record.paymentStatus || "SUCCESS").toUpperCase();
 
-        return (
-          status === "SUCCESS" &&
-          isSameDate(record, selectedDate)
-        );
-      })
-      .map(normalizeDonation);
+      return status === "SUCCESS" && isSameDate(record, selectedDate);
+    })
+    .map(normalizeDonation);
 
   // ========================================
   // MEDICAL HELP
   // ========================================
 
-  const medicalRecords =
-    medicalRecordsRaw
-      .filter((record) => {
-        const type =
-          String(
-            record?.type || ""
-          ).toUpperCase();
+  const medicalRecords = medicalRecordsRaw
+    .filter((record) => {
+      const type = String(record?.type || "").toUpperCase();
 
-        return (
-          type === "MEDICAL_HELP" &&
-          isSameDate(record, selectedDate)
-        );
-      })
-      .map(normalizeMedical);
+      return type === "MEDICAL_HELP" && isSameDate(record, selectedDate);
+    })
+    .map(normalizeMedical);
 
   // ========================================
   // CALCULATIONS
   // ========================================
 
-  const membershipCollection =
-    memberships.reduce(
-      (total, item) =>
-        total + Number(item.amount || 0),
-      0
-    );
+  const membershipCollection = memberships.reduce(
+    (total, item) => total + Number(item.amount || 0),
+    0,
+  );
 
-  const donationCollection =
-    donations.reduce(
-      (total, item) =>
-        total + Number(item.amount || 0),
-      0
-    );
+  const donationCollection = donations.reduce(
+    (total, item) => total + Number(item.amount || 0),
+    0,
+  );
 
-  const totalCollection =
-    membershipCollection +
-    donationCollection;
+  const totalCollection = membershipCollection + donationCollection;
 
   // ========================================
   // REPORT SUMMARY
@@ -359,18 +260,15 @@ async function getDailyReport(selectedDate) {
     generatedAt: new Date().toISOString(),
 
     summary: {
-      membershipCount:
-        memberships.length,
+      membershipCount: memberships.length,
 
       membershipCollection,
 
-      donationCount:
-        donations.length,
+      donationCount: donations.length,
 
       donationCollection,
 
-      medicalCount:
-        medicalRecords.length,
+      medicalCount: medicalRecords.length,
 
       totalCollection,
     },

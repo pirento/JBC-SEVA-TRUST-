@@ -26,14 +26,7 @@ async function verifyEmailConnection() {
   }
 }
 
-async function sendEmail({
-  to,
-  replyTo,
-  subject,
-  text,
-  html,
-  attachments = [],
-}) {
+async function sendEmail({ to, replyTo, subject, text, html, attachments = [] }) {
   if (!to) {
     throw new Error("Recipient email is required");
   }

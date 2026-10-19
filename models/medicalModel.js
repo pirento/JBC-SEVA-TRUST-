@@ -35,36 +35,26 @@ async function create(data) {
 
   for (const field of fields) {
     if (!required(data[field])) {
-      throw new Error(
-        `${field} is required`
-      );
+      throw new Error(`${field} is required`);
     }
   }
 
   for (const field of [...fields, "patientReferenceName"]) {
     if (String(data[field] || "").trim().length > 150) {
-      throw new Error(
-        `${field} is too long`
-      );
+      throw new Error(`${field} is too long`);
     }
   }
 
   if (!personName(data.patientName)) {
-    throw new Error(
-      "Please enter a valid patient name"
-    );
+    throw new Error("Please enter a valid patient name");
   }
 
   if (!pastDate(data.dateBirth)) {
-    throw new Error(
-      "Please enter a valid date of birth"
-    );
+    throw new Error("Please enter a valid date of birth");
   }
 
   if (!accepted(data.consent)) {
-    throw new Error(
-      "Please accept the Terms and Privacy Policy"
-    );
+    throw new Error("Please accept the Terms and Privacy Policy");
   }
 
   // ----------------------------------------------------------
@@ -72,9 +62,7 @@ async function create(data) {
   // ----------------------------------------------------------
 
   if (!aadhar(data.aadharNumber)) {
-    throw new Error(
-      "Aadhar number must be 12 digits"
-    );
+    throw new Error("Aadhar number must be 12 digits");
   }
 
   // ----------------------------------------------------------
@@ -82,9 +70,7 @@ async function create(data) {
   // ----------------------------------------------------------
 
   if (!phone(data.patientPhoneNumber)) {
-    throw new Error(
-      "Phone number must be 10 digits"
-    );
+    throw new Error("Phone number must be 10 digits");
   }
 
   // ----------------------------------------------------------
@@ -92,9 +78,7 @@ async function create(data) {
   // ----------------------------------------------------------
 
   if (!email(data.patientEmail)) {
-    throw new Error(
-      "Please enter a valid email address"
-    );
+    throw new Error("Please enter a valid email address");
   }
 
   // ----------------------------------------------------------
@@ -116,7 +100,7 @@ async function create(data) {
 
   if (duplicate) {
     throw new Error(
-      "A request for this patient and hospital was already received in the last 7 days. Our team will contact you."
+      "A request for this patient and hospital was already received in the last 7 days. Our team will contact you.",
     );
   }
 
@@ -124,65 +108,35 @@ async function create(data) {
   // SAVE MEDICAL HELP RECORD
   // ----------------------------------------------------------
 
-  return appendRecord(
-    "user.txt",
-    {
-      type: "MEDICAL_HELP",
+  return appendRecord("user.txt", {
+    type: "MEDICAL_HELP",
 
-      patientName:
-        String(
-          data.patientName
-        ).trim(),
+    patientName: String(data.patientName).trim(),
 
-      aadharNumber:
-        String(
-          data.aadharNumber
-        ).trim(),
+    aadharNumber: String(data.aadharNumber).trim(),
 
-      dateBirth:
-        String(
-          data.dateBirth
-        ).trim(),
+    dateBirth: String(data.dateBirth).trim(),
 
-      patientReferenceName:
-        String(
-          data.patientReferenceName || ""
-        ).trim(),
+    patientReferenceName: String(data.patientReferenceName || "").trim(),
 
-      patientPhoneNumber:
-        String(
-          data.patientPhoneNumber
-        ).trim(),
+    patientPhoneNumber: String(data.patientPhoneNumber).trim(),
 
-      patientEmail:
-        String(
-          data.patientEmail
-        ).trim(),
+    patientEmail: String(data.patientEmail).trim(),
 
-      nameDiseases:
-        String(
-          data.nameDiseases
-        ).trim(),
+    nameDiseases: String(data.nameDiseases).trim(),
 
-      hospitalName:
-        String(
-          data.hospitalName
-        ).trim(),
+    hospitalName: String(data.hospitalName).trim(),
 
-      referenceRegistrationNumber:
-        String(
-          data.referenceRegistrationNumber ||
-          "REF001"
-        ).trim(),
+    referenceRegistrationNumber: String(
+      data.referenceRegistrationNumber || "REF001",
+    ).trim(),
 
-      // ======================================================
-      // SUBMISSION DATE & TIME
-      // ======================================================
+    // ======================================================
+    // SUBMISSION DATE & TIME
+    // ======================================================
 
-      submittedAt:
-        new Date().toISOString(),
-    }
-  );
+    submittedAt: new Date().toISOString(),
+  });
 }
 
 // ============================================================

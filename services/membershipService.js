@@ -15,14 +15,9 @@ const {
 // MEMBERSHIP PAYU CALLBACK URLS
 // ============================================================
 
-const {
-  PAYU_SUCCESS_URL,
-  PAYU_FAILURE_URL,
-} = require("../config/payuConfig");
+const { PAYU_SUCCESS_URL, PAYU_FAILURE_URL } = require("../config/payuConfig");
 
-const {
-  generateMembershipCertificate,
-} = require("./membershipCertificateService");
+const { generateMembershipCertificate } = require("./membershipCertificateService");
 
 const { sendEmail } = require("./emailService");
 
@@ -40,55 +35,35 @@ const {
 
 const escapeHtml = require("../utils/escapeHtml");
 
-const logoPath = path.join(
-  __dirname,
-  "..",
-  "public",
-  "images",
-  "logo.jpeg"
-);
+const logoPath = path.join(__dirname, "..", "public", "images", "logo.jpeg");
 
 // ============================================================
 // MEMBERSHIP VALIDATION
 // ============================================================
 
 function validateMembership(input) {
-  const memberName = String(
-    input.memberName || ""
-  ).trim();
+  const memberName = String(input.memberName || "").trim();
 
-  const cleanPhone = String(
-    input.phoneNumber || ""
-  ).trim();
+  const cleanPhone = String(input.phoneNumber || "").trim();
 
-  const cleanEmail = String(
-    input.email || ""
-  ).trim();
+  const cleanEmail = String(input.email || "").trim();
 
   const amount = Number(input.amount);
 
-  const paymentMode = String(
-    input.paymentMode || ""
-  ).trim();
+  const paymentMode = String(input.paymentMode || "").trim();
 
-  const message = String(
-    input.message || ""
-  ).trim();
+  const message = String(input.message || "").trim();
 
   // ----------------------------------------------------------
   // Member Name
   // ----------------------------------------------------------
 
   if (!required(memberName)) {
-    throw new Error(
-      "Member name is required."
-    );
+    throw new Error("Member name is required.");
   }
 
   if (memberName.length > 100) {
-    throw new Error(
-      "Member name cannot exceed 100 characters."
-    );
+    throw new Error("Member name cannot exceed 100 characters.");
   }
 
   if (!personName(memberName)) {
@@ -104,9 +79,7 @@ function validateMembership(input) {
   // ----------------------------------------------------------
 
   if (!phone(cleanPhone)) {
-    throw new Error(
-      "Phone number must be 10 digits"
-    );
+    throw new Error("Phone number must be 10 digits");
   }
 
   // ----------------------------------------------------------
@@ -114,15 +87,11 @@ function validateMembership(input) {
   // ----------------------------------------------------------
 
   if (!required(cleanEmail)) {
-    throw new Error(
-      "Email is required"
-    );
+    throw new Error("Email is required");
   }
 
   if (!email(cleanEmail)) {
-    throw new Error(
-      "Please enter a valid email address"
-    );
+    throw new Error("Please enter a valid email address");
   }
 
   // ----------------------------------------------------------
@@ -135,22 +104,16 @@ function validateMembership(input) {
   // ----------------------------------------------------------
 
   if (!positiveAmount(amount)) {
-    throw new Error(
-      "Membership amount must be greater than 0"
-    );
+    throw new Error("Membership amount must be greater than 0");
   }
 
   if (amount < 100) {
-    throw new Error(
-      "Minimum membership amount is ₹100."
-    );
+    throw new Error("Minimum membership amount is ₹100.");
   }
 
   // Catches typing mistakes (an extra zero); large gifts go through the trust directly
   if (amount > 1000000) {
-    throw new Error(
-      "For amounts above ₹10,00,000 please contact the Trust directly."
-    );
+    throw new Error("For amounts above ₹10,00,000 please contact the Trust directly.");
   }
 
   // ----------------------------------------------------------
@@ -158,31 +121,22 @@ function validateMembership(input) {
   // ----------------------------------------------------------
 
   if (!required(paymentMode)) {
-    throw new Error(
-      "Payment mode is required"
-    );
+    throw new Error("Payment mode is required");
   }
 
   if (paymentMode === "Cash") {
-    throw new Error(
-      "Cash payment is not available through online PayU payment"
-    );
+    throw new Error("Cash payment is not available through online PayU payment");
   }
 
   if (!accepted(input.consent)) {
-    throw new Error(
-      "Please accept the Terms, Privacy Policy and Refund Policy"
-    );
+    throw new Error("Please accept the Terms, Privacy Policy and Refund Policy");
   }
 
   // ----------------------------------------------------------
   // Membership Type
   // ----------------------------------------------------------
 
-  const membershipType =
-    amount >= 11000
-      ? "Lifetime Member"
-      : "1 Year Member";
+  const membershipType = amount >= 11000 ? "Lifetime Member" : "1 Year Member";
 
   // ----------------------------------------------------------
   // Return normalized membership data
@@ -212,30 +166,23 @@ function validateMembership(input) {
 // ============================================================
 
 async function initiateMembership(input) {
-  const membership =
-    validateMembership(input);
+  const membership = validateMembership(input);
 
-  const txnid =
-    generateTxnId();
+  const txnid = generateTxnId();
 
   const paymentData = createPaymentData({
     txnid,
 
-    amount:
-      membership.amount.toFixed(2),
+    amount: membership.amount.toFixed(2),
 
     // PayU firstname
-    firstname:
-      membership.memberName,
+    firstname: membership.memberName,
 
-    email:
-      membership.email,
+    email: membership.email,
 
-    phone:
-      membership.phoneNumber,
+    phone: membership.phoneNumber,
 
-    productinfo:
-      "Membership",
+    productinfo: "Membership",
 
     // --------------------------------------------------------
     // UDF FIELDS
@@ -246,30 +193,23 @@ async function initiateMembership(input) {
     // UDF4/UDF5 = Empty
     // --------------------------------------------------------
 
-    udf1:
-      membership.membershipType,
+    udf1: membership.membershipType,
 
-    udf2:
-      membership.paymentMode,
+    udf2: membership.paymentMode,
 
-    udf3:
-      membership.message,
+    udf3: membership.message,
 
-    udf4:
-      "",
+    udf4: "",
 
-    udf5:
-      "",
+    udf5: "",
 
     // --------------------------------------------------------
     // MEMBERSHIP PAYU CALLBACK URLS
     // --------------------------------------------------------
 
-    surl:
-      PAYU_SUCCESS_URL,
+    surl: PAYU_SUCCESS_URL,
 
-    furl:
-      PAYU_FAILURE_URL,
+    furl: PAYU_FAILURE_URL,
   });
 
   // ----------------------------------------------------------
@@ -281,8 +221,7 @@ async function initiateMembership(input) {
 
     txnid,
 
-    createdAt:
-      Date.now(),
+    createdAt: Date.now(),
   });
 
   store.cleanup();
@@ -291,63 +230,34 @@ async function initiateMembership(input) {
   // Console
   // ----------------------------------------------------------
 
-  console.log(
-    "\n================================="
-  );
+  console.log("\n=================================");
 
-  console.log(
-    "💳 PAYU MEMBERSHIP PAYMENT INITIATED"
-  );
+  console.log("💳 PAYU MEMBERSHIP PAYMENT INITIATED");
 
-  console.log(
-    "Transaction:",
-    txnid
-  );
+  console.log("Transaction:", txnid);
 
-  console.log(
-    "Member:",
-    membership.memberName
-  );
+  console.log("Member:", membership.memberName);
 
-  console.log(
-    "Membership Type:",
-    membership.membershipType
-  );
+  console.log("Membership Type:", membership.membershipType);
 
-  console.log(
-    "Amount:",
-    membership.amount
-  );
+  console.log("Amount:", membership.amount);
 
-  console.log(
-    "Email:",
-    membership.email
-  );
+  console.log("Email:", membership.email);
 
-  console.log(
-    "Success URL:",
-    PAYU_SUCCESS_URL
-  );
+  console.log("Success URL:", PAYU_SUCCESS_URL);
 
-  console.log(
-    "Failure URL:",
-    PAYU_FAILURE_URL
-  );
+  console.log("Failure URL:", PAYU_FAILURE_URL);
 
-  console.log(
-    "================================="
-  );
+  console.log("=================================");
 
   return {
     paymentData,
 
-    paymentUrl:
-      PAYU_PAYMENT_URL,
+    paymentUrl: PAYU_PAYMENT_URL,
 
     // Keep existing property name
     // so current PayU EJS does not break.
-    donation:
-      membership,
+    donation: membership,
   };
 }
 
@@ -362,9 +272,7 @@ function processPaymentSuccess(data) {
 
 async function handlePaymentSuccess(data) {
   if (!data || !data.txnid) {
-    throw new Error(
-      "Transaction ID missing from PayU response."
-    );
+    throw new Error("Transaction ID missing from PayU response.");
   }
 
   // ----------------------------------------------------------
@@ -373,8 +281,7 @@ async function handlePaymentSuccess(data) {
 
   if (!verifyResponseHash(data)) {
     return {
-      error:
-        "Payment verification failed. Please contact the Trust.",
+      error: "Payment verification failed. Please contact the Trust.",
       status: 400,
     };
   }
@@ -383,10 +290,7 @@ async function handlePaymentSuccess(data) {
   // Check PayU status
   // ----------------------------------------------------------
 
-  if (
-    String(data.status || "")
-      .toLowerCase() !== "success"
-  ) {
+  if (String(data.status || "").toLowerCase() !== "success") {
     return {
       failure: true,
     };
@@ -396,20 +300,15 @@ async function handlePaymentSuccess(data) {
   // Get pending membership
   // ----------------------------------------------------------
 
-  let pending =
-    await store.getPending(data.txnid);
+  let pending = await store.getPending(data.txnid);
 
   if (!pending) {
-    pending =
-      await Membership.findByTransactionId(
-        data.txnid
-      );
+    pending = await Membership.findByTransactionId(data.txnid);
   }
 
   if (!pending) {
     return {
-      error:
-        "Transaction could not be verified.",
+      error: "Transaction could not be verified.",
       status: 400,
     };
   }
@@ -418,15 +317,9 @@ async function handlePaymentSuccess(data) {
   // Verify amount
   // ----------------------------------------------------------
 
-  if (
-    !verifyPaymentAmount(
-      data.amount,
-      pending.amount
-    )
-  ) {
+  if (!verifyPaymentAmount(data.amount, pending.amount)) {
     return {
-      error:
-        "Payment amount verification failed.",
+      error: "Payment amount verification failed.",
       status: 400,
     };
   }
@@ -435,13 +328,9 @@ async function handlePaymentSuccess(data) {
   // Verify transaction
   // ----------------------------------------------------------
 
-  if (
-    String(data.txnid) !==
-    String(pending.txnid)
-  ) {
+  if (String(data.txnid) !== String(pending.txnid)) {
     return {
-      error:
-        "Transaction verification failed.",
+      error: "Transaction verification failed.",
       status: 400,
     };
   }
@@ -453,81 +342,57 @@ async function handlePaymentSuccess(data) {
   // the actual verified PayU amount.
   // ----------------------------------------------------------
 
-  const verifiedAmount =
-    Number(data.amount);
+  const verifiedAmount = Number(data.amount);
 
-  const membershipType =
-    verifiedAmount >= 11000
-      ? "Lifetime Member"
-      : "1 Year Member";
+  const membershipType = verifiedAmount >= 11000 ? "Lifetime Member" : "1 Year Member";
 
-  pending.membershipType =
-    membershipType;
+  pending.membershipType = membershipType;
 
   // ----------------------------------------------------------
   // Ensure single member name exists
   // ----------------------------------------------------------
 
-  const memberName =
-    String(
-      pending.memberName ||
-      pending.donorName ||
-      data.firstname ||
-      ""
-    ).trim();
+  const memberName = String(
+    pending.memberName || pending.donorName || data.firstname || "",
+  ).trim();
 
   if (!memberName) {
     return {
-      error:
-        "Member information could not be verified.",
+      error: "Member information could not be verified.",
       status: 400,
     };
   }
 
-  pending.memberName =
-    memberName;
+  pending.memberName = memberName;
 
   // Keep compatibility with existing
   // email/model code.
-  pending.donorName =
-    memberName;
+  pending.donorName = memberName;
 
   // ----------------------------------------------------------
   // Save payment
   // ----------------------------------------------------------
 
-  let savedPayment =
-    await Membership.findByTransactionId(
-      data.txnid
-    );
+  let savedPayment = await Membership.findByTransactionId(data.txnid);
 
   const isNewPayment = !savedPayment;
 
   if (!savedPayment) {
-    savedPayment =
-      await Membership.create({
-        ...pending,
+    savedPayment = await Membership.create({
+      ...pending,
 
-        txnid:
-          data.txnid,
+      txnid: data.txnid,
 
-        mihpayid:
-          data.mihpayid || "",
+      mihpayid: data.mihpayid || "",
 
-        paymentStatus:
-          "SUCCESS",
+      paymentStatus: "SUCCESS",
 
-        paymentDate:
-          new Date(),
-      });
+      paymentDate: new Date(),
+    });
 
-    console.log(
-      "✅ Membership payment saved to payment.txt"
-    );
+    console.log("✅ Membership payment saved to payment.txt");
   } else {
-    console.log(
-      "ℹ️ Payment already exists. Duplicate save skipped."
-    );
+    console.log("ℹ️ Payment already exists. Duplicate save skipped.");
   }
 
   // ----------------------------------------------------------
@@ -537,60 +402,42 @@ async function handlePaymentSuccess(data) {
   const receiptData = {
     ...pending,
 
-    memberName:
-      memberName,
+    memberName: memberName,
 
-    donorName:
-      memberName,
+    donorName: memberName,
 
-    txnid:
-      data.txnid,
+    txnid: data.txnid,
 
-    mihpayid:
-      data.mihpayid || "",
+    mihpayid: data.mihpayid || "",
 
-    amount:
-      verifiedAmount,
+    amount: verifiedAmount,
 
     membershipType,
 
-    paymentDate:
-      new Date(),
+    paymentDate: new Date(),
   };
 
   // ----------------------------------------------------------
   // Generate Membership Certificate
   // ----------------------------------------------------------
 
-  const pdfBuffer =
-    await generateMembershipCertificate(
-      receiptData
-    );
+  const pdfBuffer = await generateMembershipCertificate(receiptData);
 
-  if (
-    !Buffer.isBuffer(pdfBuffer) ||
-    pdfBuffer.length === 0
-  ) {
-    throw new Error(
-      "Membership certificate PDF generation failed."
-    );
+  if (!Buffer.isBuffer(pdfBuffer) || pdfBuffer.length === 0) {
+    throw new Error("Membership certificate PDF generation failed.");
   }
 
   // ----------------------------------------------------------
   // Certificate filename
   // ----------------------------------------------------------
 
-  const fileName =
-    `membership-certificate-${data.txnid}.pdf`;
+  const fileName = `membership-certificate-${data.txnid}.pdf`;
 
-  store.setReceipt(
-    data.txnid,
-    {
-      pdfBuffer,
-      fileName,
-      createdAt: Date.now(),
-    }
-  );
+  store.setReceipt(data.txnid, {
+    pdfBuffer,
+    fileName,
+    createdAt: Date.now(),
+  });
 
   // Pending data no longer required.
   await store.deletePending(data.txnid);
@@ -602,22 +449,20 @@ async function handlePaymentSuccess(data) {
   // ----------------------------------------------------------
 
   // Email only once, even if PayU calls back again.
-  if (isNewPayment) sendMembershipEmail(
-    {
-      ...pending,
-      memberName,
-      donorName: memberName,
-      membershipType,
-      amount: verifiedAmount,
-    },
-    data,
-    pdfBuffer
-  ).catch((err) => {
-    console.error(
-      "⚠️ Membership email failed:",
-      err.message
-    );
-  });
+  if (isNewPayment)
+    sendMembershipEmail(
+      {
+        ...pending,
+        memberName,
+        donorName: memberName,
+        membershipType,
+        amount: verifiedAmount,
+      },
+      data,
+      pdfBuffer,
+    ).catch((err) => {
+      console.error("⚠️ Membership email failed:", err.message);
+    });
 
   // ----------------------------------------------------------
   // Response
@@ -636,18 +481,13 @@ async function handlePaymentSuccess(data) {
       amount: verifiedAmount,
     },
 
-    transactionId:
-      data.txnid,
+    transactionId: data.txnid,
 
-    paymentId:
-      data.mihpayid || "",
+    paymentId: data.mihpayid || "",
 
     membershipType,
 
-    receiptUrl:
-      `/donation/receipt/${encodeURIComponent(
-        data.txnid
-      )}`,
+    receiptUrl: `/donation/receipt/${encodeURIComponent(data.txnid)}`,
 
     savedPayment,
 
@@ -660,28 +500,20 @@ async function handlePaymentSuccess(data) {
 // ============================================================
 
 async function processPaymentFailure(data) {
-  const pending =
-    data && data.txnid
-      ? await store.getPending(data.txnid)
-      : null;
+  const pending = data && data.txnid ? await store.getPending(data.txnid) : null;
 
   // Do not erase pending state here: failure callbacks may be retried,
   // and this route must not let an unverified request destroy the record.
 
   return {
-    transactionId:
-      data?.txnid ||
-      "Not Available",
+    transactionId: data?.txnid || "Not Available",
 
     errorMessage:
-      data?.error_Message ||
-      data?.error ||
-      "Your payment could not be completed.",
+      data?.error_Message || data?.error || "Your payment could not be completed.",
 
     // Keep existing property name
     // for current failure EJS.
-    donation:
-      pending || null,
+    donation: pending || null,
   };
 }
 
@@ -692,37 +524,25 @@ async function processPaymentFailure(data) {
 async function getReceipt(transactionId) {
   store.cleanup();
 
-  let receipt =
-    store.getReceipt(transactionId);
+  let receipt = store.getReceipt(transactionId);
 
   if (receipt) {
     return receipt;
   }
 
-  const payment =
-    await Membership.findByTransactionId(
-      transactionId
-    );
+  const payment = await Membership.findByTransactionId(transactionId);
 
   if (!payment) {
     throw Object.assign(
-      new Error(
-        "Membership certificate not found for this transaction."
-      ),
-      { status: 404 }
+      new Error("Membership certificate not found for this transaction."),
+      { status: 404 },
     );
   }
 
-  if (
-    String(
-      payment.paymentStatus || ""
-    ).toUpperCase() !== "SUCCESS"
-  ) {
+  if (String(payment.paymentStatus || "").toUpperCase() !== "SUCCESS") {
     throw Object.assign(
-      new Error(
-        "Membership certificate is not available for this payment."
-      ),
-      { status: 404 }
+      new Error("Membership certificate is not available for this payment."),
+      { status: 404 },
     );
   }
 
@@ -733,95 +553,59 @@ async function getReceipt(transactionId) {
   // donorName is retained as legacy fallback.
   // ----------------------------------------------------------
 
-  const memberName =
-    String(
-      payment.memberName ||
-      payment.donorName ||
-      ""
-    ).trim();
+  const memberName = String(payment.memberName || payment.donorName || "").trim();
 
   if (!memberName) {
-    throw Object.assign(
-      new Error(
-        "Member name is missing from this payment."
-      ),
-      { status: 400 }
-    );
+    throw Object.assign(new Error("Member name is missing from this payment."), {
+      status: 400,
+    });
   }
 
-  const amount =
-    Number(payment.amount);
+  const amount = Number(payment.amount);
 
   // Always derive membership type from amount
   // if it is missing from the saved record.
   const membershipType =
-    payment.membershipType ||
-    (
-      amount >= 11000
-        ? "Lifetime Member"
-        : "1 Year Member"
-    );
+    payment.membershipType || (amount >= 11000 ? "Lifetime Member" : "1 Year Member");
 
-  const pdfBuffer =
-    await generateMembershipCertificate({
-      memberName,
+  const pdfBuffer = await generateMembershipCertificate({
+    memberName,
 
-      // Legacy compatibility
-      donorName:
-        memberName,
+    // Legacy compatibility
+    donorName: memberName,
 
-      phoneNumber:
-        payment.phoneNumber,
+    phoneNumber: payment.phoneNumber,
 
-      email:
-        payment.email,
+    email: payment.email,
 
-      amount,
+    amount,
 
-      membershipType,
+    membershipType,
 
-      paymentMode:
-        payment.paymentMode,
+    paymentMode: payment.paymentMode,
 
-      message:
-        payment.message || "",
+    message: payment.message || "",
 
-      txnid:
-        payment.txnid ||
-        payment.transactionId,
+    txnid: payment.txnid || payment.transactionId,
 
-      mihpayid:
-        payment.mihpayid ||
-        payment.payuPaymentId ||
-        "",
+    mihpayid: payment.mihpayid || payment.payuPaymentId || "",
 
-      paymentDate:
-        payment.paymentDate ||
-        new Date(),
-    });
+    paymentDate: payment.paymentDate || new Date(),
+  });
 
-  if (
-    !Buffer.isBuffer(pdfBuffer) ||
-    pdfBuffer.length === 0
-  ) {
-    throw new Error(
-      "Generated membership certificate PDF is invalid."
-    );
+  if (!Buffer.isBuffer(pdfBuffer) || pdfBuffer.length === 0) {
+    throw new Error("Generated membership certificate PDF is invalid.");
   }
 
   receipt = {
     pdfBuffer,
 
-    fileName:
-      `membership-certificate-${transactionId}.pdf`,
+    fileName: `membership-certificate-${transactionId}.pdf`,
 
     createdAt: Date.now(),
   };
 
-  store.setReceipt(
-    transactionId,
-    receipt
-  );
+  store.setReceipt(transactionId, receipt);
 
   return receipt;
 }
@@ -830,20 +614,10 @@ async function getReceipt(transactionId) {
 // MEMBERSHIP EMAIL
 // ============================================================
 
-async function sendMembershipEmail(
-  membership,
-  payuData,
-  pdfBuffer
-) {
-  const memberName =
-    String(
-      membership.memberName ||
-      membership.donorName ||
-      ""
-    ).trim();
+async function sendMembershipEmail(membership, payuData, pdfBuffer) {
+  const memberName = String(membership.memberName || membership.donorName || "").trim();
 
-  const fileName =
-    `membership-certificate-${payuData.txnid}.pdf`;
+  const fileName = `membership-certificate-${payuData.txnid}.pdf`;
 
   const attachments = [
     {
@@ -866,47 +640,28 @@ async function sendMembershipEmail(
 
     replyTo: membership.email,
 
-    subject:
-      "Membership Confirmation - JBC Seva Trust",
+    subject: "Membership Confirmation - JBC Seva Trust",
 
     text:
       `Dear ${memberName},\n\n` +
-
       `Thank you for becoming a member of JBC Seva Trust.\n\n` +
-
       `Your membership has been successfully processed.\n\n` +
-
       `Member Name: ${memberName}\n` +
-
-      `Membership Amount: ₹${Number(
-        membership.amount
-      ).toFixed(2)}\n` +
-
-      `Membership Type: ${
-        membership.membershipType
-      }\n` +
-
-      `Transaction ID: ${
-        payuData.txnid
-      }\n` +
-
-      `Payment ID: ${
-        payuData.mihpayid || "N/A"
-      }\n\n` +
-
+      `Membership Amount: ₹${Number(membership.amount).toFixed(2)}\n` +
+      `Membership Type: ${membership.membershipType}\n` +
+      `Transaction ID: ${payuData.txnid}\n` +
+      `Payment ID: ${payuData.mihpayid || "N/A"}\n\n` +
       `Your official membership certificate is attached to this email as a PDF.\n\n` +
-
       `Regards,\n` +
       `JBC Seva Trust`,
 
-    html:
-      createMembershipEmailHtml(
-        {
-          ...membership,
-          memberName,
-        },
-        payuData
-      ),
+    html: createMembershipEmailHtml(
+      {
+        ...membership,
+        memberName,
+      },
+      payuData,
+    ),
 
     attachments,
   });
@@ -916,16 +671,8 @@ async function sendMembershipEmail(
 // MEMBERSHIP EMAIL HTML
 // ============================================================
 
-function createMembershipEmailHtml(
-  membership,
-  payuData
-) {
-  const memberName =
-    String(
-      membership.memberName ||
-      membership.donorName ||
-      ""
-    ).trim();
+function createMembershipEmailHtml(membership, payuData) {
+  const memberName = String(membership.memberName || membership.donorName || "").trim();
 
   return `
 <!DOCTYPE html>
@@ -1108,9 +855,7 @@ function createMembershipEmailHtml(
     border-bottom:1px solid #eeeeee;
   "
 >
-  ₹${Number(
-    membership.amount
-  ).toFixed(2)}
+  ₹${Number(membership.amount).toFixed(2)}
 </td>
 </tr>
 
@@ -1132,9 +877,7 @@ function createMembershipEmailHtml(
     border-bottom:1px solid #eeeeee;
   "
 >
-  ${escapeHtml(
-    membership.membershipType
-  )}
+  ${escapeHtml(membership.membershipType)}
 </td>
 </tr>
 
@@ -1157,9 +900,7 @@ function createMembershipEmailHtml(
     word-break:break-all;
   "
 >
-  ${escapeHtml(
-    payuData.txnid
-  )}
+  ${escapeHtml(payuData.txnid)}
 </td>
 </tr>
 
@@ -1182,9 +923,7 @@ function createMembershipEmailHtml(
     word-break:break-all;
   "
 >
-  ${escapeHtml(
-    payuData.mihpayid || "N/A"
-  )}
+  ${escapeHtml(payuData.mihpayid || "N/A")}
 </td>
 </tr>
 
@@ -1196,9 +935,7 @@ function createMembershipEmailHtml(
 </td>
 
 <td align="right">
-  ${escapeHtml(
-    membership.paymentMode
-  )}
+  ${escapeHtml(membership.paymentMode)}
 </td>
 </tr>
 

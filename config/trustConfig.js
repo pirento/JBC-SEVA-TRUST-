@@ -12,7 +12,12 @@ const programmes = [
   {
     slug: "green-earth",
     donation: {
-      purposes: ["Tree plantation", "Pond clean-up and rainwater harvesting", "Plastic clean-up drives", "Wherever Green Earth needs it"],
+      purposes: [
+        "Tree plantation",
+        "Pond clean-up and rainwater harvesting",
+        "Plastic clean-up drives",
+        "Wherever Green Earth needs it",
+      ],
       amounts: [501, 1100, 2100, 5100],
     },
     icon: "tree",
@@ -36,7 +41,13 @@ const programmes = [
   {
     slug: "anand-dham",
     donation: {
-      purposes: ["Meals for elders (annadaan)", "Medicines and health check-ups", "Blankets and clothing", "Eye camp", "Wherever Anand Dham needs it"],
+      purposes: [
+        "Meals for elders (annadaan)",
+        "Medicines and health check-ups",
+        "Blankets and clothing",
+        "Eye camp",
+        "Wherever Anand Dham needs it",
+      ],
       amounts: [501, 1100, 2100, 5100],
       sevaDate: true,
     },
@@ -60,7 +71,12 @@ const programmes = [
   {
     slug: "kanyadaan",
     donation: {
-      purposes: ["Household starter kit", "Sewing machine and tailoring training", "Mass marriage ceremony", "Wherever Kanyadaan needs it"],
+      purposes: [
+        "Household starter kit",
+        "Sewing machine and tailoring training",
+        "Mass marriage ceremony",
+        "Wherever Kanyadaan needs it",
+      ],
       amounts: [1100, 2100, 5100, 11000],
     },
     icon: "rings",
@@ -83,7 +99,13 @@ const programmes = [
   {
     slug: "vidya-poshan",
     donation: {
-      purposes: ["School kit (bag, books, uniform)", "Evening tutoring", "Meals for children", "Scholarships", "Wherever Vidya and Poshan needs it"],
+      purposes: [
+        "School kit (bag, books, uniform)",
+        "Evening tutoring",
+        "Meals for children",
+        "Scholarships",
+        "Wherever Vidya and Poshan needs it",
+      ],
       amounts: [501, 1100, 2100, 5100],
     },
     icon: "book",
@@ -105,7 +127,12 @@ const programmes = [
   {
     slug: "temple",
     donation: {
-      purposes: ["Temple construction fund", "Daily aarti and bhog", "Prasad distribution", "General temple seva"],
+      purposes: [
+        "Temple construction fund",
+        "Daily aarti and bhog",
+        "Prasad distribution",
+        "General temple seva",
+      ],
       amounts: [251, 501, 1100, 2100],
       sevaDate: true,
       gotra: true,
@@ -152,8 +179,10 @@ const eightyG = {
 };
 
 const taxNotes = {
-  default: "80G tax-exemption receipts will be issued only after the Trust receives 80G approval.",
-  religious: "Kept in the separate Temple Fund. Temple donations are generally not eligible for 80G deduction.",
+  default:
+    "80G tax-exemption receipts will be issued only after the Trust receives 80G approval.",
+  religious:
+    "Kept in the separate Temple Fund. Temple donations are generally not eligible for 80G deduction.",
 };
 
 // The tax line for a receipt of the given cause title

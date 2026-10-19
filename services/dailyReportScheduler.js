@@ -1,24 +1,14 @@
 const cron = require("node-cron");
 
-const {
-  getDailyReport,
-} = require("./adminReportService");
+const { getDailyReport } = require("./adminReportService");
 
-const {
-  generateDailyReportPdf,
-} = require("./adminReportPdfService");
+const { generateDailyReportPdf } = require("./adminReportPdfService");
 
-const {
-  sendEmail,
-} = require("./emailService");
+const { sendEmail } = require("./emailService");
 
-const {
-  appendRecord,
-  readRecords,
-} = require("../models/fileStore");
+const { appendRecord, readRecords } = require("../models/fileStore");
 
 const { trustEmail: REPORT_EMAIL } = require("../config/emailConfig");
-
 
 // ============================================================
 // GET TODAY'S DATE IN INDIA
@@ -33,16 +23,13 @@ function getIndiaDate() {
   }).format(new Date());
 }
 
-
 // ============================================================
 // CHECK WHETHER REPORT EMAIL WAS ALREADY SENT
 // ============================================================
 
 async function isReportAlreadySent(reportDate) {
   try {
-    const records = await readRecords(
-      "daily-report-email.txt"
-    );
+    const records = await readRecords("daily-report-email.txt");
 
     if (!Array.isArray(records)) {
       return false;
@@ -57,15 +44,11 @@ async function isReportAlreadySent(reportDate) {
       );
     });
   } catch (error) {
-    console.error(
-      "❌ Unable to check daily report email history:",
-      error.message
-    );
+    console.error("❌ Unable to check daily report email history:", error.message);
 
     return false;
   }
 }
-
 
 // ============================================================
 // SEND DAILY REPORT
@@ -80,77 +63,44 @@ async function sendDailyReport() {
   console.log("⏰ Time:", new Date().toLocaleString("en-IN"));
   console.log("=================================");
 
-
   // ----------------------------------------------------------
   // PREVENT DUPLICATE EMAIL
   // ----------------------------------------------------------
 
-  const alreadySent =
-    await isReportAlreadySent(reportDate);
+  const alreadySent = await isReportAlreadySent(reportDate);
 
   if (alreadySent) {
-    console.log(
-      "⚠️ Daily report already sent for:",
-      reportDate
-    );
+    console.log("⚠️ Daily report already sent for:", reportDate);
 
     return;
   }
 
-
   try {
-
     // --------------------------------------------------------
     // GET COMPLETE DAILY REPORT
     // --------------------------------------------------------
 
-    const report =
-      await getDailyReport(reportDate);
+    const report = await getDailyReport(reportDate);
 
+    console.log("👥 Memberships:", report.summary.membershipCount);
 
-    console.log(
-      "👥 Memberships:",
-      report.summary.membershipCount
-    );
+    console.log("💰 Membership Collection:", report.summary.membershipCollection);
 
-    console.log(
-      "💰 Membership Collection:",
-      report.summary.membershipCollection
-    );
+    console.log("🎁 Donations:", report.summary.donationCount);
 
-    console.log(
-      "🎁 Donations:",
-      report.summary.donationCount
-    );
+    console.log("💰 Donation Collection:", report.summary.donationCollection);
 
-    console.log(
-      "💰 Donation Collection:",
-      report.summary.donationCollection
-    );
-
-    console.log(
-      "🏥 Medical Requests:",
-      report.summary.medicalCount
-    );
-
+    console.log("🏥 Medical Requests:", report.summary.medicalCount);
 
     // --------------------------------------------------------
     // GENERATE DETAILED PDF
     // --------------------------------------------------------
 
-    const pdfBuffer =
-      await generateDailyReportPdf(report);
+    const pdfBuffer = await generateDailyReportPdf(report);
 
+    console.log("📄 Daily report PDF generated");
 
-    console.log(
-      "📄 Daily report PDF generated"
-    );
-
-    console.log(
-      "📦 PDF Size:",
-      `${(pdfBuffer.length / 1024).toFixed(2)} KB`
-    );
-
+    console.log("📦 PDF Size:", `${(pdfBuffer.length / 1024).toFixed(2)} KB`);
 
     // --------------------------------------------------------
     // EMAIL
@@ -159,11 +109,9 @@ async function sendDailyReport() {
     await sendEmail({
       to: REPORT_EMAIL,
 
-      subject:
-        `JBC Seva Trust - Daily Report - ${reportDate}`,
+      subject: `JBC Seva Trust - Daily Report - ${reportDate}`,
 
-      text:
-        `Dear Admin,
+      text: `Dear Admin,
 
 Please find attached the daily administrative report for ${reportDate}.
 
@@ -203,9 +151,7 @@ JBC Seva Trust`,
 
         <p>
           <strong>Membership Collection:</strong>
-          Rs. ${Number(
-            report.summary.membershipCollection || 0
-          ).toLocaleString("en-IN")}
+          Rs. ${Number(report.summary.membershipCollection || 0).toLocaleString("en-IN")}
         </p>
 
         <p>
@@ -215,9 +161,7 @@ JBC Seva Trust`,
 
         <p>
           <strong>Donation Collection:</strong>
-          Rs. ${Number(
-            report.summary.donationCollection || 0
-          ).toLocaleString("en-IN")}
+          Rs. ${Number(report.summary.donationCollection || 0).toLocaleString("en-IN")}
         </p>
 
         <p>
@@ -227,9 +171,7 @@ JBC Seva Trust`,
 
         <p>
           <strong>Total Collection:</strong>
-          Rs. ${Number(
-            report.summary.totalCollection || 0
-          ).toLocaleString("en-IN")}
+          Rs. ${Number(report.summary.totalCollection || 0).toLocaleString("en-IN")}
         </p>
 
         <hr>
@@ -250,80 +192,57 @@ JBC Seva Trust`,
 
       attachments: [
         {
-          filename:
-            `daily-report-${reportDate}.pdf`,
+          filename: `daily-report-${reportDate}.pdf`,
 
           content: pdfBuffer,
 
-          contentType:
-            "application/pdf",
+          contentType: "application/pdf",
         },
       ],
     });
-
 
     // --------------------------------------------------------
     // SAVE EMAIL SENT LOG
     // --------------------------------------------------------
 
-    await appendRecord(
-      "daily-report-email.txt",
-      {
-        type: "DAILY_REPORT_EMAIL",
+    await appendRecord("daily-report-email.txt", {
+      type: "DAILY_REPORT_EMAIL",
 
-        reportDate,
+      reportDate,
 
-        status: "SENT",
+      status: "SENT",
 
-        recipient:
-          REPORT_EMAIL,
+      recipient: REPORT_EMAIL,
 
-        sentAt:
-          new Date().toISOString(),
+      sentAt: new Date().toISOString(),
 
-        membershipCount:
-          report.summary.membershipCount,
+      membershipCount: report.summary.membershipCount,
 
-        donationCount:
-          report.summary.donationCount,
+      donationCount: report.summary.donationCount,
 
-        medicalCount:
-          report.summary.medicalCount,
+      medicalCount: report.summary.medicalCount,
 
-        totalCollection:
-          report.summary.totalCollection,
-      }
-    );
-
+      totalCollection: report.summary.totalCollection,
+    });
 
     console.log("=================================");
     console.log("✅ DAILY REPORT EMAIL SENT");
     console.log("📧 To:", REPORT_EMAIL);
     console.log("📅 Date:", reportDate);
     console.log("=================================");
-
   } catch (error) {
-
     console.error("=================================");
-    console.error(
-      "❌ DAILY REPORT EMAIL FAILED"
-    );
-    console.error(
-      "Error:",
-      error.message
-    );
+    console.error("❌ DAILY REPORT EMAIL FAILED");
+    console.error("Error:", error.message);
     console.error("=================================");
-
   }
 }
-
 
 // ============================================================
 // START SCHEDULER
 // ============================================================
 
 function startDailyReportScheduler() {
-
   cron.schedule(
     "59 23 * * *",
 
@@ -333,26 +252,20 @@ function startDailyReportScheduler() {
 
     {
       timezone: "Asia/Kolkata",
-    }
+    },
   );
-
 
   console.log("=================================");
   console.log("⏰ Daily Report Scheduler Started");
   console.log("📅 Every day");
   console.log("🕚 11:59 PM");
   console.log("🇮🇳 Timezone: Asia/Kolkata");
-  console.log(
-    "📧 Recipient:",
-    REPORT_EMAIL
-  );
+  console.log("📧 Recipient:", REPORT_EMAIL);
   console.log("=================================");
 }
 
-
 // ============================================================
 // EXPORT
-
 
 // ============================================================
 

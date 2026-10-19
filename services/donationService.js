@@ -34,40 +34,28 @@ const {
   GENERAL_CAUSE,
 } = require("../config/trustConfig");
 
-const {
-  generateDonationCertificate,
-} = require("./donationCertificateService");
+const { generateDonationCertificate } = require("./donationCertificateService");
 
-const {
-  sendDonationCertificateEmail,
-} = require("./donationEmailService");
+const { sendDonationCertificateEmail } = require("./donationEmailService");
 
 // =========================================================
 // VALIDATE DONATION
 // =========================================================
 
 function validateDonation(input) {
-  const donorName =
-    String(input.donorName || "").trim();
+  const donorName = String(input.donorName || "").trim();
 
-  const phoneNumber =
-    String(input.phoneNumber || "").trim();
+  const phoneNumber = String(input.phoneNumber || "").trim();
 
-  const cleanEmail =
-    String(input.email || "").trim();
+  const cleanEmail = String(input.email || "").trim();
 
-  const amount =
-    Number(input.amount);
+  const amount = Number(input.amount);
 
-  const paymentMode =
-    String(input.paymentMode || "").trim();
+  const paymentMode = String(input.paymentMode || "").trim();
 
-  const message =
-    String(input.message || "").trim();
+  const message = String(input.message || "").trim();
 
-  const page =
-    donationPages.find((p) => p.title === input.cause) ||
-    donationPages[0];
+  const page = donationPages.find((p) => p.title === input.cause) || donationPages[0];
 
   const cause = page.title;
 
@@ -76,9 +64,7 @@ function validateDonation(input) {
   }
 
   if (donorName.length > 100) {
-    throw new Error(
-      "Donor name cannot exceed 100 characters."
-    );
+    throw new Error("Donor name cannot exceed 100 characters.");
   }
 
   if (!personName(donorName)) {
@@ -90,9 +76,7 @@ function validateDonation(input) {
   }
 
   if (!phone(phoneNumber)) {
-    throw new Error(
-      "Phone number must be 10 digits."
-    );
+    throw new Error("Phone number must be 10 digits.");
   }
 
   if (!required(cleanEmail)) {
@@ -100,46 +84,32 @@ function validateDonation(input) {
   }
 
   if (!email(cleanEmail)) {
-    throw new Error(
-      "Please enter a valid email address."
-    );
+    throw new Error("Please enter a valid email address.");
   }
 
   if (!positiveAmount(amount)) {
-    throw new Error(
-      "Donation amount must be greater than 0."
-    );
+    throw new Error("Donation amount must be greater than 0.");
   }
 
   if (amount < 100) {
-    throw new Error(
-      "Minimum donation amount is ₹100."
-    );
+    throw new Error("Minimum donation amount is ₹100.");
   }
 
   // Catches typing mistakes (an extra zero); large gifts go through the trust directly
   if (amount > 1000000) {
-    throw new Error(
-      "For amounts above ₹10,00,000 please contact the Trust directly."
-    );
+    throw new Error("For amounts above ₹10,00,000 please contact the Trust directly.");
   }
 
   if (!required(paymentMode)) {
-    throw new Error(
-      "Payment mode is required."
-    );
+    throw new Error("Payment mode is required.");
   }
 
   if (paymentMode === "Cash") {
-    throw new Error(
-      "Cash payment is not available through online PayU payment."
-    );
+    throw new Error("Cash payment is not available through online PayU payment.");
   }
 
   if (!accepted(input.consent)) {
-    throw new Error(
-      "Please accept the Terms, Privacy Policy and Refund Policy."
-    );
+    throw new Error("Please accept the Terms, Privacy Policy and Refund Policy.");
   }
 
   return {
@@ -166,7 +136,7 @@ function validateDonationDetails(page, input) {
 
   if (!options.purposes.includes(purpose)) {
     throw new Error(
-      `Please choose what your donation for ${page.title} should be used for.`
+      `Please choose what your donation for ${page.title} should be used for.`,
     );
   }
 
@@ -239,53 +209,38 @@ function validateDonationDetails(page, input) {
 // =========================================================
 
 async function initiateDonation(input) {
-  const donation =
-    validateDonation(input);
+  const donation = validateDonation(input);
 
-  const txnid =
-    generateTxnId();
+  const txnid = generateTxnId();
 
-  const paymentData =
-    createPaymentData({
-      txnid,
+  const paymentData = createPaymentData({
+    txnid,
 
-      amount:
-        donation.amount.toFixed(2),
+    amount: donation.amount.toFixed(2),
 
-      firstname:
-        donation.donorName,
+    firstname: donation.donorName,
 
-      email:
-        donation.email,
+    email: donation.email,
 
-      phone:
-        donation.phoneNumber,
+    phone: donation.phoneNumber,
 
-      productinfo:
-        "Donation",
+    productinfo: "Donation",
 
-      udf1:
-        "DONATION",
+    udf1: "DONATION",
 
-      udf2:
-        donation.paymentMode,
+    udf2: donation.paymentMode,
 
-      udf3:
-        donation.message,
+    udf3: donation.message,
 
-      udf4:
-        donation.cause,
+    udf4: donation.cause,
 
-      udf5:
-        donation.purpose,
+    udf5: donation.purpose,
 
-      // Donation gets separate PayU callbacks.
-      surl:
-        PAYU_DONATION_SUCCESS_URL,
+    // Donation gets separate PayU callbacks.
+    surl: PAYU_DONATION_SUCCESS_URL,
 
-      furl:
-        PAYU_DONATION_FAILURE_URL,
-    });
+    furl: PAYU_DONATION_FAILURE_URL,
+  });
 
   await store.setPending(txnid, {
     type: "DONATION",
@@ -294,50 +249,30 @@ async function initiateDonation(input) {
 
     txnid,
 
-    createdAt:
-      Date.now(),
+    createdAt: Date.now(),
   });
 
   console.log("");
-  console.log(
-    "================================="
-  );
+  console.log("=================================");
 
-  console.log(
-    "💝 PAYU DONATION PAYMENT INITIATED"
-  );
+  console.log("💝 PAYU DONATION PAYMENT INITIATED");
 
-  console.log(
-    "Transaction ID:",
-    txnid
-  );
+  console.log("Transaction ID:", txnid);
 
-  console.log(
-    "Amount: ₹",
-    donation.amount
-  );
+  console.log("Amount: ₹", donation.amount);
 
-  console.log(
-    "Success URL:",
-    PAYU_DONATION_SUCCESS_URL
-  );
+  console.log("Success URL:", PAYU_DONATION_SUCCESS_URL);
 
-  console.log(
-    "Failure URL:",
-    PAYU_DONATION_FAILURE_URL
-  );
+  console.log("Failure URL:", PAYU_DONATION_FAILURE_URL);
 
-  console.log(
-    "================================="
-  );
+  console.log("=================================");
 
   console.log("");
 
   return {
     paymentData,
 
-    paymentUrl:
-      PAYU_PAYMENT_URL,
+    paymentUrl: PAYU_PAYMENT_URL,
 
     donation,
   };
@@ -354,9 +289,7 @@ function processPaymentSuccess(data) {
 
 async function handlePaymentSuccess(data) {
   if (!data || !data.txnid) {
-    throw new Error(
-      "Transaction ID missing from PayU response."
-    );
+    throw new Error("Transaction ID missing from PayU response.");
   }
 
   // -------------------------------------------------------
@@ -365,8 +298,7 @@ async function handlePaymentSuccess(data) {
 
   if (!verifyResponseHash(data)) {
     return {
-      error:
-        "Payment verification failed. Please contact the Trust.",
+      error: "Payment verification failed. Please contact the Trust.",
 
       status: 400,
     };
@@ -376,9 +308,7 @@ async function handlePaymentSuccess(data) {
   // 2. VERIFY PAYMENT STATUS
   // -------------------------------------------------------
 
-  if (
-    String(data.status || "").toLowerCase() !== "success"
-  ) {
+  if (String(data.status || "").toLowerCase() !== "success") {
     return {
       failure: true,
     };
@@ -388,8 +318,7 @@ async function handlePaymentSuccess(data) {
   // 3. GET PENDING DONATION OR RECOVER IT
   // -------------------------------------------------------
 
-  let pending =
-    await store.getPending(data.txnid);
+  let pending = await store.getPending(data.txnid);
 
   /*
    * If pending data is missing, first check whether
@@ -400,10 +329,7 @@ async function handlePaymentSuccess(data) {
    */
 
   if (!pending) {
-    const existingDonation =
-      await donationModel.findByTransactionId(
-        data.txnid
-      );
+    const existingDonation = await donationModel.findByTransactionId(data.txnid);
 
     if (existingDonation) {
       pending = {
@@ -413,29 +339,17 @@ async function handlePaymentSuccess(data) {
 
         txnid: String(data.txnid),
 
-        donorName: String(
-          existingDonation.donorName || ""
-        ).trim(),
+        donorName: String(existingDonation.donorName || "").trim(),
 
-        phoneNumber: String(
-          existingDonation.phoneNumber || ""
-        ).trim(),
+        phoneNumber: String(existingDonation.phoneNumber || "").trim(),
 
-        email: String(
-          existingDonation.email || ""
-        ).trim(),
+        email: String(existingDonation.email || "").trim(),
 
-        amount: Number(
-          existingDonation.amount
-        ),
+        amount: Number(existingDonation.amount),
 
-        paymentMode: String(
-          existingDonation.paymentMode || ""
-        ).trim(),
+        paymentMode: String(existingDonation.paymentMode || "").trim(),
 
-        message: String(
-          existingDonation.message || ""
-        ).trim(),
+        message: String(existingDonation.message || "").trim(),
       };
     } else {
       /*
@@ -446,39 +360,28 @@ async function handlePaymentSuccess(data) {
        */
 
       const isDonationCallback =
-        String(data.udf1 || "").toUpperCase() ===
-          "DONATION" &&
-        String(data.productinfo || "").toLowerCase() ===
-          "donation";
+        String(data.udf1 || "").toUpperCase() === "DONATION" &&
+        String(data.productinfo || "").toLowerCase() === "donation";
 
       if (!isDonationCallback) {
         return {
-          error:
-            "Donation transaction could not be verified.",
+          error: "Donation transaction could not be verified.",
 
           status: 400,
         };
       }
 
-      const callbackAmount =
-        Number(data.amount);
+      const callbackAmount = Number(data.amount);
 
-      const callbackDonorName =
-        String(data.firstname || "").trim();
+      const callbackDonorName = String(data.firstname || "").trim();
 
-      const callbackEmail =
-        String(data.email || "").trim();
+      const callbackEmail = String(data.email || "").trim();
 
-      const callbackPhone =
-        String(
-          data.phone || data.phoneNumber || ""
-        ).trim();
+      const callbackPhone = String(data.phone || data.phoneNumber || "").trim();
 
-      const callbackPaymentMode =
-        String(data.udf2 || "").trim();
+      const callbackPaymentMode = String(data.udf2 || "").trim();
 
-      const callbackMessage =
-        String(data.udf3 || "").trim();
+      const callbackMessage = String(data.udf3 || "").trim();
 
       if (
         !Number.isFinite(callbackAmount) ||
@@ -499,40 +402,30 @@ async function handlePaymentSuccess(data) {
       pending = {
         type: "DONATION",
 
-        donorName:
-          callbackDonorName,
+        donorName: callbackDonorName,
 
-        phoneNumber:
-          callbackPhone,
+        phoneNumber: callbackPhone,
 
-        email:
-          callbackEmail,
+        email: callbackEmail,
 
-        amount:
-          callbackAmount,
+        amount: callbackAmount,
 
-        paymentMode:
-          callbackPaymentMode,
+        paymentMode: callbackPaymentMode,
 
-        message:
-          callbackMessage,
+        message: callbackMessage,
 
-        cause:
-          String(data.udf4 || "").trim() || GENERAL_CAUSE,
+        cause: String(data.udf4 || "").trim() || GENERAL_CAUSE,
 
-        purpose:
-          String(data.udf5 || "").trim(),
+        purpose: String(data.udf5 || "").trim(),
 
-        txnid:
-          String(data.txnid),
+        txnid: String(data.txnid),
 
-        createdAt:
-          Date.now(),
+        createdAt: Date.now(),
       };
 
       console.warn(
         "⚠️ Pending donation recovered from verified PayU callback:",
-        String(data.txnid)
+        String(data.txnid),
       );
     }
   }
@@ -541,15 +434,9 @@ async function handlePaymentSuccess(data) {
   // 4. VERIFY PAYMENT AMOUNT
   // -------------------------------------------------------
 
-  if (
-    !verifyPaymentAmount(
-      data.amount,
-      pending.amount
-    )
-  ) {
+  if (!verifyPaymentAmount(data.amount, pending.amount)) {
     return {
-      error:
-        "Payment amount verification failed.",
+      error: "Payment amount verification failed.",
 
       status: 400,
     };
@@ -559,15 +446,9 @@ async function handlePaymentSuccess(data) {
   // 5. VERIFY TRANSACTION ID
   // -------------------------------------------------------
 
-  if (
-    String(data.txnid) !==
-    String(
-      pending.txnid || pending.transactionId
-    )
-  ) {
+  if (String(data.txnid) !== String(pending.txnid || pending.transactionId)) {
     return {
-      error:
-        "Transaction verification failed.",
+      error: "Transaction verification failed.",
 
       status: 400,
     };
@@ -577,12 +458,7 @@ async function handlePaymentSuccess(data) {
   // 6. VERIFY DONOR DETAILS
   // -------------------------------------------------------
 
-  const donorName =
-    String(
-      pending.donorName ||
-      data.firstname ||
-      ""
-    ).trim();
+  const donorName = String(pending.donorName || data.firstname || "").trim();
 
   if (!donorName) {
     return {
@@ -594,44 +470,32 @@ async function handlePaymentSuccess(data) {
     };
   }
 
-  pending.donorName =
-    donorName;
+  pending.donorName = donorName;
 
   // =======================================================
   // SAVE DONATION
   // =======================================================
 
-  let savedDonation =
-    await donationModel.findByTransactionId(
-      data.txnid
-    );
+  let savedDonation = await donationModel.findByTransactionId(data.txnid);
 
   const isNewDonation = !savedDonation;
 
   if (!savedDonation) {
-    savedDonation =
-      await donationModel.create({
-        ...pending,
+    savedDonation = await donationModel.create({
+      ...pending,
 
-        transactionId:
-          data.txnid,
+      transactionId: data.txnid,
 
-        payuPaymentId:
-          data.mihpayid || "",
+      payuPaymentId: data.mihpayid || "",
 
-        amount:
-          Number(data.amount),
+      amount: Number(data.amount),
 
-        paymentStatus:
-          "SUCCESS",
+      paymentStatus: "SUCCESS",
 
-        paymentDate:
-          new Date().toISOString(),
-      });
+      paymentDate: new Date().toISOString(),
+    });
   } else {
-    console.log(
-      "ℹ️ Donation already exists. Duplicate save skipped."
-    );
+    console.log("ℹ️ Donation already exists. Duplicate save skipped.");
   }
 
   // =======================================================
@@ -643,80 +507,47 @@ async function handlePaymentSuccess(data) {
 
     donorName,
 
-    transactionId:
-      data.txnid,
+    transactionId: data.txnid,
 
-    payuPaymentId:
-      data.mihpayid || "",
+    payuPaymentId: data.mihpayid || "",
 
-    amount:
-      Number(data.amount),
+    amount: Number(data.amount),
 
-    paymentStatus:
-      "SUCCESS",
+    paymentStatus: "SUCCESS",
   };
 
   // =======================================================
   // GENERATE DONATION CERTIFICATE
   // =======================================================
 
-  let certificatePath =
-    null;
+  let certificatePath = null;
 
-  let certificateNumber =
-    null;
+  let certificateNumber = null;
 
   try {
-    const certificate =
-      await generateDonationCertificate(
-        donation
-      );
+    const certificate = await generateDonationCertificate(donation);
 
-    certificatePath =
-      certificate.path ||
-      certificate.filePath;
+    certificatePath = certificate.path || certificate.filePath;
 
-    certificateNumber =
-      certificate.certificateNumber ||
-      certificate.number ||
-      null;
+    certificateNumber = certificate.certificateNumber || certificate.number || null;
 
     console.log("");
 
-    console.log(
-      "================================="
-    );
+    console.log("=================================");
 
-    console.log(
-      "📜 DONATION CERTIFICATE GENERATED"
-    );
+    console.log("📜 DONATION CERTIFICATE GENERATED");
 
-    console.log(
-      "Transaction ID:",
-      data.txnid
-    );
+    console.log("Transaction ID:", data.txnid);
 
-    console.log(
-      "Certificate:",
-      certificatePath
-    );
+    console.log("Certificate:", certificatePath);
 
-    console.log(
-      "Certificate Number:",
-      certificateNumber
-    );
+    console.log("Certificate Number:", certificateNumber);
 
-    console.log(
-      "================================="
-    );
+    console.log("=================================");
 
     console.log("");
-
   } catch (error) {
-    console.error(
-      "❌ Donation certificate generation failed:",
-      error.message
-    );
+    console.error("❌ Donation certificate generation failed:", error.message);
 
     /*
      * Payment has already been verified and saved.
@@ -737,15 +568,10 @@ async function handlePaymentSuccess(data) {
    * the customer wait for the email server response.
    */
 
-  let emailSent =
-    false;
+  let emailSent = false;
 
   // Email only once, even if PayU calls back again.
-  if (
-    isNewDonation &&
-    certificatePath &&
-    donation.email
-  ) {
+  if (isNewDonation && certificatePath && donation.email) {
     emailSent = true;
 
     sendDonationCertificateEmail({
@@ -753,15 +579,10 @@ async function handlePaymentSuccess(data) {
       certificatePath,
     })
       .then(() => {
-        console.log(
-          "✅ Donation certificate email sent."
-        );
+        console.log("✅ Donation certificate email sent.");
       })
       .catch((error) => {
-        console.error(
-          "❌ Donation certificate email failed:",
-          error.message
-        );
+        console.error("❌ Donation certificate email failed:", error.message);
       });
   }
 
@@ -769,9 +590,7 @@ async function handlePaymentSuccess(data) {
   // DELETE PENDING DONATION
   // =======================================================
 
-  await store.deletePending(
-    data.txnid
-  );
+  await store.deletePending(data.txnid);
 
   // =======================================================
   // FINAL RESULT
@@ -780,14 +599,11 @@ async function handlePaymentSuccess(data) {
   return {
     donation,
 
-    transactionId:
-      data.txnid,
+    transactionId: data.txnid,
 
-    paymentId:
-      data.mihpayid || "",
+    paymentId: data.mihpayid || "",
 
-    paymentMode:
-      pending.paymentMode,
+    paymentMode: pending.paymentMode,
 
     emailSent,
 
@@ -804,25 +620,19 @@ async function handlePaymentSuccess(data) {
 // =========================================================
 
 async function processPaymentFailure(data) {
-  const pending =
-    data && data.txnid
-      ? await store.getPending(data.txnid)
-      : null;
+  const pending = data && data.txnid ? await store.getPending(data.txnid) : null;
 
   // Keep the persistent attempt record for safe retries and auditability.
 
   return {
-    transactionId:
-      data?.txnid ||
-      "Not Available",
+    transactionId: data?.txnid || "Not Available",
 
     errorMessage:
       data?.error_Message ||
       data?.error ||
       "Your donation payment could not be completed.",
 
-    donation:
-      pending || null,
+    donation: pending || null,
   };
 }
 

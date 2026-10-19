@@ -68,7 +68,9 @@ async function paymentSuccess(req, res) {
 async function paymentFailure(req, res) {
   try {
     const result = await membershipService.processPaymentFailure(req.body || {});
-    const query = TXN_ID.test(String(result.transactionId)) ? `?txn=${result.transactionId}` : "";
+    const query = TXN_ID.test(String(result.transactionId))
+      ? `?txn=${result.transactionId}`
+      : "";
 
     return res.redirect(303, `/donation/payment-failed${query}`);
   } catch (error) {
@@ -127,9 +129,7 @@ function showPaymentFailed(req, res) {
 
 async function downloadReceipt(req, res) {
   try {
-    let transactionId = String(
-      req.params.transactionId || ""
-    ).trim();
+    let transactionId = String(req.params.transactionId || "").trim();
 
     // --------------------------------------------------------
     // Decode URL safely
@@ -138,9 +138,7 @@ async function downloadReceipt(req, res) {
     try {
       transactionId = decodeURIComponent(transactionId);
     } catch {
-      return res
-        .status(400)
-        .send("Invalid certificate URL.");
+      return res.status(400).send("Invalid certificate URL.");
     }
 
     // --------------------------------------------------------
@@ -157,61 +155,34 @@ async function downloadReceipt(req, res) {
     // --------------------------------------------------------
 
     if (!/^TXN_[A-Za-z0-9_-]+$/.test(transactionId)) {
-      return res
-        .status(400)
-        .send("Invalid transaction ID.");
+      return res.status(400).send("Invalid transaction ID.");
     }
 
     // --------------------------------------------------------
     // Generate / retrieve certificate
     // --------------------------------------------------------
 
-    const receipt =
-      await membershipService.getReceipt(transactionId);
+    const receipt = await membershipService.getReceipt(transactionId);
 
     res.status(200);
 
-    res.setHeader(
-      "Content-Type",
-      "application/pdf"
-    );
+    res.setHeader("Content-Type", "application/pdf");
 
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${receipt.fileName}"`
-    );
+    res.setHeader("Content-Disposition", `attachment; filename="${receipt.fileName}"`);
 
-    res.setHeader(
-      "Content-Length",
-      receipt.pdfBuffer.length
-    );
+    res.setHeader("Content-Length", receipt.pdfBuffer.length);
 
-    res.setHeader(
-      "Cache-Control",
-      "no-store, no-cache, must-revalidate, private"
-    );
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
 
-    res.setHeader(
-      "Pragma",
-      "no-cache"
-    );
+    res.setHeader("Pragma", "no-cache");
 
-    res.setHeader(
-      "Expires",
-      "0"
-    );
+    res.setHeader("Expires", "0");
 
-    res.setHeader(
-      "X-Content-Type-Options",
-      "nosniff"
-    );
+    res.setHeader("X-Content-Type-Options", "nosniff");
 
     return res.end(receipt.pdfBuffer);
   } catch (error) {
-    console.error(
-      "❌ CERTIFICATE DOWNLOAD FAILED:",
-      error.message
-    );
+    console.error("❌ CERTIFICATE DOWNLOAD FAILED:", error.message);
 
     if (!res.headersSent) {
       return res
@@ -219,7 +190,7 @@ async function downloadReceipt(req, res) {
         .send(
           error.status === 404
             ? error.message
-            : "Unable to generate membership certificate."
+            : "Unable to generate membership certificate.",
         );
     }
   }

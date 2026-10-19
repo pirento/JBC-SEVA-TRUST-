@@ -1,9 +1,7 @@
 const PAYU_KEY = process.env.PAYU_KEY;
 const PAYU_SALT = process.env.PAYU_SALT;
 
-const PAYU_ENV = String(
-  process.env.PAYU_ENV || "test"
-).toLowerCase();
+const PAYU_ENV = String(process.env.PAYU_ENV || "test").toLowerCase();
 
 const PAYU_PAYMENT_URL =
   PAYU_ENV === "production"
@@ -14,23 +12,17 @@ const PAYU_PAYMENT_URL =
 // MEMBERSHIP CALLBACK URLS
 // ============================================================
 
-const PAYU_SUCCESS_URL =
-  process.env.PAYU_SUCCESS_URL;
+const PAYU_SUCCESS_URL = process.env.PAYU_SUCCESS_URL;
 
-const PAYU_FAILURE_URL =
-  process.env.PAYU_FAILURE_URL;
-
+const PAYU_FAILURE_URL = process.env.PAYU_FAILURE_URL;
 
 // ============================================================
 // DONATION CALLBACK URLS
 // ============================================================
 
-const PAYU_DONATION_SUCCESS_URL =
-  process.env.PAYU_DONATION_SUCCESS_URL;
+const PAYU_DONATION_SUCCESS_URL = process.env.PAYU_DONATION_SUCCESS_URL;
 
-const PAYU_DONATION_FAILURE_URL =
-  process.env.PAYU_DONATION_FAILURE_URL;
-
+const PAYU_DONATION_FAILURE_URL = process.env.PAYU_DONATION_FAILURE_URL;
 
 module.exports = {
   PAYU_KEY,

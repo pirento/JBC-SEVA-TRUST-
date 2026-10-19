@@ -92,10 +92,7 @@ async function login(input) {
   const password = String(input.password || "");
   const user = await userModel.findByEmail(input.email);
 
-  const valid = await bcrypt.compare(
-    password,
-    user ? user.passwordHash : DUMMY_HASH,
-  );
+  const valid = await bcrypt.compare(password, user ? user.passwordHash : DUMMY_HASH);
 
   if (!user || !valid) {
     throw invalid("Invalid email or password.");
@@ -221,13 +218,15 @@ async function findByResetToken(token) {
   const users = await userModel.listUsers();
 
   return (
-    users.find((u) => u.resetTokenHash === hash && Number(u.resetExpires) > Date.now()) || null
+    users.find((u) => u.resetTokenHash === hash && Number(u.resetExpires) > Date.now()) ||
+    null
   );
 }
 
 async function resetPassword(token, input) {
   const user = await findByResetToken(token);
-  if (!user) throw invalid("This reset link is invalid or has expired. Please ask for a new one.");
+  if (!user)
+    throw invalid("This reset link is invalid or has expired. Please ask for a new one.");
 
   const password = String(input.password || "");
   validatePassword(password, String(input.confirmPassword || ""));

@@ -43,7 +43,9 @@ function onDate(records, date) {
 }
 
 function search(rows, query) {
-  const q = String(query || "").trim().toLowerCase();
+  const q = String(query || "")
+    .trim()
+    .toLowerCase();
   if (!q) return rows;
   return rows.filter((row) => JSON.stringify(row).toLowerCase().includes(q));
 }
@@ -65,16 +67,23 @@ async function getDashboard({ date = "", view = "donations", q = "", page = 1 } 
   const day = /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : "";
   const tab = VIEWS.includes(view) ? view : "donations";
 
-  const [payments, donationRecords, medicalRecords, volunteers, messages, users, pledges] =
-    await Promise.all([
-      readRecords("payment.txt"),
-      readRecords("donations.txt"),
-      readRecords("user.txt"),
-      enquiryModel.listVolunteers(),
-      enquiryModel.listMessages(),
-      listUsers(),
-      listPledges(),
-    ]);
+  const [
+    payments,
+    donationRecords,
+    medicalRecords,
+    volunteers,
+    messages,
+    users,
+    pledges,
+  ] = await Promise.all([
+    readRecords("payment.txt"),
+    readRecords("donations.txt"),
+    readRecords("user.txt"),
+    enquiryModel.listVolunteers(),
+    enquiryModel.listMessages(),
+    listUsers(),
+    listPledges(),
+  ]);
 
   const memberships = newestFirst(onDate(payments.filter(isSuccess), day));
   const donations = newestFirst(onDate(donationRecords.filter(isSuccess), day));
@@ -110,7 +119,10 @@ async function getDashboard({ date = "", view = "donations", q = "", page = 1 } 
 
   // Search and page on the raw records; format only the rows shown
   const lists = {
-    donations: [donations, (r) => ({ ...normalizeDonation(r), gotra: r.gotra || "", pan: r.pan || "" })],
+    donations: [
+      donations,
+      (r) => ({ ...normalizeDonation(r), gotra: r.gotra || "", pan: r.pan || "" }),
+    ],
     memberships: [memberships, normalizeMembership],
     medical: [medical, normalizeMedical],
     volunteers: [newestFirst(dayVolunteers), (r) => r],

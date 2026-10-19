@@ -7,10 +7,16 @@ const donationService = require("../services/donationService");
 async function testEmail(req, res) {
   try {
     await runEmailTest();
-    res.send(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Email Test</title></head><body><h1>✅ Email Sent Successfully</h1><p>Test email has been sent to:</p><strong>${escapeHtml(user || "Not configured")}</strong><p>Please check your Gmail inbox.</p><br><a href="/">Go Back Home</a></body></html>`);
+    res.send(
+      `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Email Test</title></head><body><h1>✅ Email Sent Successfully</h1><p>Test email has been sent to:</p><strong>${escapeHtml(user || "Not configured")}</strong><p>Please check your Gmail inbox.</p><br><a href="/">Go Back Home</a></body></html>`,
+    );
   } catch (error) {
     console.error("❌ Test email failed:", error.message);
-    res.status(500).send(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Email Error</title></head><body><h1>❌ Email Failed</h1><p>${escapeHtml(error.message)}</p><br><a href="/">Go Back Home</a></body></html>`);
+    res
+      .status(500)
+      .send(
+        `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Email Error</title></head><body><h1>❌ Email Failed</h1><p>${escapeHtml(error.message)}</p><br><a href="/">Go Back Home</a></body></html>`,
+      );
   }
 }
 
@@ -21,8 +27,11 @@ async function payuWebhook(req, res) {
   try {
     const product = String(data.productinfo || "").toLowerCase();
     const service =
-      product === "donation" ? donationService :
-      product === "membership" ? membershipService : null;
+      product === "donation"
+        ? donationService
+        : product === "membership"
+          ? membershipService
+          : null;
 
     if (!service || String(data.status || "").toLowerCase() !== "success") {
       return res.status(200).send("ignored");

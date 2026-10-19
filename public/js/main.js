@@ -15,7 +15,10 @@ const say = (en, hi) => (HI ? hi : en);
   const setOpen = (open) => {
     nav.classList.toggle("open", open);
     toggle.setAttribute("aria-expanded", String(open));
-    toggle.setAttribute("aria-label", open ? say("Close menu", "मेन्यू बंद करें") : say("Open menu", "मेन्यू खोलें"));
+    toggle.setAttribute(
+      "aria-label",
+      open ? say("Close menu", "मेन्यू बंद करें") : say("Open menu", "मेन्यू खोलें"),
+    );
   };
 
   toggle.addEventListener("click", () => {
@@ -31,7 +34,6 @@ const say = (en, hi) => (HI ? hi : en);
     if (e.key === "Escape") setOpen(false);
   });
 })();
-
 
 // ========================================
 // QUICK AMOUNT BUTTONS
@@ -58,7 +60,6 @@ document.querySelectorAll(".amount-chips").forEach((group) => {
   input.addEventListener("input", mark);
 });
 
-
 // ========================================
 // SHOW / HIDE PASSWORD
 // ========================================
@@ -72,22 +73,27 @@ document.querySelectorAll("[data-toggle-password]").forEach((button) => {
     const hidden = input.type === "password";
     input.type = hidden ? "text" : "password";
     button.textContent = hidden ? say("Hide", "छिपाएँ") : say("Show", "दिखाएँ");
-    button.setAttribute("aria-label", hidden ? say("Hide password", "पासवर्ड छिपाएँ") : say("Show password", "पासवर्ड दिखाएँ"));
+    button.setAttribute(
+      "aria-label",
+      hidden
+        ? say("Hide password", "पासवर्ड छिपाएँ")
+        : say("Show password", "पासवर्ड दिखाएँ"),
+    );
   });
 });
-
 
 // ========================================
 // DIGITS-ONLY FIELDS (mobile, Aadhaar)
 // ========================================
 
-document.querySelectorAll('input[inputmode="numeric"]:not([type="number"])').forEach((input) => {
-  input.addEventListener("input", () => {
-    const digits = input.value.replace(/\D/g, "");
-    if (digits !== input.value) input.value = digits;
+document
+  .querySelectorAll('input[inputmode="numeric"]:not([type="number"])')
+  .forEach((input) => {
+    input.addEventListener("input", () => {
+      const digits = input.value.replace(/\D/g, "");
+      if (digits !== input.value) input.value = digits;
+    });
   });
-});
-
 
 // ========================================
 // PREVENT DOUBLE SUBMIT

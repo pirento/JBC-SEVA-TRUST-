@@ -23,7 +23,9 @@
   --bg: #ffffff;
   --cream: #faf6ee;
 
-  --font-body: "Noto Sans", "Noto Sans Devanagari", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-body:
+    "Noto Sans", "Noto Sans Devanagari", system-ui, -apple-system, "Segoe UI", Arial,
+    sans-serif;
   --font-head: "Noto Serif", "Noto Serif Devanagari", Georgia, "Times New Roman", serif;
 
   --radius: 8px;
@@ -329,7 +331,9 @@ a:hover {
   display: block;
   height: 2px;
   background: var(--navy);
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .nav-toggle[aria-expanded="true"] span:nth-child(1) {
@@ -362,7 +366,10 @@ a:hover {
   line-height: 1.3;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .btn:disabled {
@@ -610,7 +617,9 @@ a:hover {
   background: #fff;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .programme:hover {
@@ -1861,9 +1870,15 @@ fieldset.field {
     color: var(--navy);
   }
 
-  .plan-table td:nth-of-type(1)::before { content: "First year: "; }
-  .plan-table td:nth-of-type(2)::before { content: "Years 2–3: "; }
-  .plan-table td:nth-of-type(3)::before { content: "Measured by: "; }
+  .plan-table td:nth-of-type(1)::before {
+    content: "First year: ";
+  }
+  .plan-table td:nth-of-type(2)::before {
+    content: "Years 2–3: ";
+  }
+  .plan-table td:nth-of-type(3)::before {
+    content: "Measured by: ";
+  }
 
   .plan-list div {
     grid-template-columns: 1fr;
@@ -1946,7 +1961,9 @@ fieldset.field {
   border-radius: var(--radius);
   color: var(--text);
   text-decoration: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .cause-card:hover {

@@ -19,64 +19,45 @@ const bcrypt = require("bcrypt");
 // ========================================
 
 async function verifyAdminPassword(password) {
+  if (!password) {
+    return false;
+  }
 
-    if (!password) {
-        return false;
-    }
+  const storedHash = process.env.ADMIN_PASSWORD_HASH;
 
-    const storedHash =
-        process.env.ADMIN_PASSWORD_HASH;
+  if (!storedHash) {
+    throw new Error("ADMIN_PASSWORD_HASH is missing in .env");
+  }
 
-    if (!storedHash) {
-
-        throw new Error(
-            "ADMIN_PASSWORD_HASH is missing in .env"
-        );
-
-    }
-
-    return await bcrypt.compare(
-        String(password),
-        storedHash
-    );
+  return await bcrypt.compare(String(password), storedHash);
 }
-
 
 // ========================================
 // VERIFY ADMIN LOGIN
 // ========================================
 
-async function authenticateAdmin({
-    password
-}) {
+async function authenticateAdmin({ password }) {
+  const isValid = await verifyAdminPassword(password);
 
-    const isValid =
-        await verifyAdminPassword(password);
-
-    if (!isValid) {
-
-        return {
-            success: false,
-            message: "Invalid admin password"
-        };
-
-    }
-
+  if (!isValid) {
     return {
-        success: true,
-        message: "Admin authentication successful"
+      success: false,
+      message: "Invalid admin password",
     };
-}
+  }
 
+  return {
+    success: true,
+    message: "Admin authentication successful",
+  };
+}
 
 // ========================================
 // EXPORT
 // ========================================
 
 module.exports = {
+  verifyAdminPassword,
 
-    verifyAdminPassword,
-
-    authenticateAdmin
-
+  authenticateAdmin,
 };

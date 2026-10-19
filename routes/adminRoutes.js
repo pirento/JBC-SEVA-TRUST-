@@ -9,33 +9,17 @@ const loginLimiter = createRateLimiter();
 
 router.get("/login", adminController.showLogin);
 
-router.post(
-  "/login",
-  loginLimiter,
-  adminController.login
-);
+router.post("/login", loginLimiter, adminController.login);
 
-router.get(
-  "/dashboard",
-  adminAuth,
-  adminController.dashboard
-);
+router.get("/dashboard", adminAuth, adminController.dashboard);
 
 // ========================================
 // DAILY REPORT DOWNLOAD
 // ========================================
 
-router.get(
-  "/report/download",
-  adminAuth,
-  adminController.downloadDailyReport
-);
+router.get("/report/download", adminAuth, adminController.downloadDailyReport);
 
-router.get(
-  "/export/:type",
-  adminAuth,
-  adminController.exportCsv
-);
+router.get("/export/:type", adminAuth, adminController.exportCsv);
 
 // Updates (with photo) and events
 const content = require("../controllers/contentController");
@@ -47,10 +31,6 @@ router.post("/updates/:id/delete", adminAuth, content.deleteUpdate);
 router.post("/events", adminAuth, content.createEvent);
 router.post("/events/:id/delete", adminAuth, content.deleteEvent);
 
-router.post(
-  "/logout",
-  adminAuth,
-  adminController.logout
-);
+router.post("/logout", adminAuth, adminController.logout);
 
 module.exports = router;

@@ -8,7 +8,9 @@
     "dev": "nodemon app.js",
     "test": "node --test --test-force-exit",
     "hash-password": "node scripts/hashPassword.js",
-    "backup": "node scripts/backup.js"
+    "backup": "node scripts/backup.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

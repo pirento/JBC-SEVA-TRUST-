@@ -25,7 +25,10 @@ async function successfulDonations() {
 // Each export: file name and a function returning CSV text
 const exports_ = {
   donations: async () => {
-    const rows = (await successfulDonations()).map((r) => ({ ...normalizeDonation(r), raw: r }));
+    const rows = (await successfulDonations()).map((r) => ({
+      ...normalizeDonation(r),
+      raw: r,
+    }));
     return toCsv(rows, [
       ["Date", (r) => r.date],
       ["Time", (r) => r.time],
@@ -49,7 +52,9 @@ const exports_ = {
   },
 
   memberships: async () => {
-    const rows = (await readRecords("payment.txt")).filter(isSuccess).map(normalizeMembership);
+    const rows = (await readRecords("payment.txt"))
+      .filter(isSuccess)
+      .map(normalizeMembership);
     return toCsv(rows, [
       ["Date", (r) => r.date],
       ["Member", (r) => r.memberName],
@@ -72,7 +77,10 @@ const exports_ = {
       ["Reference", (r) => r.referenceRegistrationNumber],
       ["Patient", (r) => r.patientName],
       // Only the last 4 digits leave the system
-      ["Aadhaar (last 4)", (r) => (r.aadharNumber ? `XXXX-XXXX-${r.aadharNumber.slice(-4)}` : "")],
+      [
+        "Aadhaar (last 4)",
+        (r) => (r.aadharNumber ? `XXXX-XXXX-${r.aadharNumber.slice(-4)}` : ""),
+      ],
       ["Date of Birth", (r) => r.dateBirth],
       ["Phone", (r) => r.patientPhoneNumber],
       ["Email", (r) => r.patientEmail],
@@ -119,33 +127,49 @@ const exports_ = {
   // Donor list in the shape of Form 10BD: one row per donor PAN,
   // charitable funds only (temple gifts are not 80G donations)
   "form-10bd": async (query = {}) => {
-    const religious = new Set(donationPages.filter((p) => p.donation.religious).map((p) => p.title));
-    const fy = /^\d{4}-\d{2}$/.test(query.fy || "") ? query.fy : financialYear(new Date());
+    const religious = new Set(
+      donationPages.filter((p) => p.donation.religious).map((p) => p.title),
+    );
+    const fy = /^\d{4}-\d{2}$/.test(query.fy || "")
+      ? query.fy
+      : financialYear(new Date());
 
     const byPan = new Map();
     for (const d of await successfulDonations()) {
-      if (!d.pan || religious.has(d.cause) || financialYear(d.paymentDate) !== fy) continue;
-      const row = byPan.get(d.pan) || { pan: d.pan, name: d.donorName, address: d.address, amount: 0 };
+      if (!d.pan || religious.has(d.cause) || financialYear(d.paymentDate) !== fy)
+        continue;
+      const row = byPan.get(d.pan) || {
+        pan: d.pan,
+        name: d.donorName,
+        address: d.address,
+        amount: 0,
+      };
       row.amount += Number(d.amount || 0);
       row.address = row.address || d.address;
       byPan.set(d.pan, row);
     }
 
     let sr = 0;
-    return toCsv([...byPan.values()], [
-      ["Sr. No.", () => ++sr],
-      ["Financial Year", () => fy],
-      ["ID Code", () => "Permanent Account Number"],
-      ["Unique Identification Number", (r) => r.pan],
-      ["Section Code", () => "Section 80G"],
-      ["Unique Registration Number (URN)", () => eightyG.registrationNumber],
-      ["Date of Issuance of URN", () => eightyG.approvedOn],
-      ["Name of Donor", (r) => r.name],
-      ["Address of Donor", (r) => r.address],
-      ["Donation Type", () => "Others"],
-      ["Mode of Receipt", () => "Electronic modes including account payee cheque/draft"],
-      ["Amount of Donation (Indian rupees)", (r) => r.amount],
-    ]);
+    return toCsv(
+      [...byPan.values()],
+      [
+        ["Sr. No.", () => ++sr],
+        ["Financial Year", () => fy],
+        ["ID Code", () => "Permanent Account Number"],
+        ["Unique Identification Number", (r) => r.pan],
+        ["Section Code", () => "Section 80G"],
+        ["Unique Registration Number (URN)", () => eightyG.registrationNumber],
+        ["Date of Issuance of URN", () => eightyG.approvedOn],
+        ["Name of Donor", (r) => r.name],
+        ["Address of Donor", (r) => r.address],
+        ["Donation Type", () => "Others"],
+        [
+          "Mode of Receipt",
+          () => "Electronic modes including account payee cheque/draft",
+        ],
+        ["Amount of Donation (Indian rupees)", (r) => r.amount],
+      ],
+    );
   },
 
   "monthly-pledges": async () =>

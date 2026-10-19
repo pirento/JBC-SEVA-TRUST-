@@ -22,7 +22,11 @@ async function add(kind, data) {
 }
 
 async function remove(kind, id) {
-  await appendRecord(FILES[kind], { type: "DELETE", id, createdAt: new Date().toISOString() });
+  await appendRecord(FILES[kind], {
+    type: "DELETE",
+    id,
+    createdAt: new Date().toISOString(),
+  });
 }
 
 async function list(kind) {
@@ -36,7 +40,9 @@ async function listUpdates() {
 }
 
 async function listEvents() {
-  return (await list("event")).sort((a, b) => `${a.date} ${a.time || ""}`.localeCompare(`${b.date} ${b.time || ""}`));
+  return (await list("event")).sort((a, b) =>
+    `${a.date} ${a.time || ""}`.localeCompare(`${b.date} ${b.time || ""}`),
+  );
 }
 
 async function findEvent(id) {

@@ -1,4 +1,9 @@
-const { renderCertificatePdf, safe, formatDate, getDate } = require("./certificateDesign");
+const {
+  renderCertificatePdf,
+  safe,
+  formatDate,
+  getDate,
+} = require("./certificateDesign");
 
 // ============================================================
 // CERTIFICATE NUMBER
@@ -38,7 +43,7 @@ function generateMembershipCertificate(data) {
   const memberName = String(data.memberName || data.donorName || "").trim() || "Member";
   const membershipType = safe(
     data.membershipType,
-    Number(data.amount) >= 11000 ? "Lifetime Member" : "1 Year Member"
+    Number(data.amount) >= 11000 ? "Lifetime Member" : "1 Year Member",
   );
 
   return renderCertificatePdf({

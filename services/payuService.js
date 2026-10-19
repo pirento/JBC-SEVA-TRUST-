@@ -8,18 +8,13 @@ const {
   PAYU_PAYMENT_URL,
 } = require("../config/payuConfig");
 
-
 // ============================================================
 // SHA512
 // ============================================================
 
 function sha512(value) {
-  return crypto
-    .createHash("sha512")
-    .update(String(value), "utf8")
-    .digest("hex");
+  return crypto.createHash("sha512").update(String(value), "utf8").digest("hex");
 }
-
 
 // ============================================================
 // TRANSACTION ID
@@ -30,7 +25,6 @@ function generateTxnId() {
   // and certificate URLs, while using a larger random suffix.
   return `TXN_${Date.now()}_${crypto.randomBytes(12).toString("hex")}`;
 }
-
 
 // ============================================================
 // GENERATE PAYU HASH
@@ -62,7 +56,6 @@ function generateHash({
 
   return sha512(hashString);
 }
-
 
 // ============================================================
 // CREATE PAYMENT DATA
@@ -141,7 +134,6 @@ function createPaymentData({
   };
 }
 
-
 // ============================================================
 // VERIFY PAYU RESPONSE HASH
 // ============================================================
@@ -185,42 +177,29 @@ function verifyResponseHash(data) {
   }
 
   // PayU prepends additionalCharges to the reverse hash when a convenience fee applies.
-  const additionalCharges =
-    data.additionalCharges ? `${data.additionalCharges}|` : "";
+  const additionalCharges = data.additionalCharges ? `${data.additionalCharges}|` : "";
 
   const reverseHashString =
     `${additionalCharges}${PAYU_SALT}|${status}||||||` +
     `${udf5}|${udf4}|${udf3}|${udf2}|${udf1}|` +
     `${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
 
-  return (
-    sha512(reverseHashString).toLowerCase() ===
-    String(hash).toLowerCase()
-  );
+  return sha512(reverseHashString).toLowerCase() === String(hash).toLowerCase();
 }
-
 
 // ============================================================
 // VERIFY PAYU KEY
 // ============================================================
 
 function verifyPayUKey(key) {
-  return (
-    !!PAYU_KEY &&
-    !!key &&
-    String(key) === String(PAYU_KEY)
-  );
+  return !!PAYU_KEY && !!key && String(key) === String(PAYU_KEY);
 }
-
 
 // ============================================================
 // VERIFY PAYMENT AMOUNT
 // ============================================================
 
-function verifyPaymentAmount(
-  receivedAmount,
-  expectedAmount
-) {
+function verifyPaymentAmount(receivedAmount, expectedAmount) {
   const received = Number(receivedAmount);
   const expected = Number(expectedAmount);
 
@@ -230,7 +209,6 @@ function verifyPaymentAmount(
     received.toFixed(2) === expected.toFixed(2)
   );
 }
-
 
 // ============================================================
 // EXPORTS
