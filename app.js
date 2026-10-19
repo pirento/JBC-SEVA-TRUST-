@@ -149,9 +149,9 @@ app.use((req, res, next) => {
 // ROUTES
 // ========================================
 
-const donationRoutes = require("./routes/donationRoutes");
+const membershipRoutes = require("./routes/membershipRoutes");
 
-const donateRoutes = require("./routes/donateRoutes");
+const donationRoutes = require("./routes/donationRoutes");
 
 const medicalRoutes = require("./routes/medicalRoutes");
 
@@ -171,9 +171,9 @@ const contentRoutes = require("./routes/contentRoutes");
 // DONATION ROUTES
 // ========================================
 
-app.use("/donation", donationRoutes);
+app.use("/donation", membershipRoutes);
 
-app.use("/donate", donateRoutes);
+app.use("/donate", donationRoutes);
 
 // ========================================
 // MEDICAL ROUTES

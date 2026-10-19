@@ -1,7 +1,7 @@
 const { runEmailTest } = require("../services/systemService");
 const { user } = require("../config/emailConfig");
+const membershipService = require("../services/membershipService");
 const donationService = require("../services/donationService");
-const donateService = require("../services/donateService");
 
 async function testEmail(req, res) {
   try {
@@ -20,8 +20,8 @@ async function payuWebhook(req, res) {
   try {
     const product = String(data.productinfo || "").toLowerCase();
     const service =
-      product === "donation" ? donateService :
-      product === "membership" ? donationService : null;
+      product === "donation" ? donationService :
+      product === "membership" ? membershipService : null;
 
     if (!service || String(data.status || "").toLowerCase() !== "success") {
       return res.status(200).send("ignored");

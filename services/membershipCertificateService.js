@@ -34,7 +34,7 @@ function getValidTill(value, membershipType) {
 // GENERATE MEMBERSHIP CERTIFICATE (resolves with a PDF Buffer)
 // ============================================================
 
-function generateDonationReceipt(data) {
+function generateMembershipCertificate(data) {
   const memberName = String(data.memberName || data.donorName || "").trim() || "Member";
   const membershipType = safe(
     data.membershipType,
@@ -68,5 +68,5 @@ function generateDonationReceipt(data) {
 }
 
 module.exports = {
-  generateDonationReceipt,
+  generateMembershipCertificate,
 };

@@ -1,88 +1,84 @@
+const fs = require("fs");
+const path = require("path");
+
 const donationService = require("../services/donationService");
+const store = require("../models/pendingPaymentStore");
+const trust = require("../config/trustConfig");
+
 
 // ============================================================
-// SHOW MEMBERSHIP FORM
+// SHOW DONATION FORM
 // ============================================================
 
 function showDonationForm(req, res) {
-  return res.render("pages/donation");
+  // Old links used ?cause=<title>; send them to that cause's page
+  if (req.query.cause) {
+    const page = trust.donationPages.find((p) => p.title === req.query.cause);
+    if (page) {
+      const amount = /^\d{3,7}$/.test(String(req.query.amount || "")) ? `?amount=${req.query.amount}` : "";
+      return res.redirect(`/donate/${page.slug}${amount}`);
+    }
+  }
+
+  return res.render("pages/donate");
 }
 
+function renderCauseForm(res, page, { error = null, values = {}, status = 200 } = {}) {
+  return res.status(status).render("pages/donate-cause", {
+    page,
+    error,
+    values,
+    title: `Donate to ${page.title}`,
+  });
+}
+
+function showCauseForm(req, res, next) {
+  const page = trust.donationPages.find((p) => p.slug === req.params.slug);
+  if (!page) return next();
+
+  const amount = /^\d{3,7}$/.test(String(req.query.amount || "")) ? req.query.amount : "";
+  const purpose = page.donation.purposes.includes(req.query.purpose) ? req.query.purpose : "";
+  const monthly = req.query.monthly === "1" ? "on" : "";
+  return renderCauseForm(res, page, { values: { amount, purpose, monthly } });
+}
+
+
 // ============================================================
-// SUBMIT MEMBERSHIP FORM
+// SUBMIT DONATION
 // ============================================================
 
 async function submitDonation(req, res) {
   try {
     const body = req.body || {};
-    const amount = Number(body.amount);
-
-    // --------------------------------------------------------
-    // Validate member name
-    // --------------------------------------------------------
-
-    const memberName = String(body.memberName || "").trim();
-
-    if (!memberName) {
-      return res.status(400).render("pages/form-error", {
-        message: "Please provide the member name.",
-        backUrl: "/donation",
-      });
-    }
-
-    if (memberName.length > 100) {
-      return res.status(400).render("pages/form-error", {
-        message: "Member name cannot exceed 100 characters.",
-        backUrl: "/donation",
-      });
-    }
-
-    // --------------------------------------------------------
-    // Validate amount
-    //
-    // Minimum membership amount = ₹100
-    //
-    // ₹100 - ₹10,999  -> 1 Year Member
-    // ₹11,000+        -> Lifetime Member
-    // --------------------------------------------------------
-
-    if (!Number.isFinite(amount) || amount < 100) {
-      return res.status(400).render("pages/form-error", {
-        message: "Minimum membership amount is ₹100.",
-        backUrl: "/donation",
-      });
-    }
-
-    // --------------------------------------------------------
-    // Normalize membership data
-    // --------------------------------------------------------
-
-    const membershipData = {
-      ...body,
-      memberName,
-      amount,
-    };
-
-    // --------------------------------------------------------
-    // Existing PayU/payment flow
-    // --------------------------------------------------------
 
     const result =
-      await donationService.initiateDonation(membershipData);
+      await donationService.initiateDonation(body);
 
-    return res.render("pages/payu-payment", result);
+    // Donation uses its own PayU payment page.
+    // Membership continues using pages/payu-payment.
+    return res.render(
+      "pages/donate-payu-payment",
+      result
+    );
+
   } catch (error) {
     console.error(
-      "❌ Membership submission error:",
+      "❌ Donation submission error:",
       error.message
     );
 
-    return res.status(400).render("pages/form-error", {
-      message: error.message,
-      backUrl: "/donation",
+    const page =
+      trust.donationPages.find((p) => p.title === (req.body || {}).cause) ||
+      trust.donationPages[0];
+
+    return renderCauseForm(res, page, {
+      error: error.message,
+      values: req.body || {},
+      status: 400,
     });
   }
 }
+
 
 // ============================================================
 // PAYMENT SUCCESS
@@ -92,8 +88,9 @@ async function paymentSuccess(req, res) {
   try {
     const data = req.body || {};
 
-    console.log("\n=================================");
-    console.log("✅ PAYU PAYMENT SUCCESS");
+    console.log("");
+    console.log("=================================");
+    console.log("✅ PAYU DONATION PAYMENT SUCCESS");
     console.log("Transaction:", data.txnid);
     console.log("Amount:", data.amount);
     console.log("Status:", data.status);
@@ -101,38 +98,48 @@ async function paymentSuccess(req, res) {
     console.log("=================================");
 
     const result =
-      await donationService.processPaymentSuccess(data);
+      await donationService.processPaymentSuccess(
+        data
+      );
 
     if (result.failure) {
       return paymentFailure(req, res);
     }
 
     if (result.error) {
-      return res
-        .status(result.status || 400)
-        .render("pages/form-error", {
+      return res.status(
+        result.status || 400
+      ).render(
+        "pages/form-error",
+        {
           message: result.error,
           backUrl: "/",
-        });
+        }
+      );
     }
 
     return res.render(
-      "pages/donation-success",
+      "pages/donation-payment-success",
       result
     );
+
   } catch (error) {
     console.error(
-      "❌ PAYMENT SUCCESS PROCESSING FAILED:",
+      "❌ DONATION PAYMENT PROCESSING FAILED:",
       error.message
     );
 
-    return res.status(500).render("pages/form-error", {
-      message:
-        "Payment was received, but membership certificate processing failed. Please contact the Trust.",
-      backUrl: "/",
-    });
+    return res.status(500).render(
+      "pages/form-error",
+      {
+        message:
+          "Payment was received, but donation processing failed. Please contact the Trust.",
+        backUrl: "/",
+      }
+    );
   }
 }
+
 
 // ============================================================
 // PAYMENT FAILURE
@@ -141,134 +148,162 @@ async function paymentSuccess(req, res) {
 async function paymentFailure(req, res) {
   try {
     const result =
-      await donationService.processPaymentFailure(req.body || {});
+      await donationService.processPaymentFailure(
+        req.body || {}
+      );
 
-    console.log("\n=================================");
-    console.log("❌ PAYU PAYMENT FAILED");
-    console.log("Transaction:", result.transactionId);
-    console.log("Error:", result.errorMessage);
+    console.log("");
+    console.log("=================================");
+    console.log("❌ PAYU DONATION PAYMENT FAILED");
+    console.log(
+      "Transaction:",
+      result.transactionId
+    );
+    console.log(
+      "Error:",
+      result.errorMessage
+    );
     console.log("=================================");
 
     return res.render(
-      "pages/donation-failure",
+      "pages/donation-payment-failure",
       result
     );
+
   } catch (error) {
     console.error(
-      "❌ Payment failure error:",
+      "❌ Donation payment failure error:",
       error.message
     );
 
-    return res.status(500).render("pages/form-error", {
-      message: "Payment failed. Please try again.",
-      backUrl: "/",
-    });
+    return res.status(500).render(
+      "pages/form-error",
+      {
+        message:
+          "Donation payment failed. Please try again.",
+        backUrl: "/",
+      }
+    );
   }
 }
 
+
 // ============================================================
-// DOWNLOAD MEMBERSHIP CERTIFICATE
+// DOWNLOAD DONATION CERTIFICATE
 // ============================================================
 
-async function downloadReceipt(req, res) {
+function downloadCertificate(req, res) {
   try {
-    let transactionId = String(
-      req.params.transactionId || ""
-    ).trim();
+    const transactionId =
+      String(
+        req.params.transactionId || ""
+      ).trim();
 
-    // --------------------------------------------------------
-    // Decode URL safely
-    // --------------------------------------------------------
-
-    try {
-      transactionId = decodeURIComponent(transactionId);
-    } catch {
-      return res
-        .status(400)
-        .send("Invalid certificate URL.");
+    if (!transactionId) {
+      return res.status(400).send(
+        "Transaction ID is required."
+      );
     }
-
-    // --------------------------------------------------------
-    // Support old/new certificate prefixes
-    // --------------------------------------------------------
-
-    transactionId = transactionId
-      .replace(/^donation-receipt-/i, "")
-      .replace(/^membership-certificate-/i, "")
-      .replace(/\.pdf$/i, "");
-
-    // --------------------------------------------------------
-    // Validate transaction ID
-    // --------------------------------------------------------
 
     if (!/^TXN_[A-Za-z0-9_-]+$/.test(transactionId)) {
-      return res
-        .status(400)
-        .send("Invalid transaction ID.");
+      return res.status(400).send(
+        "Invalid transaction ID."
+      );
     }
 
+
     // --------------------------------------------------------
-    // Generate / retrieve certificate
+    // FIRST: Try receipt stored in memory
     // --------------------------------------------------------
 
     const receipt =
-      await donationService.getReceipt(transactionId);
+      store.getReceipt(transactionId);
 
-    res.status(200);
+    let certificatePath = null;
 
-    res.setHeader(
-      "Content-Type",
-      "application/pdf"
+    if (receipt) {
+      certificatePath =
+        receipt.certificatePath ||
+        receipt.path ||
+        receipt.filePath;
+    }
+
+
+    // --------------------------------------------------------
+    // SECOND: If receipt is not in memory,
+    // directly locate the generated PDF.
+    // --------------------------------------------------------
+
+    if (!certificatePath) {
+      certificatePath = path.join(
+        __dirname,
+        "..",
+        "data",
+        "receipts",
+        `donation-certificate-${transactionId}.pdf`
+      );
+    }
+
+
+    // --------------------------------------------------------
+    // CHECK FILE
+    // --------------------------------------------------------
+
+    if (!fs.existsSync(certificatePath)) {
+      console.error(
+        "❌ Donation certificate not found:",
+        certificatePath
+      );
+
+      return res.status(404).send(
+        "Donation certificate file not found."
+      );
+    }
+
+
+    // --------------------------------------------------------
+    // DOWNLOAD
+    // --------------------------------------------------------
+
+    const fileName =
+      `donation-certificate-${transactionId}.pdf`;
+
+    console.log(
+      "📥 Downloading donation certificate:",
+      certificatePath
     );
 
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${receipt.fileName}"`
+    return res.download(
+      certificatePath,
+      fileName,
+      (error) => {
+        if (error) {
+          console.error(
+            "❌ Certificate download failed:",
+            error.message
+          );
+
+          if (!res.headersSent) {
+            return res.status(500).send(
+              "Unable to download donation certificate."
+            );
+          }
+        }
+      }
     );
 
-    res.setHeader(
-      "Content-Length",
-      receipt.pdfBuffer.length
-    );
-
-    res.setHeader(
-      "Cache-Control",
-      "no-store, no-cache, must-revalidate, private"
-    );
-
-    res.setHeader(
-      "Pragma",
-      "no-cache"
-    );
-
-    res.setHeader(
-      "Expires",
-      "0"
-    );
-
-    res.setHeader(
-      "X-Content-Type-Options",
-      "nosniff"
-    );
-
-    return res.end(receipt.pdfBuffer);
   } catch (error) {
     console.error(
-      "❌ CERTIFICATE DOWNLOAD FAILED:",
+      "❌ Donation certificate download error:",
       error.message
     );
 
-    if (!res.headersSent) {
-      return res
-        .status(error.status || 500)
-        .send(
-          error.status === 404
-            ? error.message
-            : "Unable to generate membership certificate."
-        );
-    }
+    return res.status(500).send(
+      "Unable to download donation certificate."
+    );
   }
 }
+
 
 // ============================================================
 // EXPORTS
@@ -276,8 +311,9 @@ async function downloadReceipt(req, res) {
 
 module.exports = {
   showDonationForm,
+  showCauseForm,
   submitDonation,
   paymentSuccess,
   paymentFailure,
-  downloadReceipt,
+  downloadCertificate,
 };

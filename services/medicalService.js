@@ -3,7 +3,7 @@ const fs = require("fs/promises");
 const path = require("path");
 const { create } = require("../models/medicalModel");
 const { sendEmail } = require("./emailService");
-const { generateMedicalReceipt } = require("./pdfService");
+const { generateMedicalReceipt } = require("./medicalReceiptService");
 const { dataDir } = require("../config/appConfig");
 const escapeHtml = require("../utils/escapeHtml");
 

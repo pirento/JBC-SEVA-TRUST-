@@ -108,7 +108,7 @@ In `config/trustConfig.js`, fill `eightyG` (registration number, dates, trust PA
 Add an entry to `exports_` in `services/exportService.js`. It appears on the dashboard automatically at `/admin/export/<name>`.
 
 ### Change the certificate design
-Both certificates use `services/certificateDesign.js`. Donation text is in `services/donateCertificateService.js`, membership in `services/donationReceiptService.js`. Check a sample by rendering one to PDF.
+Both certificates use `services/certificateDesign.js`. Donation text is in `services/donationCertificateService.js`, membership in `services/membershipCertificateService.js`. Check a sample by rendering one to PDF.
 
 ## 8. Coding rules
 
@@ -132,7 +132,7 @@ Both certificates use `services/certificateDesign.js`. Donation text is in `serv
 
 1. Server with Node 20+, behind HTTPS (Nginx, Render, Railway, etc.).
 2. `.env`: `NODE_ENV=production`, `APP_URL=https://...`, live PayU keys with `PAYU_ENV=production` and the four callback URLs, Gmail app password, `TRUST_EMAIL`, `BACKUP_DIR` on another disk.
-3. In the PayU dashboard set the webhook to `https://<your-site>/payu/webhook` (see `PAYMENT_FIX_NOTES.md`).
+3. In the PayU dashboard set the webhook to `https://<your-site>/payu/webhook` (see `docs/payment-notes.md`).
 4. Start with `npm start` under a process manager (pm2 or the host's own) and check the startup log for missing settings.
 5. Make one small real donation and check the receipt email, the certificate and the admin dashboard.
 
