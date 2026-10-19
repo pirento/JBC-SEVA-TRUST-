@@ -724,4 +724,18 @@ module.exports = {
   "Mobile number": "मोबाइल नंबर",
   "Hospital name": "अस्पताल का नाम",
   "Referred by": "किसने भेजा",
+  "Log in to confirm your email.": "अपना ईमेल पक्का करने के लिए लॉगिन करें।",
+  "Something went wrong on our side. Please try again in a few minutes, or contact the trust.":
+    "हमारी ओर से कुछ गड़बड़ हुई। कृपया कुछ मिनट बाद फिर से कोशिश करें, या ट्रस्ट से संपर्क करें।",
+  "This gift was made outside the Trust's 80G approval period, so this is not an 80G receipt.":
+    "यह दान ट्रस्ट की 80G स्वीकृति अवधि के बाहर किया गया था, इसलिए यह 80G रसीद नहीं है।",
+  "By continuing you agree to the": "आगे बढ़कर आप इनसे सहमत होते हैं:",
+  "This payment was already started. If money was debited, please do not pay again.":
+    "यह भुगतान पहले ही शुरू हो चुका है। अगर पैसा कट गया है, तो दोबारा भुगतान न करें।",
+  "Contact the Trust with this transaction ID:":
+    "इस ट्रांज़ैक्शन आईडी के साथ ट्रस्ट से संपर्क करें:",
+  "Start a new payment": "नया भुगतान शुरू करें",
+  "Needed with PAN for 80G reporting.": "80G रिपोर्टिंग के लिए PAN के साथ ज़रूरी।",
+  "Here are new login details for your account. The temporary password below replaces your old password.":
+    "आपके खाते के नए लॉगिन विवरण ये हैं। नीचे दिया अस्थायी पासवर्ड आपके पुराने पासवर्ड की जगह लेता है।",
 };

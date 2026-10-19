@@ -4,7 +4,7 @@ const path = require("path");
 const { renderCertificatePdf, safe, formatDate } = require("./certificateDesign");
 const {
   taxNote,
-  eightyG,
+  eightyGCovers,
   GENERAL_CAUSE,
   donationPages,
 } = require("../config/trustConfig");
@@ -61,11 +61,11 @@ async function generateDonationCertificate(data) {
       ["Payment ID", safe(data.mihpayid || data.payuPaymentId, "")],
       ["Seva Date", data.sevaDate ? formatDate(data.sevaDate) : ""],
       // Donor PAN is needed on an 80G receipt; shown only once approved
-      ["Donor PAN", eightyG.approved ? data.pan : ""],
+      ["Donor PAN", eightyGCovers(data.paymentDate) ? data.pan : ""],
       // Last: a long ID may wrap to a second line
       ["Transaction ID", safe(data.txnid || data.transactionId, "N/A")],
     ],
-    note: taxNote(cause) + " This is a computer-generated certificate.",
+    note: taxNote(cause, data.paymentDate) + " This is a computer-generated certificate.",
   });
 
   const receiptsDir = path.join(dataDir, "receipts");

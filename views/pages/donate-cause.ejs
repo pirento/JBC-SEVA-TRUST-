@@ -125,7 +125,7 @@
             <label for="dAddress">Address <span class="muted">(optional)</span></label>
             <input id="dAddress" name="address" type="text" maxlength="300" autocomplete="street-address"
               value="<%= v.address || '' %>" />
-            <small>Needed with PAN for 80G reporting. Stored encrypted.</small>
+            <small><%= opt.religious ? 'Optional, for our records.' : 'Needed with PAN for 80G reporting.' %> Stored encrypted.</small>
           </div>
 
           <%- include('../partials/payment-mode') %>

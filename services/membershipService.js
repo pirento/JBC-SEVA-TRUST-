@@ -168,7 +168,14 @@ function validateMembership(input) {
 // ============================================================
 
 async function initiateMembership(input) {
-  const membership = validateMembership(input);
+  let membership;
+  try {
+    membership = validateMembership(input);
+  } catch (error) {
+    // A validation message is for the member; other errors are not shown
+    error.expose = true;
+    throw error;
+  }
 
   const txnid = generateTxnId();
 
@@ -239,13 +246,9 @@ async function initiateMembership(input) {
 
   console.log("Transaction:", txnid);
 
-  console.log("Member:", membership.memberName);
-
   console.log("Membership Type:", membership.membershipType);
 
   console.log("Amount:", membership.amount);
-
-  console.log("Email:", membership.email);
 
   console.log("Success URL:", PAYU_SUCCESS_URL);
 
@@ -422,7 +425,8 @@ async function handlePaymentSuccess(data) {
 
     membershipType,
 
-    paymentDate: new Date(),
+    // A repeated callback keeps the original payment time (and Valid Till)
+    paymentDate: savedPayment.paymentDate || new Date(),
   };
 
   // ----------------------------------------------------------
@@ -644,7 +648,8 @@ async function sendMembershipEmail(membership, payuData, pdfBuffer) {
 
   const { html, text } = renderEmail({
     lang,
-    preheader: `Your ${membership.membershipType} membership is confirmed`,
+    preheader:
+      lang === "hi" ? undefined : `Membership confirmed: ${membership.membershipType}`,
     heading: "Welcome to JBC Seva Trust",
     greeting: lang === "hi" ? `नमस्ते ${memberName},` : `Dear ${memberName},`,
     paragraphs: [

@@ -63,7 +63,11 @@ function showLogin(req, res) {
     values: {},
     next: safeNext(req.query.next),
     notice:
-      req.query.reset === "1" ? "Your password has been changed. Please log in." : null,
+      req.query.reset === "1"
+        ? "Your password has been changed. Please log in."
+        : req.query.verify === "1"
+          ? "Log in to confirm your email."
+          : null,
   });
 }
 
@@ -319,9 +323,15 @@ async function monthlyStop(req, res, next) {
 
 async function verifyEmail(req, res, next) {
   try {
-    const user = await userAuthService.verifyEmail(req.params.token);
+    const user = await userAuthService.verifyEmail(req.params.token, req.session.user);
 
-    if (!user) {
+    if (user === "login") {
+      // Back here after logging in to the account the link belongs to
+      const next = `/verify-email/${encodeURIComponent(req.params.token)}`;
+      return res.redirect(`/login?next=${encodeURIComponent(next)}&verify=1`);
+    }
+
+    if (user === "invalid") {
       return res.status(400).render("pages/form-error", {
         title: "Link expired",
         message:
@@ -330,11 +340,8 @@ async function verifyEmail(req, res, next) {
       });
     }
 
-    if (req.session.user && req.session.user.email === user.email) {
-      req.session.user = user;
-    }
-
-    return res.redirect(req.session.user ? "/account?verify=done" : "/login");
+    req.session.user = user;
+    return res.redirect("/account?verify=done");
   } catch (error) {
     return next(error);
   }

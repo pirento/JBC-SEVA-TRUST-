@@ -25,6 +25,11 @@ const fields = [
   "hospitalName",
 ];
 
+// A message meant for the person filling the form (shown on the page)
+function userError(message) {
+  return Object.assign(new Error(message), { expose: true });
+}
+
 // Shown in error messages instead of the field names
 const LABELS = {
   patientName: "Patient name",
@@ -48,26 +53,26 @@ async function create(data) {
 
   for (const field of fields) {
     if (!required(data[field])) {
-      throw new Error(`${LABELS[field]} is required`);
+      throw userError(`${LABELS[field]} is required`);
     }
   }
 
   for (const field of [...fields, "patientReferenceName"]) {
     if (String(data[field] || "").trim().length > 150) {
-      throw new Error(`${LABELS[field]} is too long`);
+      throw userError(`${LABELS[field]} is too long`);
     }
   }
 
   if (!personName(data.patientName)) {
-    throw new Error("Please enter a valid patient name");
+    throw userError("Please enter a valid patient name");
   }
 
   if (!pastDate(data.dateBirth)) {
-    throw new Error("Please enter a valid date of birth");
+    throw userError("Please enter a valid date of birth");
   }
 
   if (!accepted(data.consent)) {
-    throw new Error("Please accept the Terms and Privacy Policy");
+    throw userError("Please accept the Terms and Privacy Policy");
   }
 
   // ----------------------------------------------------------
@@ -75,7 +80,7 @@ async function create(data) {
   // ----------------------------------------------------------
 
   if (!aadhar(data.aadharNumber)) {
-    throw new Error(
+    throw userError(
       "Please enter a valid 12 digits Aadhaar number, as printed on the card",
     );
   }
@@ -85,7 +90,7 @@ async function create(data) {
   // ----------------------------------------------------------
 
   if (!phone(data.patientPhoneNumber)) {
-    throw new Error("Phone number must be 10 digits");
+    throw userError("Phone number must be 10 digits");
   }
 
   // ----------------------------------------------------------
@@ -93,7 +98,7 @@ async function create(data) {
   // ----------------------------------------------------------
 
   if (!email(data.patientEmail)) {
-    throw new Error("Please enter a valid email address");
+    throw userError("Please enter a valid email address");
   }
 
   // ----------------------------------------------------------
@@ -114,7 +119,7 @@ async function create(data) {
   );
 
   if (duplicate) {
-    throw new Error(
+    throw userError(
       "A request for this patient and hospital was already received in the last 7 days. Our team will contact you.",
     );
   }

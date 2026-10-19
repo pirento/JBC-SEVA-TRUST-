@@ -214,8 +214,19 @@ function validateDonationDetails(page, input) {
 // INITIATE DONATION
 // =========================================================
 
+// Validation messages are for the donor; anything else (settings,
+// storage) stays in the log and the donor sees a general message
+function shown(validate) {
+  try {
+    return validate();
+  } catch (error) {
+    error.expose = true;
+    throw error;
+  }
+}
+
 async function initiateDonation(input) {
-  const donation = validateDonation(input);
+  const donation = shown(() => validateDonation(input));
 
   const txnid = generateTxnId();
 

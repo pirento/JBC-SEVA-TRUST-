@@ -31,8 +31,9 @@ async function submitMedical(data) {
     await fs.writeFile(filePath, pdfBuffer);
   } catch (error) {
     console.error("❌ Medical receipt failed:", error.message);
-    throw new Error(
-      "We could not create your receipt. Please try again in a few minutes.",
+    throw Object.assign(
+      new Error("We could not create your receipt. Please try again in a few minutes."),
+      { expose: true },
     );
   }
 
@@ -60,7 +61,7 @@ async function sendMedicalEmail(data, referenceNumber, fileName, pdfBuffer) {
 
   const { html, text } = renderEmail({
     lang,
-    preheader: `Reference number ${referenceNumber}`,
+    preheader: lang === "hi" ? undefined : `Reference number ${referenceNumber}`,
     heading: "Medical help request received",
     greeting: lang === "hi" ? `नमस्ते,` : `Hello,`,
     paragraphs: [

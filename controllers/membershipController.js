@@ -27,7 +27,9 @@ async function submitMembership(req, res) {
     console.error("❌ Membership submission error:", error.message);
 
     return res.status(400).render("pages/donation", {
-      error: error.message,
+      error: error.expose
+        ? error.message
+        : "Something went wrong on our side. Please try again in a few minutes, or contact the trust.",
       values: body,
     });
   }

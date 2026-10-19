@@ -95,10 +95,11 @@ function translateText(text) {
 }
 
 function translateHtml(html) {
-  // Leave <script> and <style> bodies alone
+  // Leave <script> and <style> bodies, and what people typed into a
+  // <textarea>, alone (the textarea's own placeholder is still translated)
   return html
     .split(
-      /(<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<textarea[\s\S]*?<\/textarea>)/,
+      /(<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|(?<=<textarea[^>]*>)[\s\S]*?(?=<\/textarea>))/,
     )
     .map((part, i) => {
       if (i % 2 === 1) return part;

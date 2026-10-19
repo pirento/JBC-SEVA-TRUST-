@@ -510,6 +510,19 @@ test("someone registering with another person's email cannot see their records",
     400,
     "a made-up link does not verify",
   );
+
+  // The real owner's link, opened while not logged in to that account
+  // (their own browser, or a mail scanner), does not confirm it
+  const ownerLink = await require("../services/userAuthService").requestEmailVerification(
+    "victim@example.com",
+  );
+  res = await client()(`/verify-email/${ownerLink}`);
+  assert.match(res.location, /^\/login\?next=/, "asks to log in to that account");
+  assert.equal(
+    (await require("../models/userModel").findByEmail("victim@example.com"))
+      .emailVerified,
+    false,
+  );
 });
 
 test("login ignores off-site redirect targets", async () => {
@@ -980,6 +993,13 @@ test("tax note claims 80G only after approval, never for the temple", () => {
       /Eligible for deduction under Section 80G.*URN123/,
     );
     assert.match(trust.taxNote("Community Temple"), /not eligible for 80G/);
+    // A certificate printed again for a gift from before approval
+    assert.match(
+      trust.taxNote("Green Earth", "2025-12-01"),
+      /outside the Trust's 80G approval period/,
+    );
+    assert.equal(trust.eightyGCovers("2025-12-01"), false);
+    assert.equal(trust.eightyGCovers("2027-05-01"), true);
   } finally {
     trust.eightyG.approved = false;
   }
@@ -1465,6 +1485,36 @@ test("only genuine data is saved: bot trap, spam names, duplicates", async () =>
 // Rate limiting (last: it blocks this IP for the rest of the run)
 // ------------------------------------------------------------
 
+// A record added while a file is being read must not leave a stale cache
+test(
+  "file store: a record added during a read is seen by the next read",
+  { skip: process.env.MONGODB_URI ? "file storage only" : false },
+  async () => {
+    const store = require("../models/fileStore");
+    const fsp = require("fs/promises");
+    await store.appendRecord("race-test.txt", { id: "old" });
+
+    const realReadFile = fsp.readFile;
+    let addDuringRead = () => store.appendRecord("race-test.txt", { id: "new" });
+    fsp.readFile = async (...args) => {
+      const content = await realReadFile(...args);
+      if (addDuringRead) {
+        const add = addDuringRead;
+        addDuringRead = null;
+        await add();
+      }
+      return content;
+    };
+    try {
+      await store.readRecords("race-test.txt");
+    } finally {
+      fsp.readFile = realReadFile;
+    }
+    const ids = (await store.readRecords("race-test.txt")).map((r) => r.id);
+    assert.deepEqual(ids, ["old", "new"]);
+  },
+);
+
 // Only the file store can have a half-written line
 test(
   "a damaged line (cut-off write) is skipped, other records still read",
@@ -1894,6 +1944,26 @@ test(
     assert.equal(res.status, 302, "treated as logged out, not an error");
   },
 );
+
+test("guesses on one account are not reset by logging in to another", async () => {
+  const req = client();
+  for (let i = 0; i < 5; i += 1) {
+    await req("/login", {
+      method: "POST",
+      form: { email: "target@example.com", password: "wrong-pass1" },
+    });
+  }
+  // Logging in to one's own account in between
+  await client()("/login", {
+    method: "POST",
+    form: { email: "guest.donor@example.com", password: "mypass2026" },
+  });
+  const res = await req("/login", {
+    method: "POST",
+    form: { email: "target@example.com", password: "wrong-pass1" },
+  });
+  assert.equal(res.status, 429);
+});
 
 // Last: it leaves this IP blocked from logging in for 15 minutes
 test("too many failed logins are blocked with 429", async () => {
