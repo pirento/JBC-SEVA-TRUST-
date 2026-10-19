@@ -169,7 +169,7 @@ function normalizeRecord(record) {
         if (Array.isArray(parsed)) {
           oldMemberNames = parsed;
         }
-      } catch (_) {
+      } catch {
         oldMemberNames = oldMemberNames
           .split("|")
           .map((name) => name.trim())

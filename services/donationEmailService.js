@@ -17,7 +17,10 @@ async function sendDonationCertificateEmail({ donation, certificatePath }) {
   const lang = donation.lang === "hi" ? "hi" : "en";
   const donorName = String(donation.donorName || "Donor").trim();
   const cause = donation.cause || "Where Most Needed";
-  const amount = Number(donation.amount || 0).toFixed(2);
+  const amount = Number(donation.amount || 0).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
   const transactionId = String(donation.transactionId || donation.txnid || "").trim();
   const page = donationPages.find((p) => p.title === cause);
 

@@ -97,7 +97,10 @@ async function showThankYou(req, res, next) {
       return next();
     }
 
-    const amount = Number(membership.amount || 0).toFixed(2);
+    const amount = Number(membership.amount || 0).toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
     const certificateUrl = `/donation/receipt/${encodeURIComponent(transactionId)}`;
     const name = membership.memberName || membership.donorName || "Member";
 

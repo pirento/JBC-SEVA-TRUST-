@@ -637,7 +637,10 @@ async function getReceipt(transactionId) {
 async function sendMembershipEmail(membership, payuData, pdfBuffer) {
   const lang = membership.lang === "hi" ? "hi" : "en";
   const memberName = String(membership.memberName || membership.donorName || "").trim();
-  const amount = Number(membership.amount || 0).toFixed(2);
+  const amount = Number(membership.amount || 0).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
   const { html, text } = renderEmail({
     lang,

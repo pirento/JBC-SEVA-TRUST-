@@ -159,7 +159,10 @@ async function showThankYou(req, res, next) {
     }
 
     const page = findPage("title", donation.cause);
-    const amount = Number(donation.amount || 0).toFixed(2);
+    const amount = Number(donation.amount || 0).toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
     const certificateUrl = `/donate/certificate/${encodeURIComponent(transactionId)}`;
 
     return res.render("pages/thank-you", {

@@ -321,7 +321,6 @@ module.exports = {
   "Mobile Number": "मोबाइल नंबर",
 
   // ---------- Medical ----------
-  "Medical Help Request": "चिकित्सा सहायता अनुरोध",
   "Fill in the patient's details. You will get a reference number and a PDF receipt by email, and our team will contact you.":
     "मरीज़ की जानकारी भरें। आपको ईमेल पर संदर्भ संख्या और PDF रसीद मिलेगी, और हमारी टीम आपसे संपर्क करेगी।",
   "Patient Details": "मरीज़ की जानकारी",
@@ -342,7 +341,6 @@ module.exports = {
   "Submit Request": "अनुरोध भेजें",
 
   // ---------- Volunteer / contact ----------
-  "Volunteer with us": "हमारे साथ स्वयंसेवा करें",
   "Give a few hours to plant trees, spend time with elders, help at mass weddings or teach children. We will call you before the next drive near you.":
     "कुछ घंटे दीजिए — पेड़ लगाइए, बुज़ुर्गों के साथ समय बिताइए, सामूहिक विवाह में मदद कीजिए या बच्चों को पढ़ाइए। आपके पास अगले अभियान से पहले हम आपको फ़ोन करेंगे।",
   "Thank you for registering! Our team will contact you soon.":
@@ -387,7 +385,6 @@ module.exports = {
   "Register as a volunteer": "स्वयंसेवक के रूप में रजिस्टर करें",
   "and we will call you before the next one.":
     "और अगले कार्यक्रम से पहले हम आपको फ़ोन करेंगे।",
-  Register: "रजिस्टर करें",
   "Number of people *": "लोगों की संख्या *",
   "I will": "मैं",
   Attend: "शामिल होऊँगा/होऊँगी",
@@ -396,7 +393,6 @@ module.exports = {
     "धन्यवाद! कार्यक्रम से पहले हम आपको पूरी जानकारी देंगे।",
   "This event is over": "यह कार्यक्रम समाप्त हो चुका है",
   "Photos and news from our work on the ground.": "ज़मीन पर हमारे काम की फ़ोटो और खबरें।",
-  "Updates from the field": "ज़मीनी काम के अपडेट",
   All: "सभी",
   "Filter by programme": "कार्यक्रम के अनुसार देखें",
   "No updates yet. Photos and news will appear here as the work happens.":
@@ -487,7 +483,6 @@ module.exports = {
   "Your card, UPI and bank details are handled only by PayU.":
     "आपके कार्ड, UPI और बैंक की जानकारी केवल PayU संभालता है।",
   "Thank You": "धन्यवाद",
-  Amount: "राशि",
   "Donated for": "दान का उद्देश्य",
   "Preferred seva date": "सेवा की पसंदीदा तारीख",
   Monthly: "मासिक",
@@ -566,7 +561,6 @@ module.exports = {
   "Reset your password": "अपना पासवर्ड बदलें",
   "We received a request to set a new password for your account.":
     "हमें आपके खाते का नया पासवर्ड बनाने का अनुरोध मिला है।",
-  "Set a new password": "नया पासवर्ड बनाएँ",
   "This link works for one hour and only once. If you did not ask for this, ignore this email; your password stays the same.":
     "यह लिंक एक घंटे तक और केवल एक बार काम करेगा। अगर आपने यह अनुरोध नहीं किया है, तो इस ईमेल को अनदेखा करें; आपका पासवर्ड वही रहेगा।",
   "Your monthly gift is due": "आपका मासिक दान देय है",
@@ -577,15 +571,10 @@ module.exports = {
     "ये रिमाइंडर बंद करने के लिए मेरे खाते में लॉगिन करें और इस मासिक दान के आगे 'बंद करें' चुनें।",
 
   // ---------- Page titles ----------
-  Membership: "सदस्यता",
   "Forgot Password": "पासवर्ड भूल गए",
   "Set New Password": "नया पासवर्ड बनाएँ",
   "Page Not Found": "पेज नहीं मिला",
-  "Create Account": "खाता बनाएँ",
-  "Medical Help": "चिकित्सा सहायता",
-  "Updates from the Field": "ज़मीनी काम के अपडेट",
   "Terms & Conditions": "नियम और शर्तें",
-  "Privacy Policy": "गोपनीयता नीति",
   "Refund & Cancellation Policy": "धन वापसी और रद्दीकरण नीति",
 
   // ---------- Errors / misc ----------
