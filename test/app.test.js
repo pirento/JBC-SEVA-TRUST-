@@ -711,7 +711,7 @@ test("monthly donation: pledge, one reminder a month, stop from account", async 
   assert.equal(await pledgeService.sendDueReminders(month + 62 * 864e5), 0, "stopped pledges get no reminders");
 });
 
-test("backup copies the data files and admin sees the go-live checklist", async () => {
+test("backup copies the data files", async () => {
   const { runBackup } = require("../services/backupService");
   const target = await runBackup();
   const files = fs.readdirSync(target);
@@ -721,7 +721,7 @@ test("backup copies the data files and admin sees the go-live checklist", async 
   const req = client();
   await req("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
   const res = await req("/admin/dashboard");
-  assert.match(res.text, /Go-live checklist/);
+  assert.doesNotMatch(res.text, /Go-live checklist/, "checklist is not shown to admins");
   assert.doesNotMatch(res.text, /testsalt/, "secret values are never shown");
 });
 

@@ -34,7 +34,7 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 - Admin CSV exports `/admin/export/:type` incl. Form 10BD; 80G switch `eightyG` in trustConfig (keep `approved: false` until granted).
 - Updates with photos and events: `/admin/content`, `/updates`, `/events`; photos in `DATA_DIR/uploads` (byte-checked).
 - Monthly giving = email reminders (`services/pledgeService.js`), not auto-debit.
-- Nightly backups (`services/backupService.js`, `BACKUP_DIR`), go-live checklist on the admin dashboard.
+- Nightly backups (`services/backupService.js`, `BACKUP_DIR`); missing go-live settings are printed at server start (`services/configCheck.js`), not shown in admin.
 
 ## Pending
 - Move storage to a real database (PostgreSQL) before traffic grows.

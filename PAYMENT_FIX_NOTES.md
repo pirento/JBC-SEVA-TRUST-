@@ -20,7 +20,7 @@ Syntax validation passed for all project JavaScript files. Live PayU/Hostinger e
 ## Production hardening (Oct 2026)
 
 - New PayU webhook: `POST /payu/webhook`. In PayU Dashboard -> Developers -> Webhooks, add
-  `https://mrctrust.in/payu/webhook` for the **Successful payment** event. Payments are now
+  `https://<your-site>/payu/webhook` for the **Successful payment** event. Payments are now
   recorded even if the customer closes GPay/the browser before returning to the site.
 - Browser callback and webhook for the same txnid are processed one at a time, so the record
   is saved once and the confirmation email is sent once.

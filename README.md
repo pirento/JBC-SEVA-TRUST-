@@ -3,6 +3,8 @@
 Node.js + Express + EJS website for JBC Seva Trust: donations and membership through PayU,
 medical help requests, user accounts, an admin dashboard and the legal pages.
 
+For setup details, project layout and how to make changes, see [DEVELOPMENT.md](DEVELOPMENT.md).
+
 ## Run
 
 ```bash
@@ -51,11 +53,11 @@ request flow, a signed PayU donation callback, and login rate limiting.
 - **Security:** bcrypt passwords, encrypted records, session id rotated on login, login rate limiting (5 failures → 15 min block), security headers, escaped emails
 
 - **More:** forgot password, Hindi version (`?lang=hi`), field updates with photos, events with registration, monthly giving reminders, WhatsApp receipt/share links
-- **Admin:** CSV exports (donations, funds, Form 10BD, volunteers, messages, events, monthly pledges), go-live checklist, nightly backups (`npm run backup`)
+- **Admin:** CSV exports (donations, funds, Form 10BD, volunteers, messages, events, monthly pledges), nightly backups (`npm run backup`)
 
 ## Going live
 
-1. Fill every value in `.env` (the admin dashboard lists what is missing).
+1. Fill every value in `.env` (the server prints what is missing when it starts).
 2. `NODE_ENV=production`, HTTPS `APP_URL`, `PAYU_ENV=production` with live keys.
 3. Keep `DATA_ENCRYPTION_KEY` safe outside the server; backups cannot be read without it.
 4. When 80G is granted, fill `eightyG` in `config/trustConfig.js` and set `approved: true`.
