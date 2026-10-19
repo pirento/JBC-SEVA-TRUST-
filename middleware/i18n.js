@@ -32,9 +32,13 @@ const dict = new Map(Object.entries(hi).map(([en, h]) => [keyOf(en), escape(h)])
 const tr = (text) => dict.get(text);
 
 // Sentences built around a programme or person name
+// For patterns around a name: only when the name itself has a translation,
+// so text people typed ("Support for medicine", an update title) is left alone
+const known = (fn) => (m) => (tr(m[1]) ? fn(m, tr(m[1])) : null);
+
 const patterns = [
-  [/^Donate to (.+)$/, (m) => `${tr(m[1]) || m[1]} के लिए दान करें`],
-  [/^Support (.+)$/, (m) => `${tr(m[1]) || m[1]} को सहयोग दें`],
+  [/^Donate to (.+)$/, known((m, t) => `${t} के लिए दान करें`)],
+  [/^Support (.+)$/, known((m, t) => `${t} को सहयोग दें`)],
   [/^Wherever (.+) needs it$/, (m) => `जहाँ ${tr(m[1]) || m[1]} को ज़रूरत हो`],
   [
     /^Money given for (.+) is used only for \1\.$/,
@@ -45,8 +49,8 @@ const patterns = [
     (m) =>
       `${tr(m[1]) || m[1]} के लिए अभी कोई अपडेट नहीं। काम होने पर फ़ोटो और खबरें यहाँ दिखेंगी।`,
   ],
-  [/^All (.+) updates →$/, (m) => `${tr(m[1]) || m[1]} के सभी अपडेट →`],
-  [/^(.+): updates$/, (m) => `${tr(m[1]) || m[1]}: अपडेट`],
+  [/^All (.+) updates →$/, known((m, t) => `${t} के सभी अपडेट →`)],
+  [/^(.+): updates$/, known((m, t) => `${t}: अपडेट`)],
   [/^Part of$/, () => "इसका हिस्सा:"],
   [/^Namaste, (.+)$/, (m) => `नमस्ते, ${m[1]}`],
   [/^Thank you, (.+)!$/, (m) => `धन्यवाद, ${m[1]}!`],
@@ -66,14 +70,14 @@ const patterns = [
   ],
   [
     /^(.+) cannot exceed (\d+) characters\.$/,
-    (m) => `${tr(m[1]) || m[1]} ${m[2]} अक्षरों से अधिक नहीं हो सकता।`,
+    known((m, t) => `${t} ${m[2]} अक्षरों से अधिक नहीं हो सकता।`),
   ],
   [
     /^Password must be at least (\d+) characters\.$/,
     (m) => `पासवर्ड कम से कम ${m[1]} अक्षरों का होना चाहिए।`,
   ],
-  [/^(.+) is required$/, (m) => `${tr(m[1]) || m[1]} ज़रूरी है`],
-  [/^(.+) is too long$/, (m) => `${tr(m[1]) || m[1]} बहुत लंबा है`],
+  [/^(.+) is required$/, known((m, t) => `${t} ज़रूरी है`)],
+  [/^(.+) is too long$/, known((m, t) => `${t} बहुत लंबा है`)],
   [/^Call: (.+)$/, (m) => `फ़ोन: ${m[1]}`],
   [/^WhatsApp: (.+)$/, (m) => `व्हाट्सऐप: ${m[1]}`],
   [/^Last updated: (.+)$/, (m) => `अंतिम अपडेट: ${m[1]}`],
@@ -84,7 +88,8 @@ function translateText(text) {
   if (exact) return exact;
   for (const [re, fn] of patterns) {
     const m = text.match(re);
-    if (m) return fn(m);
+    const out = m && fn(m);
+    if (out) return out;
   }
   return null;
 }
@@ -92,7 +97,9 @@ function translateText(text) {
 function translateHtml(html) {
   // Leave <script> and <style> bodies alone
   return html
-    .split(/(<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>)/)
+    .split(
+      /(<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<textarea[\s\S]*?<\/textarea>)/,
+    )
     .map((part, i) => {
       if (i % 2 === 1) return part;
 

@@ -12,8 +12,8 @@ function backupRoot() {
   return process.env.BACKUP_DIR || path.join(dataDir, "backups");
 }
 
-// Photos and medical receipts never change once written (random or
-// unique names). A file already in the previous backup is hard-linked
+// Photos and medical receipts rarely change (random or unique names;
+// a receipt is reprinted only after an admin correction). A file already in the previous backup is hard-linked
 // to it instead of copied again, so each nightly backup is complete
 // but takes no extra space for those files. Links fail on some disks;
 // then the file is simply copied.
@@ -30,7 +30,9 @@ async function copyFiles(from, to, previous, keep = () => true) {
       if (!previous) throw new Error("no earlier backup");
       const old = path.join(previous, entry.name);
       const [before, now] = await Promise.all([fs.stat(old), fs.stat(src)]);
-      if (before.size !== now.size) throw new Error("changed");
+      // A corrected medical receipt is reprinted in place, so check time too
+      if (before.size !== now.size || now.mtimeMs > before.mtimeMs)
+        throw new Error("changed");
       await fs.link(old, dest);
     } catch {
       await fs.copyFile(src, dest);

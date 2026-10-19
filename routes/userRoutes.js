@@ -49,6 +49,13 @@ router.get("/verify-email/:token", controller.verifyEmail);
 router.post("/account/verify", userAuth, verifyLimiter, controller.resendVerification);
 router.post("/account/password", userAuth, passwordLimiter, controller.changePassword);
 router.get("/account/set-password", userAuth, controller.showSetPassword);
-router.post("/account/set-password", userAuth, passwordLimiter, controller.setPassword);
+// Own limiter: typing mistakes on reset or change must not block this step
+const setPasswordLimiter = createRateLimiter({ max: 10 });
+router.post(
+  "/account/set-password",
+  userAuth,
+  setPasswordLimiter,
+  controller.setPassword,
+);
 
 module.exports = router;

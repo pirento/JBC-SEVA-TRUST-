@@ -25,6 +25,18 @@ const fields = [
   "hospitalName",
 ];
 
+// Shown in error messages instead of the field names
+const LABELS = {
+  patientName: "Patient name",
+  aadharNumber: "Aadhaar number",
+  dateBirth: "Date of birth",
+  patientPhoneNumber: "Mobile number",
+  patientEmail: "Email",
+  nameDiseases: "Illness",
+  hospitalName: "Hospital name",
+  patientReferenceName: "Referred by",
+};
+
 // ============================================================
 // CREATE MEDICAL HELP RECORD
 // ============================================================
@@ -36,13 +48,13 @@ async function create(data) {
 
   for (const field of fields) {
     if (!required(data[field])) {
-      throw new Error(`${field} is required`);
+      throw new Error(`${LABELS[field]} is required`);
     }
   }
 
   for (const field of [...fields, "patientReferenceName"]) {
     if (String(data[field] || "").trim().length > 150) {
-      throw new Error(`${field} is too long`);
+      throw new Error(`${LABELS[field]} is too long`);
     }
   }
 

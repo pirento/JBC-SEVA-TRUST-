@@ -5,7 +5,8 @@ const createRateLimiter = require("../middleware/rateLimit");
 const honeypot = require("../middleware/honeypot");
 const { sendUpload } = require("../middleware/upload");
 
-const registerLimiter = createRateLimiter({ max: 20, windowMs: 60 * 60 * 1000 });
+// Generous: staff may register many villagers from the office connection
+const registerLimiter = createRateLimiter({ max: 100, windowMs: 60 * 60 * 1000 });
 
 router.get("/updates", controller.updates);
 router.get("/events", controller.events);

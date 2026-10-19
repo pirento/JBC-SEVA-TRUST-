@@ -19,9 +19,14 @@ async function submitMedical(req, res) {
     );
   } catch (error) {
     console.error("❌ Medical request failed:", error.message);
-    return res.status(400).render("pages/form-error", {
-      message: error.message,
-      backUrl: "/medical",
+    // Show the form again with what they typed, so a long form is not lost
+    const { aadharNumber, ...values } = req.body || {};
+    return res.status(400).render("pages/medical", {
+      error: error.message,
+      values: {
+        ...values,
+        aadharNumber: /^\d{0,12}$/.test(aadharNumber || "") ? aadharNumber : "",
+      },
     });
   }
 }

@@ -58,7 +58,15 @@ async function isReportAlreadySent(reportDate) {
 // SEND DAILY REPORT
 // ============================================================
 
-async function sendDailyReport(reportDate = getIndiaYesterday()) {
+// The 12:10 AM run and the startup catch-up can meet; send once
+let sending = null;
+
+function sendDailyReport(reportDate = getIndiaYesterday()) {
+  if (!sending) sending = runDailyReport(reportDate).finally(() => (sending = null));
+  return sending;
+}
+
+async function runDailyReport(reportDate) {
   console.log("=================================");
   console.log("📊 DAILY REPORT SCHEDULER");
   console.log("📅 Report Date:", reportDate);
@@ -111,7 +119,9 @@ async function sendDailyReport(reportDate = getIndiaYesterday()) {
     const money = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
     const { html, text } = renderEmail({
       heading: `Daily report: ${reportDate}`,
-      paragraphs: ["Today's summary is below. The detailed report is attached as a PDF."],
+      paragraphs: [
+        `Summary for ${reportDate} is below. The detailed report is attached as a PDF.`,
+      ],
       rows: [
         [
           "Donations",
@@ -207,10 +217,12 @@ function startDailyReportScheduler() {
   );
 
   // If the server was down at 12:10 AM, send yesterday's report now
-  // (already-sent days are skipped)
-  sendDailyReport().catch((error) =>
-    console.error("❌ Daily report catch-up failed:", error.message),
-  );
+  // (already-sent days are skipped; nothing to do without email settings)
+  if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    sendDailyReport().catch((error) =>
+      console.error("❌ Daily report catch-up failed:", error.message),
+    );
+  }
 
   console.log("=================================");
   console.log("⏰ Daily Report Scheduler Started");

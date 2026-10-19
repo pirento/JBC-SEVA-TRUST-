@@ -633,6 +633,31 @@ test("medical form validates input and escapes error output", async () => {
   });
   assert.equal(res.status, 400);
   assert.doesNotMatch(res.text, /<script>alert/);
+
+  // The form comes back filled in, with a readable message
+  const kept = await req("/medical", {
+    method: "POST",
+    form: { ...medical, hospitalName: "" },
+  });
+  assert.equal(kept.status, 400);
+  assert.match(kept.text, /Hospital name is required/);
+  assert.match(kept.text, /value="Ram Prasad"/);
+  assert.match(kept.text, /value="Cataract"/);
+
+  // Typed text is not translated in Hindi mode
+  const hindi = await req("/contact", {
+    method: "POST",
+    headers: { cookie: "lang=hi" },
+    form: {
+      name: "Asha",
+      phone: "9876543210",
+      email: "a@example.com",
+      message: "Support for medicine",
+      enquiryType: "",
+      consent: "on",
+    },
+  });
+  assert.match(hindi.text, /Support for medicine<\/textarea>/);
 });
 
 test("medical request is saved with an unguessable reference and shows in account", async () => {
