@@ -1,3 +1,4 @@
+const { realDate } = require("../utils/validation");
 const { readRecords } = require("../models/fileStore");
 const enquiryModel = require("../models/enquiryModel");
 const { listUsers } = require("../models/userModel");
@@ -64,7 +65,7 @@ function paginate(rows, page) {
 }
 
 async function getDashboard({ date = "", view = "donations", q = "", page = 1 } = {}) {
-  const day = /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : "";
+  const day = realDate(date) ? date : "";
   const tab = VIEWS.includes(view) ? view : "donations";
 
   const [

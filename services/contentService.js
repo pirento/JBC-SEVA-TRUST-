@@ -8,7 +8,15 @@ const { sendEmail } = require("./emailService");
 const { trustEmail } = require("../config/emailConfig");
 const { appUrl } = require("../config/appConfig");
 const { renderEmail } = require("./emailTemplate");
-const { required, phone, email, accepted, personName } = require("../utils/validation");
+const {
+  required,
+  phone,
+  email,
+  accepted,
+  personName,
+  realDate,
+  todayIndia,
+} = require("../utils/validation");
 
 function invalid(message) {
   const error = new Error(message);
@@ -30,8 +38,7 @@ function programmeSlug(value) {
   return slug;
 }
 
-// Local date (the app runs in Indian time), as YYYY-MM-DD
-const today = () => new Date().toLocaleDateString("en-CA");
+const today = todayIndia;
 
 // ---------------- Updates ----------------
 
@@ -68,8 +75,7 @@ async function deleteUpdate(id) {
 
 async function createEvent(input) {
   const date = String(input.date || "");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date)))
-    throw invalid("Please enter a valid event date.");
+  if (!realDate(date)) throw invalid("Please enter a valid event date.");
   if (date < today()) throw invalid("Event date cannot be in the past.");
 
   const time = String(input.time || "");

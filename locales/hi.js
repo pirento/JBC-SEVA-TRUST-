@@ -623,7 +623,8 @@ module.exports = {
   "Number of people must be between 1 and 20.":
     "लोगों की संख्या 1 से 20 के बीच होनी चाहिए।",
   "Please enter a valid date of birth": "कृपया सही जन्म तिथि लिखें",
-  "Aadhar number must be 12 digits": "आधार नंबर 12 अंकों का होना चाहिए",
+  "Please enter a valid 12 digits Aadhaar number, as printed on the card":
+    "कृपया कार्ड पर छपा सही 12 अंकों का आधार नंबर डालें",
   "Phone number must be 10 digits": "फ़ोन नंबर 10 अंकों का होना चाहिए",
   "Please accept the Terms and Privacy Policy":
     "कृपया नियम और गोपनीयता नीति स्वीकार करें",

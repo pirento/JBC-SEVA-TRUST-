@@ -62,7 +62,9 @@ async function create(data) {
   // ----------------------------------------------------------
 
   if (!aadhar(data.aadharNumber)) {
-    throw new Error("Aadhar number must be 12 digits");
+    throw new Error(
+      "Please enter a valid 12 digits Aadhaar number, as printed on the card",
+    );
   }
 
   // ----------------------------------------------------------

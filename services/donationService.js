@@ -26,6 +26,8 @@ const {
   accepted,
   personName,
   fewLinks,
+  realDate,
+  todayIndia,
 } = require("../utils/validation");
 
 const {
@@ -161,16 +163,15 @@ function validateDonationDetails(page, input) {
 
   if (options.sevaDate && text(input.sevaDate)) {
     sevaDate = text(input.sevaDate);
-    const date = new Date(`${sevaDate}T00:00:00Z`);
-    const today = new Date(new Date().toISOString().slice(0, 10));
-    const yearAhead = new Date(today.getTime() + 366 * 24 * 60 * 60 * 1000);
+    // Compared as YYYY-MM-DD in Indian time ("today" is today in India)
+    const today = todayIndia();
+    const yearAhead = new Date(`${today}T00:00:00Z`);
+    yearAhead.setUTCDate(yearAhead.getUTCDate() + 366);
 
     if (
-      !/^\d{4}-\d{2}-\d{2}$/.test(sevaDate) ||
-      Number.isNaN(date.getTime()) ||
-      date.toISOString().slice(0, 10) !== sevaDate ||
-      date < today ||
-      date > yearAhead
+      !realDate(sevaDate) ||
+      sevaDate < today ||
+      sevaDate > yearAhead.toISOString().slice(0, 10)
     ) {
       throw new Error("Seva date must be a valid date within the next year.");
     }

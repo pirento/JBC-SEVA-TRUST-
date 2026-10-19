@@ -130,14 +130,22 @@ const exports_ = {
     const religious = new Set(
       donationPages.filter((p) => p.donation.religious).map((p) => p.title),
     );
-    const fy = /^\d{4}-\d{2}$/.test(query.fy || "")
-      ? query.fy
-      : financialYear(new Date());
+    // "2026-27": the second year must follow the first
+    const m = /^(\d{4})-(\d{2})$/.exec(query.fy || "");
+    const fy =
+      m && (Number(m[1]) + 1) % 100 === Number(m[2])
+        ? query.fy
+        : financialYear(new Date());
+
+    // Only gifts inside the 80G approval period count as 80G donations
+    const inApproval = (year) =>
+      (!eightyG.validFrom || year >= eightyG.validFrom) &&
+      (!eightyG.validTo || year <= eightyG.validTo);
 
     const byPan = new Map();
     for (const d of await successfulDonations()) {
-      if (!d.pan || religious.has(d.cause) || financialYear(d.paymentDate) !== fy)
-        continue;
+      const year = financialYear(d.paymentDate);
+      if (!d.pan || religious.has(d.cause) || year !== fy || !inApproval(year)) continue;
       const row = byPan.get(d.pan) || {
         pan: d.pan,
         name: d.donorName,

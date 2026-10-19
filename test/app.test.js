@@ -487,7 +487,7 @@ test("someone registering with another person's email cannot see their records",
     form: {
       ...medical,
       patientEmail: "victim@example.com",
-      aadharNumber: "999988887777",
+      aadharNumber: "999988887779",
     },
   });
 
@@ -598,7 +598,7 @@ test("admin login: wrong password rejected, right password opens dashboard", asy
 
 const medical = {
   patientName: "Ram Prasad",
-  aadharNumber: "123412341234",
+  aadharNumber: "234123412346",
   dateBirth: "1960-05-10",
   patientPhoneNumber: "9123456780",
   patientEmail: "asha@example.com",
@@ -887,8 +887,8 @@ test("temple donation keeps purpose, dedication, seva date and gotra end to end"
   assert.match(res.text, /Community Temple,1,501/);
 
   res = await req("/admin/export/medical");
-  assert.match(res.text, /XXXX-XXXX-1234/);
-  assert.doesNotMatch(res.text, /123412341234/, "full Aadhaar never exported");
+  assert.match(res.text, /XXXX-XXXX-2346/);
+  assert.doesNotMatch(res.text, /234123412346/, "full Aadhaar never exported");
 
   assert.equal((await req("/admin/export/unknown")).status, 404);
   assert.equal(

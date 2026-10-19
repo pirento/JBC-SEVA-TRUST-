@@ -1,4 +1,5 @@
 const { authenticateAdmin } = require("../services/adminAuthService");
+const { realDate } = require("../utils/validation");
 const { getDailyReport } = require("../services/adminReportService");
 const { generateDailyReportPdf } = require("../services/adminReportPdfService");
 const { getDashboard } = require("../services/adminDashboardService");
@@ -93,10 +94,7 @@ exports.downloadDailyReport = async (req, res, next) => {
   try {
     const selectedDate = String(req.query.date || "").trim();
 
-    if (
-      !/^\d{4}-\d{2}-\d{2}$/.test(selectedDate) ||
-      Number.isNaN(Date.parse(selectedDate))
-    ) {
+    if (!realDate(selectedDate)) {
       return res.status(400).render("pages/form-error", {
         message: "Please choose a valid report date.",
         backUrl: "/admin/dashboard",

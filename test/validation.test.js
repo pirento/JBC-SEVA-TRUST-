@@ -20,10 +20,15 @@ test("pastDate accepts real past dates only", () => {
   assert.ok(!v.pastDate("1850-01-01"));
   assert.ok(!v.pastDate("10/05/1990"));
   assert.ok(!v.pastDate(""));
+  assert.ok(v.realDate("2028-02-29"));
+  assert.ok(!v.realDate("2026-02-30"));
+  assert.ok(!v.realDate("2026-13-01"));
 });
 
 test("aadhar, email, consent", () => {
-  assert.ok(v.aadhar("123412341234"));
+  assert.ok(v.aadhar("234123412346"));
+  assert.ok(!v.aadhar("234123412345"), "wrong check digit (one-digit typo)");
+  assert.ok(!v.aadhar("123412341234"), "cannot start with 0 or 1");
   assert.ok(!v.aadhar("1234 1234 1234"));
   assert.ok(v.email("a@b.co"));
   assert.ok(!v.email("a@b"));
