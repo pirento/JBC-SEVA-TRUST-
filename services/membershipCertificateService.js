@@ -1,3 +1,4 @@
+const { eightyG } = require("../config/trustConfig");
 const {
   renderCertificatePdf,
   safe,
@@ -68,7 +69,9 @@ function generateMembershipCertificate(data) {
     ],
     note:
       "Membership does not give ownership, voting or management rights in the Trust. " +
-      "80G tax-exemption receipts will be issued only after the Trust receives 80G approval. " +
+      (eightyG.approved
+        ? ""
+        : "80G tax-exemption receipts will be issued only after the Trust receives 80G approval. ") +
       "This is a computer-generated certificate.",
   });
 }

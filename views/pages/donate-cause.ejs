@@ -117,7 +117,7 @@
               <input id="dPan" name="pan" type="text" maxlength="10" autocomplete="off"
                 pattern="[A-Za-z]{5}[0-9]{4}[A-Za-z]" title="10 character PAN, e.g. ABCDE1234F"
                 value="<%= v.pan || '' %>" />
-              <small><%= opt.religious ? 'Optional, for our records.' : 'Needed for an 80G receipt once the trust is approved.' %> Stored encrypted.</small>
+              <small><%= opt.religious ? 'Optional, for our records.' : trust.eightyG.approved ? 'Needed for your 80G receipt.' : 'Needed for an 80G receipt once the trust is approved.' %> Stored encrypted.</small>
             </div>
           </div>
 

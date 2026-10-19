@@ -654,4 +654,51 @@ module.exports = {
   "This confirmation link is invalid or has expired. Log in and ask for a new one from My Account.":
     "यह पुष्टि लिंक गलत है या इसकी अवधि खत्म हो गई है। लॉगिन करके मेरे खाते से नया लिंक माँगें।",
   "Legal pages": "कानूनी पेज",
+
+  // ---------- Form errors and result pages ----------
+  "Transaction ID:": "ट्रांज़ैक्शन आईडी:",
+  "If money was debited from your account, please do not pay again. It is usually refunded by the bank automatically; otherwise":
+    "अगर आपके खाते से पैसा कट गया है, तो दोबारा भुगतान न करें। आमतौर पर बैंक इसे अपने आप लौटा देता है; नहीं तो",
+  "contact us": "हमसे संपर्क करें",
+  "with the transaction ID.": "और ट्रांज़ैक्शन आईडी बताएँ।",
+  "Yes, we will remind you each month": "हाँ, हम हर महीने याद दिलाएँगे",
+  "Unknown programme.": "अज्ञात कार्यक्रम।",
+  "Please enter a valid event date.": "कृपया सही कार्यक्रम तिथि डालें।",
+  "Event date cannot be in the past.": "कार्यक्रम की तिथि बीती हुई नहीं हो सकती।",
+  "Please enter a valid time.": "कृपया सही समय डालें।",
+  "Donor name cannot exceed 100 characters.":
+    "दानदाता का नाम 100 अक्षरों से अधिक नहीं हो सकता।",
+  "Donation amount must be greater than 0.": "दान राशि 0 से अधिक होनी चाहिए।",
+  "Please choose a valid dedication.": "कृपया सही समर्पण चुनें।",
+  "Dedication cannot exceed 100 characters.": "समर्पण 100 अक्षरों से अधिक नहीं हो सकता।",
+  "Gotra cannot exceed 50 characters.": "गोत्र 50 अक्षरों से अधिक नहीं हो सकता।",
+  "Address cannot exceed 300 characters.": "पता 300 अक्षरों से अधिक नहीं हो सकता।",
+  "Please choose what your message is about.":
+    "कृपया चुनें कि आपका संदेश किस बारे में है।",
+  "Member name cannot exceed 100 characters.":
+    "सदस्य का नाम 100 अक्षरों से अधिक नहीं हो सकता।",
+  "Email is required": "ईमेल ज़रूरी है",
+  "Email is required.": "ईमेल ज़रूरी है।",
+  "Please enter a valid email address": "कृपया सही ईमेल पता डालें",
+  "Membership amount must be greater than 0": "सदस्यता राशि 0 से अधिक होनी चाहिए",
+  "Minimum membership amount is ₹100.": "न्यूनतम सदस्यता राशि ₹100 है।",
+  "Minimum membership amount is ₹100": "न्यूनतम सदस्यता राशि ₹100 है",
+  "Payment mode is required": "भुगतान का तरीका चुनना ज़रूरी है",
+  "Payment mode is required.": "भुगतान का तरीका चुनना ज़रूरी है।",
+  "Please accept the Terms, Privacy Policy and Refund Policy":
+    "कृपया नियम, गोपनीयता नीति और रिफ़ंड नीति स्वीकार करें",
+  "Password is too long (maximum 72 characters).":
+    "पासवर्ड बहुत लंबा है (अधिकतम 72 अक्षर)।",
+  "Name cannot exceed 100 characters.": "नाम 100 अक्षरों से अधिक नहीं हो सकता।",
+  "Account not found.": "खाता नहीं मिला।",
+  "Current password is incorrect.": "मौजूदा पासवर्ड गलत है।",
+  "Donor name is required.": "दानदाता का नाम ज़रूरी है।",
+  "Member name is required.": "सदस्य का नाम ज़रूरी है।",
+  "Member name is required": "सदस्य का नाम ज़रूरी है",
+  "Name is required.": "नाम ज़रूरी है।",
+  "Valid online payment mode is required.": "कृपया ऑनलाइन भुगतान का सही तरीका चुनें।",
+  "Payment was received, but donation processing failed. Please contact the Trust with your transaction ID.":
+    "भुगतान मिल गया, लेकिन दान दर्ज करने में दिक्कत आई। कृपया अपनी ट्रांज़ैक्शन आईडी के साथ ट्रस्ट से संपर्क करें।",
+  "Payment was received, but membership processing failed. Please contact the Trust with your transaction ID.":
+    "भुगतान मिल गया, लेकिन सदस्यता दर्ज करने में दिक्कत आई। कृपया अपनी ट्रांज़ैक्शन आईडी के साथ ट्रस्ट से संपर्क करें।",
 };

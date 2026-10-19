@@ -236,8 +236,8 @@
             <h2>About the trust</h2>
             <p>
               <%= trust.name %> is a <%= trust.legalForm.toLowerCase() %> based in
-              <%= trust.location %>. "JBC" stands for Jang Bahadur Chaudhary, who
-              started the trust together with Ravikant Soni.
+              <%= trust.location %>. "JBC" stands for <%= trust.trustees[0].name %>, who
+              started the trust together with <%= trust.trustees[1].name %>.
             </p>
             <p>
               The trust is an independent body with its own bank account, books and

@@ -71,9 +71,16 @@
     the reminders at any time from My Account.
   </li>
   <li>
-    <strong>Tax receipts:</strong> the Trust does not yet have 80G approval.
-    Receipts issued now are not 80G receipts and no tax benefit is promised.
-    80G receipts will be issued only after approval from the Income Tax Department.
+    <% if (trust.eightyG.approved) { %>
+      <strong>Tax receipts:</strong> the Trust is approved under Section 80G
+      (Registration No. <%= trust.eightyG.registrationNumber %>, valid
+      <%= trust.eightyG.validFrom %> to <%= trust.eightyG.validTo %>). Receipts for
+      charitable causes are 80G receipts; Temple Fund gifts are generally not eligible.
+    <% } else { %>
+      <strong>Tax receipts:</strong> the Trust does not yet have 80G approval.
+      Receipts issued now are not 80G receipts and no tax benefit is promised.
+      80G receipts will be issued only after approval from the Income Tax Department.
+    <% } %>
   </li>
   <li>
     The Trust does not accept foreign contributions, because it does not have

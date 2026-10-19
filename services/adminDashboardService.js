@@ -43,12 +43,23 @@ function onDate(records, date) {
   return date ? records.filter((record) => isSameDate(record, date)) : records;
 }
 
+// Matches field values only (not field names or JSON punctuation), and
+// never the full Aadhaar number, which the dashboard shows masked
 function search(rows, query) {
   const q = String(query || "")
+    .slice(0, 100)
     .trim()
     .toLowerCase();
   if (!q) return rows;
-  return rows.filter((row) => JSON.stringify(row).toLowerCase().includes(q));
+  return rows.filter((row) =>
+    Object.entries(row)
+      .filter(([key]) => key !== "aadharNumber")
+      .some(([, value]) =>
+        String(value ?? "")
+          .toLowerCase()
+          .includes(q),
+      ),
+  );
 }
 
 function paginate(rows, page) {

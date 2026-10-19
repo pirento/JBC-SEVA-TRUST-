@@ -10,11 +10,18 @@
 
 <h2>2. Registration and tax benefits</h2>
 <p>
-  <%= trust.name %> will issue tax-exemption receipts under Section 80G of the
-  Income Tax Act only after it receives 80G approval. Until then, donations do
-  not carry any promised tax benefit. Temple Fund donations are generally not
-  eligible for 80G even after approval. Please check with your tax adviser.
-  The Trust does not accept foreign contributions.
+  <% if (trust.eightyG.approved) { %>
+    <%= trust.name %> is approved under Section 80G of the Income Tax Act
+    (Registration No. <%= trust.eightyG.registrationNumber %>, valid
+    <%= trust.eightyG.validFrom %> to <%= trust.eightyG.validTo %>). The tax benefit
+    depends on your own tax situation.
+  <% } else { %>
+    <%= trust.name %> will issue tax-exemption receipts under Section 80G of the
+    Income Tax Act only after it receives 80G approval. Until then, donations do
+    not carry any promised tax benefit.
+  <% } %>
+  Temple Fund donations are generally not eligible for 80G. Please check with
+  your tax adviser. The Trust does not accept foreign contributions.
 </p>
 
 <h2>3. Medical help</h2>
