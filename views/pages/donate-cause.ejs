@@ -114,6 +114,13 @@
             </div>
           </div>
 
+          <div class="field">
+            <label for="dAddress">Address <span class="muted">(optional)</span></label>
+            <input id="dAddress" name="address" type="text" maxlength="300" autocomplete="street-address"
+              value="<%= v.address || '' %>" />
+            <small>Needed with PAN for 80G reporting. Stored encrypted.</small>
+          </div>
+
           <%- include('../partials/payment-mode') %>
 
           <div class="field">
@@ -144,7 +151,7 @@
             <li>Your receipt is emailed to you and can be downloaded.</li>
             <li>The money goes into the <strong><%= page.title %></strong> fund<%= opt.religious ? ', kept apart from the charitable programmes' : '' %>.</li>
           </ol>
-          <p class="muted small"><%= opt.religious ? trust.taxNotes.religious : trust.taxNotes.default %></p>
+          <p class="muted small"><%= trust.taxNote(page.title) %></p>
         </div>
       </aside>
     </div>

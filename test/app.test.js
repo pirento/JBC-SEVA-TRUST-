@@ -644,6 +644,35 @@ test("temple donation keeps purpose, dedication, seva date and gotra end to end"
   assert.equal((await client()("/admin/export/donations")).status, 302, "needs admin login");
 });
 
+test("Form 10BD export lists charitable donors by PAN, never temple gifts", async () => {
+  const req = client();
+  for (const amount of ["1000", "500"]) {
+    const callback = await startDonation(req, { ...donation, amount, pan: "PQRSX6789K", address: "Village Mudila, Basti" });
+    assert.equal((await req("/donate/success", { method: "POST", form: callback })).status, 200);
+  }
+
+  const admin = client();
+  await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+  const res = await admin("/admin/export/form-10bd");
+  assert.match(res.text, /PQRSX6789K/);
+  assert.match(res.text, /Village Mudila, Basti/);
+  assert.match(res.text, /,1500\r\n/, "two gifts from one PAN are added up");
+  assert.doesNotMatch(res.text, /ABCDE1234F/, "temple donor excluded");
+});
+
+test("tax note claims 80G only after approval, never for the temple", () => {
+  const trust = require("../config/trustConfig");
+  assert.match(trust.taxNote("Green Earth"), /only after the Trust receives 80G approval/);
+
+  Object.assign(trust.eightyG, { approved: true, registrationNumber: "URN123", validFrom: "2026-27", validTo: "2030-31", trustPan: "AAATJ0000X" });
+  try {
+    assert.match(trust.taxNote("Green Earth"), /Eligible for deduction under Section 80G.*URN123/);
+    assert.match(trust.taxNote("Community Temple"), /not eligible for 80G/);
+  } finally {
+    trust.eightyG.approved = false;
+  }
+});
+
 test("backup copies the data files and admin sees the go-live checklist", async () => {
   const { runBackup } = require("../services/backupService");
   const target = await runBackup();

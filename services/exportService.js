@@ -2,7 +2,14 @@ const { readRecords } = require("../models/fileStore");
 const enquiryModel = require("../models/enquiryModel");
 const contentModel = require("../models/contentModel");
 const { toCsv } = require("../utils/csv");
-const { donationPages, GENERAL_CAUSE } = require("../config/trustConfig");
+const { donationPages, GENERAL_CAUSE, eightyG } = require("../config/trustConfig");
+
+// Indian financial year (April-March) of a date, e.g. "2026-27"
+function financialYear(dateValue) {
+  const d = new Date(dateValue);
+  const start = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
+  return `${start}-${String(start + 1).slice(-2)}`;
+}
 const {
   normalizeMembership,
   normalizeDonation,
@@ -109,6 +116,38 @@ const exports_ = {
       ["Role", (r) => r.role],
     ]),
 
+  // Donor list in the shape of Form 10BD: one row per donor PAN,
+  // charitable funds only (temple gifts are not 80G donations)
+  "form-10bd": async (query = {}) => {
+    const religious = new Set(donationPages.filter((p) => p.donation.religious).map((p) => p.title));
+    const fy = /^\d{4}-\d{2}$/.test(query.fy || "") ? query.fy : financialYear(new Date());
+
+    const byPan = new Map();
+    for (const d of await successfulDonations()) {
+      if (!d.pan || religious.has(d.cause) || financialYear(d.paymentDate) !== fy) continue;
+      const row = byPan.get(d.pan) || { pan: d.pan, name: d.donorName, address: d.address, amount: 0 };
+      row.amount += Number(d.amount || 0);
+      row.address = row.address || d.address;
+      byPan.set(d.pan, row);
+    }
+
+    let sr = 0;
+    return toCsv([...byPan.values()], [
+      ["Sr. No.", () => ++sr],
+      ["Financial Year", () => fy],
+      ["ID Code", () => "Permanent Account Number"],
+      ["Unique Identification Number", (r) => r.pan],
+      ["Section Code", () => "Section 80G"],
+      ["Unique Registration Number (URN)", () => eightyG.registrationNumber],
+      ["Date of Issuance of URN", () => eightyG.approvedOn],
+      ["Name of Donor", (r) => r.name],
+      ["Address of Donor", (r) => r.address],
+      ["Donation Type", () => "Others"],
+      ["Mode of Receipt", () => "Electronic modes including account payee cheque/draft"],
+      ["Amount of Donation (Indian rupees)", (r) => r.amount],
+    ]);
+  },
+
   funds: async () => {
     const donations = await successfulDonations();
     const rows = donationPages.map((page) => {
@@ -127,10 +166,10 @@ const exports_ = {
   },
 };
 
-async function buildExport(type) {
+async function buildExport(type, query) {
   const build = exports_[type];
   if (!build) return null;
-  return build();
+  return build(query);
 }
 
 module.exports = { buildExport, exportTypes: Object.keys(exports_), successfulDonations };

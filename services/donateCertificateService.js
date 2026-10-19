@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const { renderCertificatePdf, safe, formatDate } = require("./certificateDesign");
-const { donationPages, taxNotes, GENERAL_CAUSE } = require("../config/trustConfig");
+const { taxNote, eightyG, GENERAL_CAUSE } = require("../config/trustConfig");
 const { dataDir } = require("../config/appConfig");
 
 // ============================================================
@@ -26,7 +26,6 @@ function generateCertificateNumber(data) {
 
 async function generateDonationCertificate(data) {
   const cause = safe(data.cause, GENERAL_CAUSE);
-  const page = donationPages.find((p) => p.title === cause);
   const purpose = String(data.purpose || "").trim();
   const certificateNumber = generateCertificateNumber(data);
 
@@ -51,9 +50,11 @@ async function generateDonationCertificate(data) {
       ["Transaction ID", safe(data.txnid || data.transactionId, "N/A")],
       ["Payment ID", safe(data.mihpayid || data.payuPaymentId, "")],
       ["Seva Date", data.sevaDate ? formatDate(data.sevaDate) : ""],
+      // Donor PAN is needed on an 80G receipt; shown only once approved
+      ["Donor PAN", eightyG.approved ? data.pan : ""],
     ],
     note:
-      (page && page.donation.religious ? taxNotes.religious : taxNotes.default) +
+      taxNote(cause) +
       " This is a computer-generated certificate.",
   });
 

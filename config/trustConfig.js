@@ -140,11 +140,37 @@ const generalDonation = {
 
 const dedicationTypes = ["In memory of", "In honour of", "On the occasion of"];
 
-// Shown on receipts; never claim 80G before approval is received
+// Fill in ONLY when the Income Tax Department has granted 80G.
+// Until `approved` is true no receipt claims any tax benefit.
+const eightyG = {
+  approved: false,
+  registrationNumber: "", // 80G URN, e.g. AAATJ0000XE20261
+  approvedOn: "", // date of the URN, YYYY-MM-DD
+  validFrom: "", // e.g. 2026-27
+  validTo: "", // e.g. 2030-31
+  trustPan: "",
+};
+
 const taxNotes = {
   default: "80G tax-exemption receipts will be issued only after the Trust receives 80G approval.",
   religious: "Kept in the separate Temple Fund. Temple donations are generally not eligible for 80G deduction.",
 };
+
+// The tax line for a receipt of the given cause title
+function taxNote(causeTitle) {
+  const page = [generalDonation, ...programmes].find((p) => p.title === causeTitle);
+  if (page && page.donation.religious) return taxNotes.religious;
+
+  if (eightyG.approved) {
+    return (
+      `Eligible for deduction under Section 80G of the Income Tax Act. ` +
+      `80G Registration No. ${eightyG.registrationNumber}, valid ${eightyG.validFrom} to ${eightyG.validTo}. ` +
+      `Trust PAN: ${eightyG.trustPan}.`
+    );
+  }
+
+  return taxNotes.default;
+}
 
 // Causes a donor can pick; earmarked money goes only to that cause
 const donationCauses = [GENERAL_CAUSE, ...programmes.map((p) => p.title)];
@@ -177,6 +203,8 @@ module.exports = {
   generalDonation,
   dedicationTypes,
   taxNotes,
+  taxNote,
+  eightyG,
   // Every donation page: "Where Most Needed" first, then the programmes
   donationPages: [generalDonation, ...programmes],
   volunteerAreas: [

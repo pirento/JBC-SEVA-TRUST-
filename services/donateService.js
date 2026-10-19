@@ -189,6 +189,12 @@ function validateDonationDetails(page, input) {
     throw new Error("Gotra cannot exceed 50 characters.");
   }
 
+  const address = text(input.address);
+
+  if (address.length > 300) {
+    throw new Error("Address cannot exceed 300 characters.");
+  }
+
   const pan = text(input.pan).toUpperCase();
 
   if (pan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) {
@@ -202,6 +208,7 @@ function validateDonationDetails(page, input) {
     sevaDate,
     gotra,
     pan,
+    address,
   };
 }
 

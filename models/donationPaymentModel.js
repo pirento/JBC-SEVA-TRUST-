@@ -106,6 +106,7 @@ async function create(data) {
     sevaDate: String(data.sevaDate || "").trim(),
     gotra: String(data.gotra || "").trim(),
     pan: String(data.pan || "").trim(),
+    address: String(data.address || "").trim(),
 
     paymentDate:
       data.paymentDate ||

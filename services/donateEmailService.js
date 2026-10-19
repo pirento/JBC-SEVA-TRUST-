@@ -2,7 +2,7 @@ const path = require("path");
 
 const { sendEmail } = require("./emailService");
 const escapeHtml = require("../utils/escapeHtml");
-const { donationPages, taxNotes } = require("../config/trustConfig");
+const { taxNote: taxNoteFor } = require("../config/trustConfig");
 
 async function sendDonationCertificateEmail({
   donation,
@@ -39,8 +39,7 @@ async function sendDonationCertificateEmail({
     ["Gotra", donation.gotra],
   ].filter(([, value]) => value);
 
-  const page = donationPages.find((p) => p.title === donation.cause);
-  const taxNote = page && page.donation.religious ? taxNotes.religious : taxNotes.default;
+  const taxNote = taxNoteFor(donation.cause);
 
   const subject =
     `Donation Receipt - ${donation.cause || "JBC Seva Trust"} - JBC Seva Trust`;

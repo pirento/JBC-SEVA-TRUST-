@@ -1543,7 +1543,7 @@ JBC Seva Trust`,
 
 exports.exportCsv = async (req, res, next) => {
   try {
-    const csv = await buildExport(req.params.type);
+    const csv = await buildExport(req.params.type, req.query);
     if (csv === null) return next();
 
     const date = new Date().toISOString().slice(0, 10);
