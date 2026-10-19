@@ -11,6 +11,9 @@
       <h1 class="form-title">Welcome back</h1>
       <p class="form-intro">Log in to see your donations, memberships and receipts.</p>
 
+      <% if (locals.notice) { %>
+        <div class="alert success" role="status"><%= notice %></div>
+      <% } %>
       <% if (error) { %>
         <div class="alert error" role="alert"><%= error %></div>
       <% } %>
@@ -38,7 +41,7 @@
       </form>
 
       <p class="auth-switch">New here? <a href="/register">Create an account</a></p>
-      <p class="auth-switch muted">Forgot your password? Please contact the trust<% if (trustEmail) { %> at <a href="mailto:<%= trustEmail %>"><%= trustEmail %></a><% } %>.</p>
+      <p class="auth-switch"><a href="/forgot-password">Forgot your password?</a></p>
     </section>
   </main>
 

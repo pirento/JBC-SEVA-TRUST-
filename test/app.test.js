@@ -331,6 +331,39 @@ test("full user journey: register, logout, login, change password", async () => 
   assert.equal(res.status, 302, "new password works");
 });
 
+test("forgot password: same answer for unknown email, link resets password once", async () => {
+  const req = client();
+  const userAuthService = require("../services/userAuthService");
+  await req("/register", { method: "POST", form: { ...user, email: "reset@example.com" } });
+  await req("/logout", { method: "POST" });
+
+  let res = await req("/forgot-password", { method: "POST", form: { email: "nobody-here@example.com" } });
+  assert.equal(res.status, 200);
+  assert.match(res.text, /If an account exists/);
+
+  res = await req("/forgot-password", { method: "POST", form: { email: "reset@example.com" } });
+  assert.match(res.text, /If an account exists/);
+
+  const token = await userAuthService.requestPasswordReset("reset@example.com");
+  assert.match(token, /^[a-f0-9]{64}$/);
+
+  assert.equal((await req("/reset-password/" + "0".repeat(64))).status, 400, "unknown token");
+
+  res = await req(`/reset-password/${token}`, { method: "POST", form: { password: "short", confirmPassword: "short" } });
+  assert.equal(res.status, 400);
+  assert.match(res.text, /at least 8/);
+
+  res = await req(`/reset-password/${token}`, { method: "POST", form: { password: "fresh2026pw", confirmPassword: "fresh2026pw" } });
+  assert.equal(res.status, 302);
+  assert.equal(res.location, "/login?reset=1");
+
+  res = await req(`/reset-password/${token}`, { method: "POST", form: { password: "again2026pw", confirmPassword: "again2026pw" } });
+  assert.equal(res.status, 400, "link works only once");
+
+  res = await req("/login", { method: "POST", form: { email: "reset@example.com", password: "fresh2026pw" } });
+  assert.equal(res.status, 302, "new password works");
+});
+
 test("login ignores off-site redirect targets", async () => {
   const req = client();
   await req("/register", { method: "POST", form: { ...user, email: "redir@example.com" } });

@@ -62,6 +62,7 @@ function showLogin(req, res) {
     error: null,
     values: {},
     next: safeNext(req.query.next),
+    notice: req.query.reset === "1" ? "Your password has been changed. Please log in." : null,
   });
 }
 
@@ -133,7 +134,61 @@ async function changePassword(req, res, next) {
   }
 }
 
+function showForgot(req, res) {
+  res.render("user/forgot-password", { sent: false, error: null });
+}
+
+async function forgot(req, res, next) {
+  req.rateLimit?.hit();
+
+  const email = String((req.body || {}).email || "").trim();
+  if (!email) {
+    return res.status(400).render("user/forgot-password", { sent: false, error: "Please enter your email." });
+  }
+
+  try {
+    await userAuthService.requestPasswordReset(email);
+    return res.render("user/forgot-password", { sent: true, error: null });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function showReset(req, res, next) {
+  try {
+    const user = await userAuthService.findByResetToken(req.params.token);
+    return res.status(user ? 200 : 400).render("user/reset-password", {
+      valid: Boolean(user),
+      error: null,
+      token: req.params.token,
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function reset(req, res, next) {
+  try {
+    await userAuthService.resetPassword(req.params.token, req.body || {});
+    return res.redirect("/login?reset=1");
+  } catch (error) {
+    if (!error.expose) return next(error);
+
+    req.rateLimit?.hit();
+
+    return res.status(400).render("user/reset-password", {
+      valid: !/invalid or has expired/.test(error.message),
+      error: error.message,
+      token: req.params.token,
+    });
+  }
+}
+
 module.exports = {
+  showForgot,
+  forgot,
+  showReset,
+  reset,
   showRegister,
   register,
   showLogin,
