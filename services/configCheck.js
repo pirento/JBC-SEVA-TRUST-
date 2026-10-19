@@ -43,6 +43,7 @@ function goLiveChecks() {
       ].every(has),
     },
     { label: "Backups on a separate disk (BACKUP_DIR)", ok: has("BACKUP_DIR") },
+    { label: "Database: MongoDB (MONGODB_URI)", ok: has("MONGODB_URI") },
   ];
 }
 

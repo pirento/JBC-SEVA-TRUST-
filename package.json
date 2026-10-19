@@ -7,25 +7,30 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "test": "node --test --test-force-exit",
+    "test:mongo": "node scripts/testWithMongo.js",
     "hash-password": "node scripts/hashPassword.js",
     "backup": "node scripts/backup.js",
+    "migrate:mongo": "node scripts/migrateToMongo.js",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "compression": "^1.8.2",
+    "connect-mongo": "^5.1.0",
     "dotenv": "^17.4.2",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-session": "^1.19.0",
     "memorystore": "^1.6.8",
+    "mongodb": "^6.21.0",
     "multer": "^2.4.0",
     "node-cron": "^4.6.0",
     "nodemailer": "^10.0.0",
     "pdfkit": "^0.20.2"
   },
   "devDependencies": {
+    "mongodb-memory-server": "^11.3.0",
     "nodemon": "^3.1.10",
     "prettier": "^3.9.10"
   }

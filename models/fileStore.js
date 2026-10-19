@@ -314,33 +314,14 @@ async function readRecordsFromDisk(fileName, filePath) {
 }
 
 // ========================================
-// READ FILE
-// ========================================
-//
-// Kept for compatibility with existing code.
-//
-// Returns decrypted records as JSON string.
-//
-// ========================================
-
-async function readFile(fileName) {
-  const records = await readRecords(fileName);
-
-  if (records.length === 0) {
-    return "";
-  }
-
-  return JSON.stringify(records, null, 2);
-}
-
-// ========================================
 // EXPORT
 // ========================================
+// With MONGODB_URI set, records live in MongoDB (models/mongoStore.js)
+// through the same two functions; otherwise in the encrypted files here.
+// `files` is always the file store, for the migration script.
 
-module.exports = {
-  appendRecord,
+const files = { appendRecord, readRecords };
 
-  readFile,
-
-  readRecords,
-};
+module.exports = process.env.MONGODB_URI
+  ? { ...require("./mongoStore"), files }
+  : { ...files, files };

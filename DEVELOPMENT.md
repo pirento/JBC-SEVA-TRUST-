@@ -158,9 +158,9 @@ Step-by-step server guide (VPS, Nginx, HTTPS, pm2, PayU): [docs/deploy.md](docs/
 
 ## 11. Known limits
 
-- File storage reads whole files (decrypted records are cached until the file changes); move to a database (PostgreSQL) when records reach the tens of thousands.
-- Measured with 5,000 donations, 2,000 accounts and 1,500 memberships (production mode, one process): public pages about 550–1,000 requests per second; admin dashboard about 7 ms per request.
-- Sessions and rate limits are in memory: a restart logs everyone out, and it supports one server process only.
+- Records are in MongoDB (`MONGODB_URI`) or, without it, encrypted files; either way each record is encrypted and a collection is read whole (cached until a record is added). Once records reach the tens of thousands, store searchable fields in clear with indexes and keep only personal data encrypted.
+- Measured with 5,000 donations, 2,000 accounts and 1,500 memberships (production mode, one process, file storage): public pages about 550–1,000 requests per second; admin dashboard about 7 ms per request. On MongoDB (same data, development mode) pages took 60–120 ms at 20 at a time, about 20–40% slower than files.
+- With MongoDB, sessions are stored there (a restart keeps people logged in). Rate limits are in memory, so run one server process.
 - Monthly giving sends email reminders; automatic debits need PayU standing instructions.
 - WhatsApp sharing uses links; automatic messages need the WhatsApp Business API.
 - Hindi names in PDFs may not join letters correctly (no complex script shaping in pdfkit).

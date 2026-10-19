@@ -54,10 +54,17 @@ async function runBackup() {
 
   const entries = await fs.readdir(dataDir, { withFileTypes: true }).catch(() => []);
 
+  // Records change every day: always a fresh copy. With MongoDB they are
+  // exported in the same encrypted one-record-per-line format.
+  if (process.env.MONGODB_URI) {
+    await require("../models/mongoStore").exportAll((name, text) =>
+      fs.writeFile(path.join(target, name), text, "utf8"),
+    );
+  }
+
   for (const entry of entries) {
     const src = path.join(dataDir, entry.name);
-    // Records change every day: always a fresh copy
-    if (entry.isFile() && entry.name.endsWith(".txt")) {
+    if (entry.isFile() && entry.name.endsWith(".txt") && !process.env.MONGODB_URI) {
       await fs.copyFile(src, path.join(target, entry.name));
     } else if (entry.isDirectory() && entry.name === "uploads") {
       await copyFiles(

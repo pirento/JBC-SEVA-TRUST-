@@ -1461,19 +1461,24 @@ test("only genuine data is saved: bot trap, spam names, duplicates", async () =>
 // Rate limiting (last: it blocks this IP for the rest of the run)
 // ------------------------------------------------------------
 
-test("a damaged line (cut-off write) is skipped, other records still read", async () => {
-  const store = require("../models/fileStore");
+// Only the file store can have a half-written line
+test(
+  "a damaged line (cut-off write) is skipped, other records still read",
+  { skip: process.env.MONGODB_URI && "file storage only" },
+  async () => {
+    const store = require("../models/fileStore");
 
-  await store.appendRecord("torn-test.txt", { n: 1 });
-  fs.appendFileSync(path.join(dataDir, "torn-test.txt"), '{"iv":"abc","auth');
-  await store.appendRecord("torn-test.txt", { n: 2 });
+    await store.appendRecord("torn-test.txt", { n: 1 });
+    fs.appendFileSync(path.join(dataDir, "torn-test.txt"), '{"iv":"abc","auth');
+    await store.appendRecord("torn-test.txt", { n: 2 });
 
-  const records = await store.readRecords("torn-test.txt");
-  assert.deepEqual(
-    records.map((r) => r.n),
-    [1, 2],
-  );
-});
+    const records = await store.readRecords("torn-test.txt");
+    assert.deepEqual(
+      records.map((r) => r.n),
+      [1, 2],
+    );
+  },
+);
 
 test("forms posted from another website are refused, PayU callbacks are not", async () => {
   const req = client();

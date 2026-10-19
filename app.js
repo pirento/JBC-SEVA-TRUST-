@@ -121,8 +121,16 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET,
 
-    // The default store never removes expired sessions; this one does
-    store: new MemoryStore({ checkPeriod: 1000 * 60 * 15 }),
+    // With MongoDB, sessions are kept there (a restart no longer logs
+    // everyone out); otherwise in memory. Both remove expired sessions.
+    store: process.env.MONGODB_URI
+      ? require("connect-mongo").create({
+          clientPromise: require("./models/mongoStore").getClient(),
+          dbName: require("./models/mongoStore").DB_NAME,
+          collectionName: "sessions",
+          ttl: 2 * 60 * 60,
+        })
+      : new MemoryStore({ checkPeriod: 1000 * 60 * 15 }),
 
     resave: false,
 
@@ -297,6 +305,18 @@ app.use(errorHandler);
 // ========================================
 
 if (require.main === module) {
+  // Without its database the site cannot work: stop with a clear message
+  // (pm2 starts it again) instead of running half-broken
+  if (process.env.MONGODB_URI) {
+    require("./models/mongoStore")
+      .getClient()
+      .then(() => console.log("✅ MongoDB connected"))
+      .catch((error) => {
+        console.error("❌ MongoDB connection failed:", error.message);
+        process.exit(1);
+      });
+  }
+
   // Log a stray async error instead of letting it stop the whole site
   process.on("unhandledRejection", (error) => {
     console.error("❌ Unhandled error:", error?.stack || error);
@@ -333,8 +353,14 @@ if (require.main === module) {
     verifyEmailConnection();
   });
 
-  // pm2 / the host sends SIGTERM on restart: finish open requests first
-  process.on("SIGTERM", () => server.close(() => process.exit(0)));
+  // pm2 / the host sends SIGTERM on restart: finish open requests first,
+  // then close the database connection
+  process.on("SIGTERM", () =>
+    server.close(async () => {
+      if (process.env.MONGODB_URI) await require("./models/mongoStore").closeDatabase();
+      process.exit(0);
+    }),
+  );
 }
 
 // ========================================

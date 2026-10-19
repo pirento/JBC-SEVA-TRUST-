@@ -23,8 +23,8 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 - Trust facts used by pages live in `config/trustConfig.js`; change them there, not in views.
 - Legal pages (`views/legal/*`) are written around the trust's actual work (causes, temple fund, seva dates, Kanyadaan, volunteers, photos); bump `LEGAL_UPDATED` in `controllers/webController.js` when editing.
 - Every page uses `views/partials/head|header|footer`; `res.locals` gives `trust`, `currentUser`, `isAdmin`, `trustEmail`.
-- Storage is encrypted append-only text files (`models/fileStore.js`); accounts in `accounts.txt`, latest record per email wins.
-- Run `npm test` and `npm run format` before pushing.
+- Storage: `models/fileStore.js` `appendRecord`/`readRecords`. With `MONGODB_URI` they go to MongoDB (`models/mongoStore.js`, one collection per old file name, each document an encrypted record, sessions in `sessions`); without it, encrypted append-only `.txt` files. Records are only appended; latest record wins (accounts by email). `npm run migrate:mongo [-- folder]` copies files or a backup into MongoDB; `npm run test:mongo` runs the tests on a temporary MongoDB.
+- Run `npm test`, `npm run test:mongo` and `npm run format` before pushing.
 - Public forms: honeypot partial + middleware, rate limit, server validation, duplicate check, redirect after POST.
 - Account records need a confirmed email (`emailVerified`).
 - No account is needed to pay. After a verified donation or membership, `userAuthService.ensureAccountForPayment` makes an account for that email (if none) and emails a temporary password (7 days, `mustChangePassword` forces `/account/set-password`; logging in with it confirms the email).
@@ -50,6 +50,6 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 - Nightly backups (`services/backupService.js`, `BACKUP_DIR`): records, photos and medical receipts; unchanged photos/receipts hard-linked to the previous backup; missing go-live settings are printed at server start (`services/configCheck.js`), not shown in admin.
 
 ## Pending
-- Move storage to a real database (PostgreSQL) before traffic grows.
+- MongoDB: store searchable fields in clear with indexes (keep Aadhaar/PAN/address encrypted) once records reach the tens of thousands.
 - PayU standing instructions for automatic monthly debits (needs merchant enablement).
 - Website domain (set `APP_URL` once known).

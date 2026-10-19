@@ -28,7 +28,9 @@ Open `http://localhost:3000`.
 | `TRUST_EMAIL` | Optional: inbox for copies of emails and the daily report (default: the trust email in `config/trustConfig.js`) |
 | `PAYU_KEY`, `PAYU_SALT`, `PAYU_ENV` | PayU merchant key/salt; `PAYU_ENV=production` for live payments |
 | `PAYU_*_URL` | PayU success/failure callback URLs for membership and donation |
-| `DATA_DIR` | Optional: folder for data files (default `data/`) |
+| `MONGODB_URI` | MongoDB connection string (e.g. Atlas). Without it records are kept in encrypted files in `DATA_DIR` (fine for local work) |
+| `MONGODB_DB` | Optional: database name (default `jbc_seva_trust`) |
+| `DATA_DIR` | Folder for photos and PDF receipts (and records when no MongoDB); default `data/` |
 | `APP_URL` | Public address, e.g. `https://jbcsevatrust.org` (links in emails) |
 | `BACKUP_DIR` | Folder for nightly backups, ideally another disk (default `data/backups`) |
 
