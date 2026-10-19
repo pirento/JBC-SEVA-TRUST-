@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: `Edit ${title}` }) %>
+  <meta name="robots" content="noindex" />
+</head>
+<body class="page-bg admin-page">
+  <%- include('../partials/admin-header') %>
+  <% const backView = { donation: 'donations', membership: 'memberships', medical: 'medical' }[kind]; %>
+
+  <main id="main" class="account-page">
+    <div class="account-head">
+      <div>
+        <h1>Correct <%= title.toLowerCase() %> details</h1>
+        <p class="muted mono"><%= id %></p>
+      </div>
+      <a href="/admin/dashboard?view=<%= backView %>" class="btn secondary small-btn">Back to dashboard</a>
+    </div>
+
+    <% if (notice) { %><div class="alert success" role="status"><%= notice %></div><% } %>
+    <% if (error) { %><div class="alert error" role="alert"><%= error %></div><% } %>
+
+    <div class="admin-two">
+      <section class="panel">
+        <h2>Details</h2>
+        <p class="muted small">Only what the person typed can be corrected. Amount, cause and payment details cannot be changed.</p>
+
+        <form method="POST" action="/admin/records/<%= kind %>/<%= encodeURIComponent(id) %>/edit" class="form-body js-once">
+          <% fields.forEach(([field, label]) => { %>
+            <div class="field">
+              <label for="f-<%= field %>"><%= label %></label>
+              <% if (field === 'dedicationType') { %>
+                <select id="f-<%= field %>" name="<%= field %>">
+                  <option value="">None</option>
+                  <% trust.dedicationTypes.forEach((t) => { %>
+                    <option value="<%= t %>" <%= values[field] === t ? 'selected' : '' %>><%= t %></option>
+                  <% }) %>
+                </select>
+              <% } else { %>
+                <input id="f-<%= field %>" name="<%= field %>" value="<%= values[field] || '' %>"
+                  <%= field.toLowerCase().includes('email') ? 'type=email' : field.toLowerCase().includes('phone') ? 'type=tel inputmode=numeric maxlength=15' : 'type=text' %> />
+              <% } %>
+            </div>
+          <% }) %>
+
+          <div class="field">
+            <label for="f-reason">Reason for the change <span class="muted">(kept in the history)</span></label>
+            <input id="f-reason" name="reason" type="text" maxlength="200" placeholder="e.g. Donor called: email was mistyped" />
+          </div>
+
+          <label class="checkbox field">
+            <input type="checkbox" name="resend" />
+            <span>Send the receipt again to the email above</span>
+          </label>
+
+          <div class="actions">
+            <button type="submit" class="btn orange">Save</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Record</h2>
+        <div class="table-wrap">
+          <table>
+            <tbody>
+              <% if (record.amount) { %><tr><th scope="row">Amount</th><td>₹<%= Number(record.amount).toLocaleString('en-IN') %></td></tr><% } %>
+              <% if (record.cause) { %><tr><th scope="row">Fund</th><td><%= record.cause %><%= record.purpose ? ` (${record.purpose})` : '' %></td></tr><% } %>
+              <% if (record.membershipType) { %><tr><th scope="row">Membership</th><td><%= record.membershipType %></td></tr><% } %>
+              <tr><th scope="row">Date</th><td><%= new Date(record.paymentDate || record.submittedAt || record.createdAt).toLocaleString('en-IN') %></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>History</h2>
+        <% if (edits.length === 0) { %>
+          <p class="muted small">Not changed since it was received.</p>
+        <% } else { %>
+          <ul class="plain-list history">
+            <% edits.slice().reverse().forEach((e) => { %>
+              <li>
+                <strong><%= new Date(e.editedAt).toLocaleString('en-IN') %></strong>
+                <% if (e.previous && e.previous.reason) { %> · <em><%= e.previous.reason %></em><% } %>
+                <ul>
+                  <% Object.keys(e.changes).filter((f) => f !== 'donorName' || kind !== 'membership').forEach((f) => { %>
+                    <li><%= f %>: <s><%= (e.previous || {})[f] || '(empty)' %></s> → <%= e.changes[f] || '(empty)' %></li>
+                  <% }) %>
+                </ul>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

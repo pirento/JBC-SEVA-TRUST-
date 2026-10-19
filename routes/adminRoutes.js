@@ -31,6 +31,19 @@ router.post("/updates/:id/delete", adminAuth, content.deleteUpdate);
 router.post("/events", adminAuth, content.createEvent);
 router.post("/events/:id/delete", adminAuth, content.deleteEvent);
 
+// Accounts: search, password reset link, new login details
+const users = require("../controllers/adminUsersController");
+
+router.get("/users", adminAuth, users.list);
+router.post("/users/reset", adminAuth, users.sendReset);
+router.post("/users/login-details", adminAuth, users.sendLoginDetails);
+
+// Correct what a donor, member or patient typed (history is kept)
+const records = require("../controllers/adminRecordsController");
+
+router.get("/records/:kind/:id/edit", adminAuth, records.show);
+router.post("/records/:kind/:id/edit", adminAuth, records.save);
+
 router.post("/logout", adminAuth, adminController.logout);
 
 module.exports = router;

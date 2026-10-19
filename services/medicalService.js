@@ -91,6 +91,21 @@ async function sendMedicalEmail(data, referenceNumber, fileName, pdfBuffer) {
   });
 }
 
+// After the admin corrects a request: print the receipt again over the
+// same file (the download link stays the same)
+async function regenerateReceipt(record) {
+  const fileName =
+    record.receiptFile ||
+    `Medical-Help-Receipt-${record.referenceRegistrationNumber}.pdf`;
+  const pdfBuffer = await generateMedicalReceipt({
+    ...record,
+    submissionDate: record.submittedAt,
+  });
+  await fs.mkdir(receiptsDir, { recursive: true });
+  await fs.writeFile(path.join(receiptsDir, path.basename(fileName)), pdfBuffer);
+  return { fileName, pdfBuffer };
+}
+
 async function getMedicalReceipt(fileName) {
   const safeName = path.basename(fileName);
   const filePath = path.join(receiptsDir, safeName);
@@ -98,4 +113,9 @@ async function getMedicalReceipt(fileName) {
   return { filePath, fileName: safeName };
 }
 
-module.exports = { submitMedical, getMedicalReceipt };
+module.exports = {
+  submitMedical,
+  getMedicalReceipt,
+  regenerateReceipt,
+  sendMedicalEmail,
+};

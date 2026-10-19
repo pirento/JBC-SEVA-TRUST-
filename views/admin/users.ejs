@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: 'Users' }) %>
+  <meta name="robots" content="noindex" />
+</head>
+<body class="page-bg admin-page">
+  <%- include('../partials/admin-header') %>
+
+  <main id="main" class="account-page">
+    <div class="account-head">
+      <div>
+        <h1>Users</h1>
+        <p class="muted">Accounts made by registering, by Google login, or automatically after a payment.</p>
+      </div>
+    </div>
+
+    <% if (notice) { %>
+      <div class="alert success" role="status"><%= notice %></div>
+    <% } %>
+
+    <section class="panel">
+      <form method="GET" action="/admin/users" class="search-form">
+        <label for="q" class="sr-only">Search</label>
+        <input id="q" name="q" type="search" value="<%= q %>" placeholder="Search name, email or phone..." />
+        <button type="submit" class="btn navy small-btn">Search</button>
+        <% if (q) { %><a href="/admin/users" class="btn secondary small-btn">Clear</a><% } %>
+      </form>
+
+      <p class="muted small"><%= total %> account(s)<%= q ? ` matching "${q}"` : '' %><%= total > users.length ? ` · showing the newest ${users.length}` : '' %></p>
+
+      <% if (users.length === 0) { %>
+        <p class="empty-note">No accounts found.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Name</th><th>Contact</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <% users.forEach((u) => { %>
+                <tr>
+                  <td><strong><%= u.name %></strong></td>
+                  <td><%= u.email %><br><small><%= u.phone || '-' %></small></td>
+                  <td><%= new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+                  <td>
+                    <%= u.emailVerified ? 'Email confirmed' : 'Email not confirmed' %>
+                    <% if (u.mustChangePassword) { %><br><small class="muted">Temporary password not yet changed</small><% } %>
+                    <% if (u.googleId) { %><br><small class="muted">Uses Google login</small><% } %>
+                  </td>
+                  <td class="action-cell">
+                    <form method="POST" action="/admin/users/reset" class="inline-form">
+                      <input type="hidden" name="email" value="<%= u.email %>" />
+                      <button type="submit" class="btn secondary small-btn">Send reset link</button>
+                    </form>
+                    <form method="POST" action="/admin/users/login-details" class="inline-form" onsubmit="return confirm('This replaces their current password with a new temporary one and emails it. Continue?')">
+                      <input type="hidden" name="email" value="<%= u.email %>" />
+                      <button type="submit" class="btn secondary small-btn">Send new login details</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+  </main>
+</body>
+</html>

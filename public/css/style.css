@@ -2649,3 +2649,21 @@ html[lang="hi"] body {
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* Admin: buttons side by side in a table cell, wrapping on small screens */
+.action-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 170px;
+}
+
+.history > li {
+  margin-bottom: 10px;
+}
+
+.history ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: 14px;
+}

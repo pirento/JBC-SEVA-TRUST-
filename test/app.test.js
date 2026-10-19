@@ -1583,6 +1583,128 @@ test("guest donor gets an account with a temporary password to replace", async (
   assert.match(res.text, /temporary password has expired/);
 });
 
+test("admin users page: search, reset link, new login details", async () => {
+  const admin = client();
+  await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+
+  let res = await admin("/admin/users?q=guest.donor");
+  assert.equal(res.status, 200);
+  assert.match(res.text, /guest\.donor@example\.com/);
+  assert.doesNotMatch(res.text, /asha@example\.com/, "search filters the list");
+
+  res = await admin("/admin/users/reset", {
+    method: "POST",
+    form: { email: "guest.donor@example.com" },
+  });
+  assert.match(res.location, /done=reset/);
+  const userModel = require("../models/userModel");
+  assert.ok((await userModel.findByEmail("guest.donor@example.com")).resetTokenHash);
+
+  res = await admin("/admin/users/login-details", {
+    method: "POST",
+    form: { email: "guest.donor@example.com" },
+  });
+  assert.match(res.location, /done=login/);
+  assert.equal(
+    (await userModel.findByEmail("guest.donor@example.com")).mustChangePassword,
+    true,
+  );
+
+  assert.equal((await client()("/admin/users")).status, 302, "admin only");
+});
+
+test("admin corrects a mistyped donor email; history kept, receipt follows", async () => {
+  const req = client();
+  const callback = await startDonation(req, {
+    ...donation,
+    email: "typo@exmaple.com",
+    donorName: "Kamla Devi",
+  });
+  await req("/donate/success", { method: "POST", form: callback });
+  const txn = callback.txnid;
+
+  const admin = client();
+  await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+
+  let res = await admin("/admin/dashboard?view=donations");
+  assert.match(res.text, new RegExp(`/admin/records/donation/${txn}/edit`));
+
+  res = await admin(`/admin/records/donation/${txn}/edit`);
+  assert.equal(res.status, 200);
+  assert.match(res.text, /typo@exmaple\.com/);
+
+  res = await admin(`/admin/records/donation/${txn}/edit`, {
+    method: "POST",
+    form: { donorName: "Kamla Devi", email: "not-an-email", phoneNumber: "9876543210" },
+  });
+  assert.equal(res.status, 400, "bad email refused");
+
+  res = await admin(`/admin/records/donation/${txn}/edit`, {
+    method: "POST",
+    form: {
+      donorName: "Kamla Devi Gupta",
+      email: "kamla@example.com",
+      phoneNumber: "9876543210",
+      reason: "Donor called",
+    },
+  });
+  assert.match(res.location, /saved=1/);
+
+  res = await admin(res.location);
+  assert.match(res.text, /typo@exmaple\.com<\/s>/, "old value shown in history");
+  assert.match(res.text, /Donor called/);
+
+  // Everywhere reads the corrected record
+  const donationService = require("../services/donationService");
+  const fixed = await donationService.findDonation(txn);
+  assert.equal(fixed.email, "kamla@example.com");
+  assert.equal(fixed.donorName, "Kamla Devi Gupta");
+  res = await admin("/admin/dashboard?view=donations&q=kamla@example.com");
+  assert.match(res.text, /Kamla Devi Gupta/);
+
+  // Amount cannot be changed through the form
+  await admin(`/admin/records/donation/${txn}/edit`, {
+    method: "POST",
+    form: {
+      donorName: "Kamla Devi Gupta",
+      email: "kamla@example.com",
+      phoneNumber: "9876543210",
+      amount: "1",
+    },
+  });
+  assert.equal(Number((await donationService.findDonation(txn)).amount), 1100);
+
+  assert.equal((await client()(`/admin/records/donation/${txn}/edit`)).status, 302);
+});
+
+test("admin corrects a medical request; receipt is printed again at the same link", async () => {
+  const req = client();
+  let res = await req("/medical", {
+    method: "POST",
+    form: { ...medical, aadharNumber: "999988887779", hospitalName: "PHC Harraiya" },
+  });
+  const params = new URL(res.location, base).searchParams;
+  const ref = params.get("reference");
+  const file = params.get("file");
+
+  const admin = client();
+  await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+  res = await admin(`/admin/records/medical/${ref}/edit`, {
+    method: "POST",
+    form: {
+      patientName: "Ram Prasad Verma",
+      patientEmail: medical.patientEmail,
+      patientPhoneNumber: medical.patientPhoneNumber,
+      hospitalName: "PHC Harraiya",
+      nameDiseases: medical.nameDiseases,
+    },
+  });
+  assert.match(res.location, /saved=1/);
+  assert.equal((await req(`/medical/receipt/${file}`)).status, 200);
+  res = await admin("/admin/dashboard?view=medical&q=Verma");
+  assert.match(res.text, /Ram Prasad Verma/);
+});
+
 // Last: it leaves this IP blocked from logging in for 15 minutes
 test("too many failed logins are blocked with 429", async () => {
   const req = client();

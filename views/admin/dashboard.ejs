@@ -104,7 +104,7 @@
         <div class="table-wrap">
           <table class="admin-table">
             <% if (view === 'donations') { %>
-              <thead><tr><th>Date</th><th>Donor</th><th>Fund / Purpose</th><th>Amount</th><th>Payment</th><th>Certificate</th></tr></thead>
+              <thead><tr><th>Date</th><th>Donor</th><th>Fund / Purpose</th><th>Amount</th><th>Payment</th><th>Actions</th></tr></thead>
               <tbody>
                 <% list.rows.forEach((d) => { %>
                   <tr>
@@ -120,12 +120,12 @@
                     </td>
                     <td><strong><%= rupees(d.amount) %></strong></td>
                     <td><%= d.paymentMode %><br><small class="mono"><%= d.transactionId %></small></td>
-                    <td><a href="/donate/certificate/<%= encodeURIComponent(d.transactionId) %>">PDF</a></td>
+                    <td><a href="/donate/certificate/<%= encodeURIComponent(d.transactionId) %>">PDF</a> · <a href="/admin/records/donation/<%= encodeURIComponent(d.transactionId) %>/edit">Edit</a></td>
                   </tr>
                 <% }) %>
               </tbody>
             <% } else if (view === 'memberships') { %>
-              <thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Amount</th><th>Payment</th><th>Certificate</th></tr></thead>
+              <thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Amount</th><th>Payment</th><th>Actions</th></tr></thead>
               <tbody>
                 <% list.rows.forEach((m) => { %>
                   <tr>
@@ -134,12 +134,12 @@
                     <td><%= m.membershipType %></td>
                     <td><strong><%= rupees(m.amount) %></strong></td>
                     <td><%= m.paymentMode %><br><small class="mono"><%= m.transactionId %></small></td>
-                    <td><a href="/donation/receipt/<%= encodeURIComponent(m.transactionId) %>">PDF</a></td>
+                    <td><a href="/donation/receipt/<%= encodeURIComponent(m.transactionId) %>">PDF</a> · <a href="/admin/records/membership/<%= encodeURIComponent(m.transactionId) %>/edit">Edit</a></td>
                   </tr>
                 <% }) %>
               </tbody>
             <% } else if (view === 'medical') { %>
-              <thead><tr><th>Date</th><th>Patient</th><th>Contact</th><th>Illness / Hospital</th><th>Reference</th><th>Receipt</th></tr></thead>
+              <thead><tr><th>Date</th><th>Patient</th><th>Contact</th><th>Illness / Hospital</th><th>Reference</th><th>Actions</th></tr></thead>
               <tbody>
                 <% list.rows.forEach((r) => { %>
                   <tr>
@@ -148,7 +148,7 @@
                     <td><%= r.patientPhoneNumber %><br><small><%= r.patientEmail %></small></td>
                     <td><%= r.nameDiseases %><br><small><%= r.hospitalName %></small></td>
                     <td class="mono"><%= r.referenceRegistrationNumber %></td>
-                    <td><a href="/medical/receipt/<%= encodeURIComponent(r.receiptFile || `Medical-Help-Receipt-${r.referenceRegistrationNumber}.pdf`) %>">PDF</a></td>
+                    <td><a href="/medical/receipt/<%= encodeURIComponent(r.receiptFile || `Medical-Help-Receipt-${r.referenceRegistrationNumber}.pdf`) %>">PDF</a> · <a href="/admin/records/medical/<%= encodeURIComponent(r.referenceRegistrationNumber) %>/edit">Edit</a></td>
                   </tr>
                 <% }) %>
               </tbody>

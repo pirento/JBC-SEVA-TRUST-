@@ -12,7 +12,9 @@
 
     <nav class="admin-nav" aria-label="Admin">
       <a href="/admin/dashboard" class="<%= currentPath === '/admin/dashboard' ? 'active' : '' %>">Dashboard</a>
+      <a href="/admin/users" class="<%= currentPath === '/admin/users' ? 'active' : '' %>">Users</a>
       <a href="/admin/content" class="<%= currentPath === '/admin/content' ? 'active' : '' %>">Updates &amp; Events</a>
+      <a href="/admin/settings" class="<%= currentPath === '/admin/settings' ? 'active' : '' %>">Settings</a>
       <a href="/" target="_blank" rel="noopener">View site</a>
       <form action="/admin/logout" method="POST" class="inline-form">
         <button type="submit" class="btn navy small-btn">Logout</button>
