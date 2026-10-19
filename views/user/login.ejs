@@ -18,6 +18,8 @@
         <div class="alert error" role="alert"><%= error %></div>
       <% } %>
 
+      <%- include('../partials/google-button') %>
+
       <form action="/login" method="POST" class="form-body js-once">
         <input type="hidden" name="next" value="<%= next %>" />
 

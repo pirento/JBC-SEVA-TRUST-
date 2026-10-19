@@ -701,4 +701,30 @@ module.exports = {
     "भुगतान मिल गया, लेकिन दान दर्ज करने में दिक्कत आई। कृपया अपनी ट्रांज़ैक्शन आईडी के साथ ट्रस्ट से संपर्क करें।",
   "Payment was received, but membership processing failed. Please contact the Trust with your transaction ID.":
     "भुगतान मिल गया, लेकिन सदस्यता दर्ज करने में दिक्कत आई। कृपया अपनी ट्रांज़ैक्शन आईडी के साथ ट्रस्ट से संपर्क करें।",
+
+  // ---------- Accounts and Google login ----------
+  "Continue with Google": "Google से जारी रखें",
+  or: "या",
+  "Google login did not work": "Google लॉगिन नहीं हो पाया",
+  "The login took too long or was started elsewhere. Please try again.":
+    "लॉगिन में बहुत देर हुई या कहीं और से शुरू हुआ। कृपया फिर से कोशिश करें।",
+  "Google login was cancelled. You can try again or log in with email.":
+    "Google लॉगिन रद्द हो गया। आप फिर से कोशिश करें या ईमेल से लॉगिन करें।",
+  "Google login did not work. Please try again, or log in with email and password.":
+    "Google लॉगिन नहीं हो पाया। कृपया फिर से कोशिश करें, या ईमेल और पासवर्ड से लॉगिन करें।",
+  "This email is linked to a different Google account.":
+    "यह ईमेल किसी दूसरे Google खाते से जुड़ा है।",
+  "Choose Your Password": "अपना पासवर्ड चुनें",
+  "Choose your password": "अपना पासवर्ड चुनें",
+  "You logged in with the temporary password from your email. Please choose your own password to continue.":
+    "आपने ईमेल में मिले अस्थायी पासवर्ड से लॉगिन किया है। आगे बढ़ने के लिए अपना पासवर्ड चुनें।",
+  "Save password": "पासवर्ड सेव करें",
+  "This temporary password has expired. Use Forgot password to set a new one.":
+    "यह अस्थायी पासवर्ड समाप्त हो गया है। नया पासवर्ड बनाने के लिए 'पासवर्ड भूल गए' का उपयोग करें।",
+  "Your JBC Seva Trust account": "आपका जेबीसी सेवा ट्रस्ट खाता",
+  "Thank you for your support. We have made an account for you, where you can see your donations and download your receipts.":
+    "आपके सहयोग के लिए धन्यवाद। हमने आपके लिए एक खाता बनाया है, जहाँ आप अपने दान देख सकते हैं और रसीदें डाउनलोड कर सकते हैं।",
+  "Temporary password": "अस्थायी पासवर्ड",
+  "This password works for 7 days. When you log in, you will be asked to choose your own password.":
+    "यह पासवर्ड 7 दिन चलेगा। लॉगिन करने पर आपसे अपना पासवर्ड चुनने को कहा जाएगा।",
 };

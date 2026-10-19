@@ -1,6 +1,7 @@
 const userAuthService = require("../services/userAuthService");
 const accountService = require("../services/accountService");
 const pledgeService = require("../services/pledgeService");
+const googleAuthService = require("../services/googleAuthService");
 
 // Only same-site paths, so ?next= cannot send users to another site
 function safeNext(value) {
@@ -83,6 +84,54 @@ async function login(req, res, next) {
       values: { email: body.email },
       next: target,
     });
+  }
+}
+
+// ---------------- Google login ----------------
+
+async function googleStart(req, res, next) {
+  try {
+    const start = await googleAuthService.startUrl();
+    if (!start) return next();
+    req.session.googleState = { state: start.state, next: safeNext(req.query.next) };
+    return req.session.save(() => res.redirect(start.url));
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function googleCallback(req, res, next) {
+  const saved = req.session.googleState;
+  delete req.session.googleState;
+
+  const failed = (message) =>
+    res.status(400).render("pages/form-error", {
+      title: "Google login did not work",
+      message,
+      backUrl: "/login",
+    });
+
+  if (!saved || !req.query.state || req.query.state !== saved.state) {
+    return failed("The login took too long or was started elsewhere. Please try again.");
+  }
+  if (req.query.error) {
+    return failed("Google login was cancelled. You can try again or log in with email.");
+  }
+
+  try {
+    const profile = await googleAuthService.finish(req.query.code);
+    const user = await userAuthService.loginWithGoogle({
+      ...profile,
+      lang: res.locals.lang,
+    });
+    await startSession(req, user);
+    return res.redirect(saved.next);
+  } catch (error) {
+    if (error.expose) return failed(error.message);
+    console.error("❌ Google login failed:", error.message);
+    return failed(
+      "Google login did not work. Please try again, or log in with email and password.",
+    );
   }
 }
 
@@ -318,4 +367,6 @@ module.exports = {
   changePassword,
   showSetPassword,
   setPassword,
+  googleStart,
+  googleCallback,
 };

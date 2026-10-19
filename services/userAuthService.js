@@ -209,6 +209,39 @@ async function sendLoginDetails(user) {
   return { user: updated, password };
 }
 
+// Google login: the email is verified by Google. An existing account
+// with that email is used (and linked); otherwise one is made.
+async function loginWithGoogle({ googleId, email: googleEmail, name, lang }) {
+  const cleanEmail = userModel.normalizeEmail(googleEmail);
+  let user = await userModel.findByEmail(cleanEmail);
+
+  if (user && user.googleId && user.googleId !== googleId) {
+    throw invalid("This email is linked to a different Google account.");
+  }
+
+  if (!user) {
+    user = await userModel.createUser({
+      name: String(name || "").trim() || cleanEmail,
+      email: cleanEmail,
+      phone: "",
+      // No password; they can set one later with Forgot password
+      passwordHash: await bcrypt.hash(
+        crypto.randomBytes(32).toString("hex"),
+        SALT_ROUNDS,
+      ),
+      lang: lang === "hi" ? "hi" : "en",
+    });
+  }
+
+  const updated = await userModel.updateUser(user, {
+    googleId,
+    emailVerified: true,
+    // Google proved the email; no need to replace a pending temporary password
+    mustChangePassword: false,
+  });
+  return toSessionUser(updated);
+}
+
 // First login with a temporary password: choose a password, no old one asked
 async function setOwnPassword(sessionUser, input) {
   const user = await userModel.findByEmail(sessionUser.email);
@@ -406,6 +439,7 @@ module.exports = {
   register,
   login,
   ensureAccountForPayment,
+  loginWithGoogle,
   sendLoginDetails,
   setOwnPassword,
   changePassword,

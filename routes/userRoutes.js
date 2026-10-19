@@ -10,6 +10,21 @@ const passwordLimiter = createRateLimiter();
 // Generous: many people may share one IP (cyber cafe, mobile network)
 const registerLimiter = createRateLimiter({ max: 20, windowMs: 60 * 60 * 1000 });
 
+const { googleLogin } = require("../services/settingsService");
+
+// Login and register pages show "Continue with Google" when it is set up
+router.use(["/login", "/register"], async (req, res, next) => {
+  try {
+    res.locals.googleLogin = Boolean(await googleLogin());
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/auth/google", controller.googleStart);
+router.get("/auth/google/callback", controller.googleCallback);
+
 router.get("/register", controller.showRegister);
 router.post("/register", registerLimiter, honeypot, controller.register);
 

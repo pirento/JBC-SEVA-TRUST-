@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: 'Settings' }) %>
+  <meta name="robots" content="noindex" />
+</head>
+<body class="page-bg admin-page">
+  <%- include('../partials/admin-header') %>
+
+  <main id="main" class="account-page">
+    <div class="account-head">
+      <div>
+        <h1>Settings</h1>
+        <p class="muted">Changes here take effect at once, without restarting the site.</p>
+      </div>
+    </div>
+
+    <% if (notice) { %><div class="alert success" role="status"><%= notice %></div><% } %>
+    <% if (error) { %><div class="alert error" role="alert"><%= error %></div><% } %>
+
+    <div class="admin-two">
+      <section class="panel">
+        <h2>Google login</h2>
+        <p class="muted small">
+          Status:
+          <strong><%= settings.googleEnabled && settings.googleClientId && settings.googleClientSecret ? 'On' : 'Off' %></strong>
+        </p>
+
+        <form method="POST" action="/admin/settings" class="form-body js-once">
+          <div class="field">
+            <label for="googleClientId">Client ID</label>
+            <input id="googleClientId" name="googleClientId" type="text" value="<%= settings.googleClientId %>" placeholder="123456-abc.apps.googleusercontent.com" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="googleClientSecret">Client secret</label>
+            <input id="googleClientSecret" name="googleClientSecret" type="password" value="" autocomplete="new-password"
+              placeholder="<%= settings.googleClientSecret ? 'Saved. Leave empty to keep it.' : 'Paste the client secret' %>" />
+            <% if (settings.googleClientSecret) { %>
+              <label class="checkbox"><input type="checkbox" name="clearSecret" /> <span>Remove the saved secret</span></label>
+            <% } %>
+          </div>
+          <label class="checkbox field">
+            <input type="checkbox" name="googleEnabled" <%= settings.googleEnabled ? 'checked' : '' %> />
+            <span>Show "Continue with Google" on the login and register pages</span>
+          </label>
+          <div class="actions">
+            <button type="submit" class="btn orange">Save</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>How to get the Client ID</h2>
+        <ol class="steps">
+          <li>Open <strong>console.cloud.google.com</strong> with the trust's Google account and create a project (e.g. "JBC Seva Trust website").</li>
+          <li>Go to <strong>APIs &amp; Services → OAuth consent screen</strong>: choose External, enter the trust's name and email, and publish it.</li>
+          <li>Go to <strong>APIs &amp; Services → Credentials → Create credentials → OAuth client ID</strong>, type <strong>Web application</strong>.</li>
+          <li>Under <strong>Authorised redirect URIs</strong> add exactly:<br><code class="mono"><%= redirectUri %></code></li>
+          <li>Copy the <strong>Client ID</strong> and <strong>Client secret</strong> into the form here, tick the box and save.</li>
+        </ol>
+        <p class="muted small">The redirect address uses <code>APP_URL</code> from the server settings; set it to the live https address before doing this.</p>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

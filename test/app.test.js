@@ -1705,6 +1705,92 @@ test("admin corrects a medical request; receipt is printed again at the same lin
   assert.match(res.text, /Ram Prasad Verma/);
 });
 
+test("Google login: set up in admin settings, verified email logs in", async () => {
+  const admin = client();
+  await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+
+  let res = await admin("/admin/settings", {
+    method: "POST",
+    form: { googleClientId: "wrong", googleClientSecret: "s", googleEnabled: "on" },
+  });
+  assert.equal(res.status, 400);
+
+  res = await admin("/admin/settings", {
+    method: "POST",
+    form: {
+      googleClientId: "123-abc.apps.googleusercontent.com",
+      googleClientSecret: "secret-1",
+      googleEnabled: "on",
+    },
+  });
+  assert.equal(res.location, "/admin/settings?saved=1");
+  res = await admin("/admin/settings");
+  assert.doesNotMatch(res.text, /secret-1/, "the secret is never shown again");
+  assert.match(res.text, /\/auth\/google\/callback/);
+
+  const req = client();
+  assert.match((await req("/login")).text, /Continue with Google/);
+
+  res = await req("/auth/google");
+  const google = new URL(res.location);
+  assert.equal(google.host, "accounts.google.com");
+  assert.equal(
+    google.searchParams.get("client_id"),
+    "123-abc.apps.googleusercontent.com",
+  );
+  const state = google.searchParams.get("state");
+
+  // Google's servers, faked
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, options) => {
+    if (String(url).startsWith("https://oauth2.googleapis.com/token")) {
+      assert.equal(new URLSearchParams(options.body).get("client_secret"), "secret-1");
+      return new Response(JSON.stringify({ access_token: "token-1" }), { status: 200 });
+    }
+    if (String(url).startsWith("https://openidconnect.googleapis.com/")) {
+      return new Response(
+        JSON.stringify({
+          sub: "g-1",
+          email: "Googler@Example.com",
+          email_verified: true,
+          name: "Google User",
+        }),
+        { status: 200 },
+      );
+    }
+    return realFetch(url, options);
+  };
+
+  try {
+    res = await req(`/auth/google/callback?state=bad&code=abc`);
+    assert.equal(res.status, 400, "wrong state refused");
+
+    res = await req("/auth/google");
+    const state2 = new URL(res.location).searchParams.get("state");
+    assert.notEqual(state2, state);
+    res = await req(`/auth/google/callback?state=${state2}&code=abc`);
+    assert.equal(res.location, "/account");
+    res = await req("/account");
+    assert.equal(res.status, 200);
+    assert.match(res.text, /googler@example\.com/);
+    const userModel = require("../models/userModel");
+    const user = await userModel.findByEmail("googler@example.com");
+    assert.equal(user.emailVerified, true);
+    assert.equal(user.googleId, "g-1");
+  } finally {
+    globalThis.fetch = realFetch;
+    await admin("/admin/settings", {
+      method: "POST",
+      form: { googleClientId: "123-abc.apps.googleusercontent.com" },
+    });
+  }
+  assert.doesNotMatch(
+    (await client()("/login")).text,
+    /Continue with Google/,
+    "switched off",
+  );
+});
+
 // Last: it leaves this IP blocked from logging in for 15 minutes
 test("too many failed logins are blocked with 429", async () => {
   const req = client();

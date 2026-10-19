@@ -15,6 +15,8 @@
         <div class="alert error" role="alert"><%= error %></div>
       <% } %>
 
+      <%- include('../partials/google-button') %>
+
       <form action="/register" method="POST" class="form-body js-once">
         <div class="field">
           <label for="name">Full Name *</label>

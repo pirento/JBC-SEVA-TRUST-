@@ -44,6 +44,12 @@ const records = require("../controllers/adminRecordsController");
 router.get("/records/:kind/:id/edit", adminAuth, records.show);
 router.post("/records/:kind/:id/edit", adminAuth, records.save);
 
+// Site settings (Google login)
+const settings = require("../controllers/adminSettingsController");
+
+router.get("/settings", adminAuth, settings.show);
+router.post("/settings", adminAuth, settings.save);
+
 router.post("/logout", adminAuth, adminController.logout);
 
 module.exports = router;
