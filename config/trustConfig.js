@@ -223,9 +223,6 @@ function taxNote(causeTitle, paymentDate = new Date()) {
   return taxNotes.default;
 }
 
-// Causes a donor can pick; earmarked money goes only to that cause
-const donationCauses = [GENERAL_CAUSE, ...programmes.map((p) => p.title)];
-
 module.exports = {
   name: "JBC Seva Trust",
   tagline: "Serving humanity. Preserving nature.",
@@ -254,7 +251,6 @@ module.exports = {
   ],
   programmes,
   GENERAL_CAUSE,
-  donationCauses,
   generalDonation,
   dedicationTypes,
   taxNotes,

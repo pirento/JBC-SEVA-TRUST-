@@ -181,14 +181,6 @@ function verifyResponseHash(data) {
 }
 
 // ============================================================
-// VERIFY PAYU KEY
-// ============================================================
-
-function verifyPayUKey(key) {
-  return !!PAYU_KEY && !!key && String(key) === String(PAYU_KEY);
-}
-
-// ============================================================
 // VERIFY PAYMENT AMOUNT
 // ============================================================
 
@@ -212,7 +204,6 @@ module.exports = {
   generateHash,
   createPaymentData,
   verifyResponseHash,
-  verifyPayUKey,
   verifyPaymentAmount,
   PAYU_PAYMENT_URL,
 };

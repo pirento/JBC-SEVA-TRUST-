@@ -159,33 +159,6 @@ function normalizeRecord(record) {
   let memberName = String(record.memberName || record.donorName || "").trim();
 
   // ----------------------------------------------------------
-  // OLD MEMBERNAMES[] COMPATIBILITY
-  // ----------------------------------------------------------
-
-  if (!memberName) {
-    let oldMemberNames = record.memberNames;
-
-    if (typeof oldMemberNames === "string") {
-      try {
-        const parsed = JSON.parse(oldMemberNames);
-
-        if (Array.isArray(parsed)) {
-          oldMemberNames = parsed;
-        }
-      } catch {
-        oldMemberNames = oldMemberNames
-          .split("|")
-          .map((name) => name.trim())
-          .filter(Boolean);
-      }
-    }
-
-    if (Array.isArray(oldMemberNames)) {
-      memberName = String(oldMemberNames[0] || "").trim();
-    }
-  }
-
-  // ----------------------------------------------------------
   // AMOUNT
   // ----------------------------------------------------------
 
