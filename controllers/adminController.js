@@ -16,6 +16,11 @@ const {
 } = require("../models/userModel");
 
 const {
+  buildExport,
+  exportTypes,
+} = require("../services/exportService");
+
+const {
   listVolunteers,
   listMessages,
 } = require("../models/enquiryModel");
@@ -1027,6 +1032,8 @@ exports.dashboard = async (
 
         fundTotals,
 
+        exportTypes,
+
         // Membership
         memberships,
 
@@ -1523,6 +1530,25 @@ JBC Seva Trust`,
 // ========================================
 // ADMIN LOGOUT
 // ========================================
+
+// ========================================
+// CSV EXPORT
+// ========================================
+
+exports.exportCsv = async (req, res, next) => {
+  try {
+    const csv = await buildExport(req.params.type);
+    if (csv === null) return next();
+
+    const date = new Date().toISOString().slice(0, 10);
+    res.set("Content-Type", "text/csv; charset=utf-8");
+    res.attachment(`jbc-${req.params.type}-${date}.csv`);
+    return res.send(csv);
+  } catch (error) {
+    return next(error);
+  }
+};
+
 
 exports.logout = (
   req,

@@ -1059,6 +1059,16 @@
   </section>
 
 
+  <section class="dashboard-card" style="padding:16px 20px;">
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+      <strong style="margin-right:6px;">Download Excel (CSV):</strong>
+      <% exportTypes.forEach((type) => { %>
+        <a href="/admin/export/<%= type %>" class="home-btn" style="text-transform:capitalize;"><%= type.replace(/-/g, " ") %></a>
+      <% }) %>
+    </div>
+  </section>
+
+
   <!-- ===================================================
        TOP STATISTICS
   =================================================== -->

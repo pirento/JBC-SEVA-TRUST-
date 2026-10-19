@@ -625,6 +625,23 @@ test("temple donation keeps purpose, dedication, seva date and gotra end to end"
   assert.match(res.text, /Gotra: Kashyap/);
   assert.match(res.text, /PAN: ABCDE1234F/, "PAN stored uppercased");
   assert.match(res.text, /<td><strong>Community Temple<\/strong><\/td>\s*<td>1<\/td>\s*<td>₹501<\/td>/);
+
+  // CSV exports
+  res = await req("/admin/export/donations");
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get("content-type"), /text\/csv/);
+  assert.match(res.text, /Late Shri Ram Prasad/);
+  assert.match(res.text, /ABCDE1234F/);
+
+  res = await req("/admin/export/funds");
+  assert.match(res.text, /Community Temple,1,501/);
+
+  res = await req("/admin/export/medical");
+  assert.match(res.text, /XXXX-XXXX-1234/);
+  assert.doesNotMatch(res.text, /123412341234/, "full Aadhaar never exported");
+
+  assert.equal((await req("/admin/export/unknown")).status, 404);
+  assert.equal((await client()("/admin/export/donations")).status, 302, "needs admin login");
 });
 
 // ------------------------------------------------------------

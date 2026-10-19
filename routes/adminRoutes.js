@@ -31,6 +31,12 @@ router.get(
   adminController.downloadDailyReport
 );
 
+router.get(
+  "/export/:type",
+  adminAuth,
+  adminController.exportCsv
+);
+
 router.post(
   "/logout",
   adminAuth,
