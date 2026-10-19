@@ -1,169 +1,124 @@
 const membershipService = require("../services/membershipService");
+const { appUrl } = require("../config/appConfig");
+
+// Transaction ids are created by generateTxnId: TXN_<time>_<random>
+const TXN_ID = /^TXN_[A-Za-z0-9_-]+$/;
 
 // ============================================================
-// SHOW MEMBERSHIP FORM
+// MEMBERSHIP FORM
 // ============================================================
 
 function showMembershipForm(req, res) {
-  return res.render("pages/donation");
+  return res.render("pages/donation", { error: null, values: {} });
 }
 
-// ============================================================
-// SUBMIT MEMBERSHIP FORM
-// ============================================================
-
 async function submitMembership(req, res) {
+  const body = req.body || {};
+
   try {
-    const body = req.body || {};
-    const amount = Number(body.amount);
+    // The service checks every field (name, phone, email, amount, consent)
+    const result = await membershipService.initiateMembership(body);
 
-    // --------------------------------------------------------
-    // Validate member name
-    // --------------------------------------------------------
-
-    const memberName = String(body.memberName || "").trim();
-
-    if (!memberName) {
-      return res.status(400).render("pages/form-error", {
-        message: "Please provide the member name.",
-        backUrl: "/donation",
-      });
-    }
-
-    if (memberName.length > 100) {
-      return res.status(400).render("pages/form-error", {
-        message: "Member name cannot exceed 100 characters.",
-        backUrl: "/donation",
-      });
-    }
-
-    // --------------------------------------------------------
-    // Validate amount
-    //
-    // Minimum membership amount = ₹100
-    //
-    // ₹100 - ₹10,999  -> 1 Year Member
-    // ₹11,000+        -> Lifetime Member
-    // --------------------------------------------------------
-
-    if (!Number.isFinite(amount) || amount < 100) {
-      return res.status(400).render("pages/form-error", {
-        message: "Minimum membership amount is ₹100.",
-        backUrl: "/donation",
-      });
-    }
-
-    // --------------------------------------------------------
-    // Normalize membership data
-    // --------------------------------------------------------
-
-    const membershipData = {
-      ...body,
-      memberName,
-      amount,
-    };
-
-    // --------------------------------------------------------
-    // Existing PayU/payment flow
-    // --------------------------------------------------------
-
-    const result =
-      await membershipService.initiateMembership(membershipData);
-
-    return res.render("pages/payu-payment", result);
+    return res.render("pages/payu-redirect", { ...result, kind: "Membership" });
   } catch (error) {
-    console.error(
-      "❌ Membership submission error:",
-      error.message
-    );
+    console.error("❌ Membership submission error:", error.message);
 
-    return res.status(400).render("pages/form-error", {
-      message: error.message,
-      backUrl: "/donation",
+    return res.status(400).render("pages/donation", {
+      error: error.message,
+      values: body,
     });
   }
 }
 
 // ============================================================
-// PAYMENT SUCCESS
+// PAYU CALLBACKS
 // ============================================================
+// After saving, the browser is redirected to a GET page so a refresh
+// never re-posts the payment.
 
 async function paymentSuccess(req, res) {
   try {
-    const data = req.body || {};
-
-    console.log("\n=================================");
-    console.log("✅ PAYU PAYMENT SUCCESS");
-    console.log("Transaction:", data.txnid);
-    console.log("Amount:", data.amount);
-    console.log("Status:", data.status);
-    console.log("Email:", data.email);
-    console.log("=================================");
-
-    const result =
-      await membershipService.processPaymentSuccess(data);
+    const result = await membershipService.processPaymentSuccess(req.body || {});
 
     if (result.failure) {
       return paymentFailure(req, res);
     }
 
     if (result.error) {
-      return res
-        .status(result.status || 400)
-        .render("pages/form-error", {
-          message: result.error,
-          backUrl: "/",
-        });
+      return res.status(result.status || 400).render("pages/form-error", {
+        message: result.error,
+        backUrl: "/donation",
+      });
     }
 
-    return res.render(
-      "pages/donation-success",
-      result
-    );
+    const transactionId = result.transactionId || (req.body || {}).txnid;
+
+    return res.redirect(303, `/donation/thank-you/${encodeURIComponent(transactionId)}`);
   } catch (error) {
-    console.error(
-      "❌ PAYMENT SUCCESS PROCESSING FAILED:",
-      error.message
-    );
+    console.error("❌ Membership payment processing failed:", error.message);
 
     return res.status(500).render("pages/form-error", {
       message:
-        "Payment was received, but membership certificate processing failed. Please contact the Trust.",
+        "Payment was received, but membership processing failed. Please contact the Trust with your transaction ID.",
       backUrl: "/",
     });
   }
 }
 
-// ============================================================
-// PAYMENT FAILURE
-// ============================================================
-
 async function paymentFailure(req, res) {
   try {
-    const result =
-      await membershipService.processPaymentFailure(req.body || {});
+    const result = await membershipService.processPaymentFailure(req.body || {});
+    const query = TXN_ID.test(String(result.transactionId)) ? `?txn=${result.transactionId}` : "";
 
-    console.log("\n=================================");
-    console.log("❌ PAYU PAYMENT FAILED");
-    console.log("Transaction:", result.transactionId);
-    console.log("Error:", result.errorMessage);
-    console.log("=================================");
-
-    return res.render(
-      "pages/donation-failure",
-      result
-    );
+    return res.redirect(303, `/donation/payment-failed${query}`);
   } catch (error) {
-    console.error(
-      "❌ Payment failure error:",
-      error.message
-    );
-
-    return res.status(500).render("pages/form-error", {
-      message: "Payment failed. Please try again.",
-      backUrl: "/",
-    });
+    console.error("❌ Membership failure handling failed:", error.message);
+    return res.redirect(303, "/donation/payment-failed");
   }
+}
+
+// ============================================================
+// RESULT PAGES
+// ============================================================
+
+async function showThankYou(req, res, next) {
+  try {
+    const transactionId = String(req.params.transactionId || "");
+    const membership = TXN_ID.test(transactionId)
+      ? await membershipService.findMembership(transactionId)
+      : null;
+
+    if (!membership) {
+      return next();
+    }
+
+    const amount = Number(membership.amount || 0).toFixed(2);
+    const certificateUrl = `/donation/receipt/${encodeURIComponent(transactionId)}`;
+    const name = membership.memberName || membership.donorName || "Member";
+
+    return res.render("pages/thank-you", {
+      name,
+      headline: "Welcome to JBC Seva Trust. Your membership is confirmed.",
+      rows: [
+        ["Membership", membership.membershipType],
+        ["Amount", `₹${amount}`],
+        ["Payment mode", membership.paymentMode],
+        ["Transaction ID", transactionId],
+      ],
+      certificateUrl,
+      certificateLabel: "Download Membership Certificate",
+      selfText: `My JBC Seva Trust membership certificate: ${appUrl}${certificateUrl}`,
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+function showPaymentFailed(req, res) {
+  return res.render("pages/payment-failed", {
+    transactionId: TXN_ID.test(String(req.query.txn || "")) ? req.query.txn : "",
+    retryUrl: "/donation",
+  });
 }
 
 // ============================================================
@@ -279,5 +234,7 @@ module.exports = {
   submitMembership,
   paymentSuccess,
   paymentFailure,
+  showThankYou,
+  showPaymentFailed,
   downloadReceipt,
 };

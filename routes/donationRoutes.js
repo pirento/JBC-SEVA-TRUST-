@@ -3,43 +3,27 @@ const router = require("express").Router();
 const controller = require("../controllers/donationController");
 
 // ========================================
-// DONATION PAYMENT
+// DONATION PAGES
 // ========================================
 
-// Donation form page
-router.get(
-  "/",
-  controller.showDonationForm
-);
+router.get("/", controller.showDonationForm);
 
-// Download donation certificate (before /:slug so it is not taken as a cause)
-router.get(
-  "/certificate/:transactionId",
-  controller.downloadCertificate
-);
+// Fixed paths come before /:slug so they are not taken as a cause
+router.get("/thank-you/:transactionId", controller.showThankYou);
+router.get("/payment-failed", controller.showPaymentFailed);
+router.get("/certificate/:transactionId", controller.downloadCertificate);
 
-// Donation form for one cause, e.g. /donate/temple
-router.get(
-  "/:slug",
-  controller.showCauseForm
-);
+// Form for one cause, e.g. /donate/temple
+router.get("/:slug", controller.showCauseForm);
 
-// Start donation payment
-router.post(
-  "/",
-  controller.submitDonation
-);
+// ========================================
+// PAYMENT
+// ========================================
 
-// PayU successful payment callback
-router.post(
-  "/success",
-  controller.paymentSuccess
-);
+router.post("/", controller.submitDonation);
 
-// PayU failed payment callback
-router.post(
-  "/failure",
-  controller.paymentFailure
-);
+// PayU callbacks (browser returns here from PayU)
+router.post("/success", controller.paymentSuccess);
+router.post("/failure", controller.paymentFailure);
 
 module.exports = router;

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="<%= locals.lang || 'en' %>">
+<head>
+  <%- include('../partials/head', { title: 'Secure Payment' }) %>
+  <meta name="robots" content="noindex" />
+</head>
+<body class="page-bg">
+  <main id="main" class="result-page">
+    <div class="result-card">
+      <img src="/images/logo-mark.png" alt="" width="64" height="64" class="result-logo">
+      <h1>Secure <%= kind %> Payment</h1>
+      <p>You are being taken to PayU's secure payment page.</p>
+      <p class="pay-amount" id="payAmount">₹ <%= paymentData.amount %></p>
+      <div class="loader" id="payLoader" aria-hidden="true"></div>
+
+      <form id="payuForm" action="<%= paymentUrl %>" method="POST">
+        <% Object.entries(paymentData).forEach(([key, value]) => { %>
+          <input type="hidden" name="<%= key %>" value="<%= value %>">
+        <% }) %>
+        <button type="submit" class="btn orange">Continue to Payment</button>
+      </form>
+
+      <p id="payAgainNote" class="alert error" hidden>
+        This payment was already started. If money was debited, please do not pay again;
+        contact the Trust with transaction ID <strong class="mono"><%= paymentData.txnid %></strong>.
+        Otherwise, <a href="/donate">start a new payment</a>.
+      </p>
+
+      <p class="muted small">Your card, UPI and bank details are handled only by PayU.</p>
+    </div>
+  </main>
+
+  <script>
+    // PayU rejects a reused transaction id, so never post this form again
+    // when the donor comes back with the Back button or from a UPI app.
+    window.addEventListener("load", function () {
+      var key = "payu_submitted_" + <%- JSON.stringify(String(paymentData.txnid)) %>;
+      var form = document.getElementById("payuForm");
+
+      try {
+        if (sessionStorage.getItem(key)) {
+          form.hidden = true;
+          document.getElementById("payLoader").hidden = true;
+          document.getElementById("payAgainNote").hidden = false;
+          return;
+        }
+      } catch (e) {}
+
+      form.addEventListener("submit", function () {
+        try { sessionStorage.setItem(key, "1"); } catch (e) {}
+      });
+
+      setTimeout(function () {
+        try { sessionStorage.setItem(key, "1"); } catch (e) {}
+        form.submit();
+      }, 800);
+    });
+  </script>
+</body>
+</html>

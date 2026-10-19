@@ -2528,3 +2528,80 @@ html[lang="hi"] body {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* =========================================
+   PAYMENT PAGES
+========================================= */
+
+.pay-amount {
+  font-family: var(--font-head);
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 10px 0;
+}
+
+.loader {
+  width: 38px;
+  height: 38px;
+  margin: 8px auto 18px;
+  border: 4px solid var(--navy-100);
+  border-top-color: var(--orange-400);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+.loader[hidden] {
+  display: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.success-mark {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #e6f4ea;
+  color: #1f6a35;
+}
+
+.thank-you .lead {
+  margin-top: 0;
+}
+
+.receipt-table {
+  width: 100%;
+  margin: 18px 0 22px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 15px;
+}
+
+.receipt-table th,
+.receipt-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.receipt-table th {
+  width: 42%;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.receipt-table td {
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.button-row.center {
+  justify-content: center;
+}

@@ -1,270 +1,37 @@
 <!DOCTYPE html>
 <html lang="<%= locals.lang || 'en' %>">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Medical Request Submitted -
-        JBC Seva Trust
-    </title>
-
-    <link
-        rel="stylesheet"
-        href="/css/style.css"
-    >
-
+  <%- include('../partials/head', { title: 'Request Submitted' }) %>
+  <meta name="robots" content="noindex" />
 </head>
-
-
 <body class="page-bg">
-
-
-    <!-- HEADER -->
-
-    <%- include('../partials/header') %>
-
-
-    <!-- MAIN -->
-
-    <main class="result-page">
-
-        <div
-            class="result-card"
-            style="text-align:center;"
-        >
-
-            <!-- SUCCESS ICON -->
-
-            <div
-                style="
-                    font-size:56px;
-                    margin-bottom:15px;
-                "
-            >
-                ✅
-            </div>
-
-
-            <h2>
-                Medical Help Request Submitted
-            </h2>
-
-
-            <p>
-
-                Your medical help request has been
-                successfully submitted to
-
-                <strong>
-                    JBC Seva Trust
-                </strong>.
-
-            </p>
-
-
-            <!-- REFERENCE NUMBER -->
-
-            <% if (reference) { %>
-
-                <div
-                    style="
-                        margin:25px auto;
-                        padding:16px;
-                        max-width:420px;
-                        background:#f7f7f7;
-                        border:1px solid #ddd;
-                        border-radius:8px;
-                    "
-                >
-
-                    <div
-                        style="
-                            font-size:14px;
-                            color:#666;
-                            margin-bottom:6px;
-                        "
-                    >
-                        Reference Number
-                    </div>
-
-
-                    <strong
-                        style="
-                            font-size:20px;
-                        "
-                    >
-                        <%= reference %>
-                    </strong>
-
-                </div>
-
-            <% } %>
-
-
-            <!-- EMAIL MESSAGE -->
-
-            <p>
-
-                📧 A confirmation email with your
-                receipt has been sent to your
-                registered email address.
-
-            </p>
-
-
-            <!-- DOWNLOAD STATUS -->
-
-            <p
-                id="downloadMessage"
-                style="
-                    margin-top:25px;
-                    color:#555;
-                "
-            >
-
-                📄 Preparing your receipt...
-
-            </p>
-
-
-            <!-- MANUAL DOWNLOAD FALLBACK -->
-
-            <% if (file) { %>
-
-                <a
-                    id="downloadButton"
-                    class="btn red"
-                    href="/medical/receipt/<%= encodeURIComponent(file) %>"
-                    download="<%= file %>"
-                >
-
-                    📥 Download Medical Receipt
-
-                </a>
-
-            <% } %>
-
-
-            <br>
-            <br>
-
-
-            <a
-                class="btn secondary"
-                href="/"
-            >
-                Back to Home
-            </a>
-
-
-        </div>
-
-    </main>
-
-
-    <!-- FOOTER -->
-
-    <%- include('../partials/footer') %>
-
-
-    <!-- ========================================
-         AUTOMATIC PDF DOWNLOAD
-    ========================================= -->
-
-    <% if (file) { %>
-
-        <script>
-
-            document.addEventListener(
-                "DOMContentLoaded",
-                function () {
-
-                    const downloadUrl =
-                        "/medical/receipt/<%= encodeURIComponent(file) %>";
-
-
-                    const fileName =
-                        "<%= file %>";
-
-
-                    const message =
-                        document.getElementById(
-                            "downloadMessage"
-                        );
-
-
-                    /*
-                     * Small delay so that the
-                     * success page can render first.
-                     */
-
-                    setTimeout(function () {
-
-                        const link =
-                            document.createElement("a");
-
-
-                        link.href =
-                            downloadUrl;
-
-
-                        link.download =
-                            fileName;
-
-
-                        link.style.display =
-                            "none";
-
-
-                        document.body.appendChild(
-                            link
-                        );
-
-
-                        /*
-                         * Automatically start download
-                         */
-
-                        link.click();
-
-
-                        /*
-                         * Remove temporary element
-                         */
-
-                        document.body.removeChild(
-                            link
-                        );
-
-
-                        /*
-                         * Update status
-                         */
-
-                        if (message) {
-
-                            message.innerHTML =
-                                "✅ Your receipt download has started.";
-
-                        }
-
-                    }, 500);
-
-                }
-            );
-
-        </script>
-
-    <% } %>
-
-
+  <%- include('../partials/header') %>
+
+  <main id="main" class="result-page">
+    <div class="result-card thank-you">
+      <div class="success-mark" aria-hidden="true"><%- include('../partials/icon', { name: 'check', size: 34 }) %></div>
+      <h1>Medical help request submitted</h1>
+      <p class="lead">Our team will review the request and contact you.</p>
+
+      <% if (reference) { %>
+        <table class="receipt-table">
+          <tbody>
+            <tr><th scope="row">Reference number</th><td class="mono"><%= reference %></td></tr>
+          </tbody>
+        </table>
+      <% } %>
+
+      <div class="button-row center">
+        <% if (file) { %>
+          <a href="/medical/receipt/<%= encodeURIComponent(file) %>" class="btn orange">Download Receipt</a>
+        <% } %>
+        <a href="/" class="btn secondary">Back to Home</a>
+      </div>
+
+      <p class="muted small">A copy of the receipt is sent to the email you gave. Keep the reference number for any follow-up.</p>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
 </body>
-
 </html>

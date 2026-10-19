@@ -1259,7 +1259,22 @@ function createMembershipEmailHtml(
 // EXPORTS
 // ============================================================
 
+// ============================================================
+// FIND A SAVED MEMBERSHIP
+// ============================================================
+
+async function findMembership(transactionId) {
+  const membership = await Membership.findByTransactionId(transactionId);
+
+  if (!membership || String(membership.paymentStatus || "").toUpperCase() !== "SUCCESS") {
+    return null;
+  }
+
+  return membership;
+}
+
 module.exports = {
+  findMembership,
   validateMembership,
   initiateMembership,
   processPaymentSuccess,

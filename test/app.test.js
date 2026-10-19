@@ -19,6 +19,8 @@ Object.assign(process.env, {
   ADMIN_PASSWORD_HASH: bcrypt.hashSync(ADMIN_PASSWORD, 4),
   PAYU_KEY: "testkey",
   PAYU_SALT: "testsalt",
+  PAYU_SUCCESS_URL: "http://localhost/donation/success",
+  PAYU_FAILURE_URL: "http://localhost/donation/failure",
   PAYU_DONATION_SUCCESS_URL: "http://localhost/donate/success",
   PAYU_DONATION_FAILURE_URL: "http://localhost/donate/failure",
   EMAIL_USER: "",
@@ -566,7 +568,16 @@ test("verified PayU donation is saved with its cause and listed in the account",
   assert.notEqual(res.status, 200);
 
   res = await req("/donate/success", { method: "POST", form: callback });
-  assert.equal(res.status, 200, res.text.slice(0, 300));
+  assert.equal(res.status, 303, "redirects after saving, so a refresh never re-posts");
+  assert.equal(res.location, `/donate/thank-you/${txnid}`);
+
+  res = await req(res.location);
+  assert.equal(res.status, 200);
+  assert.match(res.text, /Your donation to Green Earth has been received/);
+
+  // PayU posting the same callback again does not create a second record
+  res = await req("/donate/success", { method: "POST", form: callback });
+  assert.equal(res.status, 303);
 
   res = await req("/login", { method: "POST", form: { email: user.email, password: "newpass123" } });
   res = await req("/account");
@@ -611,8 +622,10 @@ test("temple donation keeps purpose, dedication, seva date and gotra end to end"
   assert.equal(callback.udf5, "Daily aarti and bhog", "purpose signed into PayU request");
 
   let res = await req("/donate/success", { method: "POST", form: callback });
+  assert.equal(res.status, 303);
+  res = await req(res.location);
   assert.equal(res.status, 200, res.text.slice(0, 300));
-  assert.match(res.text, /for <strong>Community Temple<\/strong>/);
+  assert.match(res.text, /Your donation to Community Temple has been received/);
   assert.match(res.text, /In memory of Late Shri Ram Prasad/);
   assert.match(res.text, /https:\/\/wa\.me\/\?text=[^"]*donate%2Fcertificate%2F/, "WhatsApp receipt link");
   assert.match(res.text, /donate%2Ftemple/, "share link points to the temple page");
@@ -651,7 +664,7 @@ test("Form 10BD export lists charitable donors by PAN, never temple gifts", asyn
   const req = client();
   for (const amount of ["1000", "500"]) {
     const callback = await startDonation(req, { ...donation, amount, pan: "PQRSX6789K", address: "Village Mudila, Basti" });
-    assert.equal((await req("/donate/success", { method: "POST", form: callback })).status, 200);
+    assert.equal((await req("/donate/success", { method: "POST", form: callback })).status, 303);
   }
 
   const admin = client();
@@ -684,7 +697,7 @@ test("monthly donation: pledge, one reminder a month, stop from account", async 
   const callback = await startDonation(req, {
     ...donation, email: "monthly@example.com", cause: "Anand Dham", purpose: "Meals for elders (annadaan)", amount: "1100", monthly: "on",
   });
-  assert.equal((await req("/donate/success", { method: "POST", form: callback })).status, 200);
+  assert.equal((await req("/donate/success", { method: "POST", form: callback })).status, 303);
 
   let res = await req("/account");
   assert.match(res.text, /Monthly donations/);
@@ -837,6 +850,50 @@ test("Hindi version: switch, translated pages, English form values, admin stays 
 
   res = await req("/?lang=en");
   assert.match(res.text, /What we do/);
+});
+
+test("payment failure and unknown thank-you pages", async () => {
+  const req = client();
+
+  const callback = await startDonation(req, { ...donation, cause: "Kanyadaan", purpose: "Household starter kit" });
+  let res = await req("/donate/failure", { method: "POST", form: { ...callback, status: "failure" } });
+  assert.equal(res.status, 303);
+  assert.match(res.location, /^\/donate\/payment-failed\?txn=TXN_[^&]+&cause=kanyadaan$/);
+
+  res = await req(res.location);
+  assert.match(res.text, /Payment not completed/);
+  assert.match(res.text, /href="\/donate\/kanyadaan"/, "try again goes back to the same cause");
+
+  assert.equal((await req("/donate/thank-you/TXN_unknown_123")).status, 404);
+  assert.equal((await req("/donation/thank-you/TXN_unknown_123")).status, 404);
+  assert.equal((await req("/donate/thank-you/<script>")).status, 404);
+});
+
+test("membership: errors keep typed values, success redirects to thank-you", async () => {
+  const req = client();
+  const member = { memberName: "Kamla Devi", phoneNumber: "9876501234", email: "kamla@example.com", amount: "50", paymentMode: "UPI", consent: "on" };
+
+  let res = await req("/donation", { method: "POST", form: member });
+  assert.equal(res.status, 400);
+  assert.match(res.text, /Minimum membership amount/);
+  assert.match(res.text, /value="Kamla Devi"/);
+
+  const page = await req("/donation", { method: "POST", form: { ...member, amount: "11000" } });
+  assert.equal(page.status, 200);
+  const field = (name) => page.text.match(new RegExp(`name="${name}"\\s+value="([^"]*)"`))?.[1] ?? "";
+  const cb = { key: "testkey", status: "success", mihpayid: "PAYUM1" };
+  for (const name of ["txnid", "amount", "productinfo", "firstname", "email", "udf1", "udf2", "udf3", "udf4", "udf5"]) cb[name] = field(name);
+  cb.hash = crypto.createHash("sha512").update(`testsalt|success||||||${cb.udf5}|${cb.udf4}|${cb.udf3}|${cb.udf2}|${cb.udf1}|${cb.email}|${cb.firstname}|${cb.productinfo}|${cb.amount}|${cb.txnid}|testkey`).digest("hex");
+
+  res = await req("/donation/success", { method: "POST", form: cb });
+  assert.equal(res.status, 303, res.text.slice(0, 200));
+  res = await req(res.location);
+  assert.match(res.text, /Your membership is confirmed/);
+  assert.match(res.text, /Lifetime Member/);
+
+  const pdf = await req(`/donation/receipt/${cb.txnid}`);
+  assert.equal(pdf.status, 200);
+  assert.match(pdf.headers.get("content-type"), /pdf/);
 });
 
 // ------------------------------------------------------------

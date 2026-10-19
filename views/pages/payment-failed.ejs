@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="<%= locals.lang || 'en' %>">
+<head>
+  <%- include('../partials/head', { title: 'Payment Not Completed' }) %>
+  <meta name="robots" content="noindex" />
+</head>
+<body class="page-bg">
+  <%- include('../partials/header') %>
+
+  <main id="main" class="result-page">
+    <div class="result-card" role="alert">
+      <img src="/images/logo-mark.png" alt="" width="64" height="64" class="result-logo">
+      <h1>Payment not completed</h1>
+      <p>Your payment was cancelled or did not go through. No receipt has been issued.</p>
+      <% if (transactionId) { %>
+        <p class="small">Transaction ID: <span class="mono"><%= transactionId %></span></p>
+      <% } %>
+      <p class="muted small">If money was debited from your account, please do not pay again. It is usually refunded by the bank automatically; otherwise <a href="/contact">contact us</a> with the transaction ID.</p>
+      <div class="button-row center">
+        <a href="<%= retryUrl %>" class="btn orange">Try again</a>
+        <a href="/" class="btn secondary">Back to Home</a>
+      </div>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

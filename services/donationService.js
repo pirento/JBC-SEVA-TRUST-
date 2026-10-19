@@ -1,3 +1,7 @@
+const fs = require("fs");
+const path = require("path");
+
+const { dataDir } = require("../config/appConfig");
 const {
   generateTxnId,
   createPaymentData,
@@ -276,8 +280,6 @@ async function initiateDonation(input) {
     createdAt:
       Date.now(),
   });
-
-  store.cleanup();
 
   console.log("");
   console.log(
@@ -707,30 +709,6 @@ async function handlePaymentSuccess(data) {
   }
 
   // =======================================================
-  // STORE CERTIFICATE FOR DOWNLOAD
-  // =======================================================
-
-  if (certificatePath) {
-    store.setReceipt(
-      data.txnid,
-      {
-        type:
-          "DONATION",
-
-        transactionId:
-          data.txnid,
-
-        certificatePath,
-
-        certificateNumber,
-
-        createdAt:
-          Date.now(),
-      }
-    );
-  }
-
-  // =======================================================
   // SEND EMAIL IN BACKGROUND
   // =======================================================
 
@@ -832,6 +810,46 @@ async function processPaymentFailure(data) {
 }
 
 // =========================================================
+// FIND A SAVED DONATION
+// =========================================================
+
+async function findDonation(transactionId) {
+  const donation = await donationModel.findByTransactionId(transactionId);
+
+  if (!donation || String(donation.paymentStatus || "").toUpperCase() !== "SUCCESS") {
+    return null;
+  }
+
+  return donation;
+}
+
+// =========================================================
+// CERTIFICATE FILE (made again if it is missing)
+// =========================================================
+
+async function getCertificatePath(transactionId) {
+  const safeId = String(transactionId).replace(/[^A-Za-z0-9_-]/g, "_");
+  const filePath = path.join(dataDir, "receipts", `donation-certificate-${safeId}.pdf`);
+
+  if (fs.existsSync(filePath)) {
+    return filePath;
+  }
+
+  const donation = await findDonation(transactionId);
+
+  if (!donation) {
+    return null;
+  }
+
+  const certificate = await generateDonationCertificate({
+    ...donation,
+    txnid: donation.transactionId,
+  });
+
+  return certificate.path;
+}
+
+// =========================================================
 // EXPORTS
 // =========================================================
 
@@ -843,4 +861,6 @@ module.exports = {
   processPaymentSuccess,
 
   processPaymentFailure,
+  findDonation,
+  getCertificatePath,
 };

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="<%= locals.lang || 'en' %>">
+<head>
+  <%- include('../partials/head', { title: 'Thank You' }) %>
+  <meta name="robots" content="noindex" />
+</head>
+<body class="page-bg">
+  <%- include('../partials/header') %>
+
+  <main id="main" class="result-page">
+    <div class="result-card thank-you">
+      <div class="success-mark" aria-hidden="true"><%- include('../partials/icon', { name: 'check', size: 34 }) %></div>
+      <h1>Thank you, <%= name %>!</h1>
+      <p class="lead"><%= headline %></p>
+
+      <table class="receipt-table">
+        <tbody>
+          <% rows.filter(([, value]) => value).forEach(([label, value]) => { %>
+            <tr><th scope="row"><%= label %></th><td><%= value %></td></tr>
+          <% }) %>
+        </tbody>
+      </table>
+
+      <div class="button-row center">
+        <a href="<%= certificateUrl %>" class="btn orange"><%= certificateLabel %></a>
+        <a href="https://wa.me/?text=<%= encodeURIComponent(selfText) %>" target="_blank" rel="noopener" class="btn secondary">Save on WhatsApp</a>
+        <% if (locals.shareText) { %>
+          <a href="https://wa.me/?text=<%= encodeURIComponent(shareText) %>" target="_blank" rel="noopener" class="btn secondary">Tell friends</a>
+        <% } %>
+      </div>
+
+      <p class="muted small">A copy is sent to your email. Keep your transaction ID for any question about this payment.</p>
+      <p class="small"><a href="<%= currentUser ? '/account' : '/' %>"><%= currentUser ? 'Go to My Account' : 'Back to Home' %></a></p>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

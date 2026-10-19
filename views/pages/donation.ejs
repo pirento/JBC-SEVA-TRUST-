@@ -10,7 +10,10 @@
     <section class="form-card narrow">
       <h1 class="form-title">Become a Member</h1>
       <p class="form-intro">Join <%= trust.name %> and receive a membership certificate by email.</p>
-      <%- include('../partials/membership-form', { idPrefix: 'membershipPage' }) %>
+      <% if (locals.error) { %>
+        <div class="alert error" role="alert"><%= error %></div>
+      <% } %>
+      <%- include('../partials/membership-form', { idPrefix: 'membershipPage', values: locals.values || {} }) %>
     </section>
   </main>
 

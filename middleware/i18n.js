@@ -33,6 +33,8 @@ const patterns = [
   [/^(.+): updates$/, (m) => `${tr(m[1]) || m[1]}: अपडेट`],
   [/^Part of$/, () => "इसका हिस्सा:"],
   [/^Namaste, (.+)$/, (m) => `नमस्ते, ${m[1]}`],
+  [/^Thank you, (.+)!$/, (m) => `धन्यवाद, ${m[1]}!`],
+  [/^Your donation to (.+) has been received\.$/, (m) => `${tr(m[1]) || m[1]} के लिए आपका दान मिल गया है।`],
   [/^(.+) - JBC Seva Trust$/, (m) => `${translateText(m[1]) || m[1]} - JBC Seva Trust`],
   [/^Last updated: (.+)$/, (m) => `अंतिम अपडेट: ${m[1]}`],
 ];
