@@ -41,7 +41,7 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 
 ## Features added later
 - Forgot password (`/forgot-password`, hashed one-hour tokens, needs `APP_URL`).
-- Admin CSV exports `/admin/export/:type` incl. Form 10BD; 80G switch `eightyG` in trustConfig (keep `approved: false` until granted).
+- Admin CSV exports `/admin/export/:type` incl. Form 10BD; 80G switch `eightyG` in trustConfig (keep `approved: false` until granted); terms, disclaimer, donate form, certificates and Form 10BD (hidden until approved, only gifts inside validFrom..validTo) follow it.
 - Updates with photos and events: `/admin/content`, `/updates`, `/events`; photos in `DATA_DIR/uploads` (byte-checked).
 - Monthly giving = email reminders (`services/pledgeService.js`), not auto-debit.
 - Nightly backups (`services/backupService.js`, `BACKUP_DIR`): records, photos and medical receipts; unchanged photos/receipts hard-linked to the previous backup; missing go-live settings are printed at server start (`services/configCheck.js`), not shown in admin.
