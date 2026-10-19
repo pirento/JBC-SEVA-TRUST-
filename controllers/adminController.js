@@ -78,7 +78,7 @@ exports.dashboard = async (req, res, next) => {
       page: req.query.page,
     });
 
-    return res.render("admin/dashboard", { ...data, exportTypes });
+    return res.render("admin/dashboard", { ...data, exportTypes: exportTypes() });
   } catch (error) {
     return next(error);
   }

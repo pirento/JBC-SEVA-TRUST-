@@ -202,10 +202,13 @@ const exports_ = {
   },
 };
 
+// Form 10BD needs the trust's 80G URN, so it stays hidden until approval
+const exportTypes = () =>
+  Object.keys(exports_).filter((type) => type !== "form-10bd" || eightyG.approved);
+
 async function buildExport(type, query) {
-  const build = exports_[type];
-  if (!build) return null;
-  return build(query);
+  if (!exportTypes().includes(type)) return null;
+  return exports_[type](query);
 }
 
-module.exports = { buildExport, exportTypes: Object.keys(exports_), successfulDonations };
+module.exports = { buildExport, exportTypes, successfulDonations };

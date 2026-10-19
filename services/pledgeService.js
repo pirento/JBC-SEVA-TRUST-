@@ -27,14 +27,13 @@ async function listPledges() {
     readRecords(FILE),
   ]);
 
+  const paid = donations.filter(
+    (d) => d.email && String(d.paymentStatus || "SUCCESS").toUpperCase() === "SUCCESS",
+  );
+
   const pledges = new Map();
-  for (const d of donations) {
-    if (
-      !d.monthly ||
-      String(d.paymentStatus || "SUCCESS").toUpperCase() !== "SUCCESS" ||
-      !d.email
-    )
-      continue;
+  for (const d of paid) {
+    if (!d.monthly) continue;
     const key = keyOf(d.email, d.cause);
     const current = pledges.get(key);
     if (!current || time(d.paymentDate) > time(current.lastPaid)) {
@@ -46,9 +45,18 @@ async function listPledges() {
         purpose: d.purpose || "",
         lang: d.lang || "en",
         amount: Number(d.amount),
+        lastMonthly: d.paymentDate,
         lastPaid: d.paymentDate,
       });
     }
+  }
+
+  // This month's gift paid without ticking "monthly" still counts as
+  // paid, so the donor is not reminded for a month they already gave
+  for (const d of paid) {
+    const pledge = pledges.get(keyOf(d.email, d.cause));
+    if (pledge && time(d.paymentDate) > time(pledge.lastPaid))
+      pledge.lastPaid = d.paymentDate;
   }
 
   for (const pledge of pledges.values()) {
@@ -57,7 +65,8 @@ async function listPledges() {
       0,
       ...mine.filter((e) => e.type === "CANCEL").map((e) => time(e.createdAt)),
     );
-    pledge.active = lastCancel < time(pledge.lastPaid);
+    // Only a new monthly gift restarts stopped reminders, not a one-off one
+    pledge.active = lastCancel < time(pledge.lastMonthly);
     pledge.lastReminder = Math.max(
       0,
       ...mine.filter((e) => e.type === "REMINDER").map((e) => time(e.createdAt)),

@@ -139,6 +139,7 @@ Both certificates use `services/certificateDesign.js`. Donation text is in `serv
 - After PayU returns, the result is saved and the browser is redirected (303) to a thank-you or payment-failed page.
 - PayU callbacks are checked by hash, amount and transaction id; cause and purpose are inside the signed fields.
 - Uploads: JPG/PNG/WebP only, checked by their first bytes, 5 MB limit, random file names.
+- Form posts from another website are refused (Origin/Referer check, `middleware/sameOrigin.js`); PayU callback paths are exempt.
 - CSV exports block spreadsheet formulas; medical exports show only the last 4 Aadhaar digits.
 
 ## 10. Going live

@@ -903,7 +903,16 @@ test("Form 10BD export lists charitable donors by PAN, never temple gifts", asyn
 
   const admin = client();
   await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+  assert.equal(
+    (await admin("/admin/export/form-10bd")).status,
+    404,
+    "hidden until 80G approval",
+  );
+
+  const { eightyG } = require("../config/trustConfig");
+  eightyG.approved = true;
   const res = await admin("/admin/export/form-10bd");
+  eightyG.approved = false;
   assert.match(res.text, /PQRSX6789K/);
   assert.match(res.text, /Village Mudila, Basti/);
   assert.match(res.text, /,1500\r\n/, "two gifts from one PAN are added up");
@@ -988,6 +997,24 @@ test("monthly donation: pledge, one reminder a month, stop from account", async 
     "only one reminder per month",
   );
 
+  // A one-off gift to the same cause counts as this month's payment
+  const oneOff = {
+    ...donation,
+    email: "monthly@example.com",
+    cause: "Anand Dham",
+    purpose: "Meals for elders (annadaan)",
+    amount: "1100",
+  };
+  await req("/donate/success", {
+    method: "POST",
+    form: await startDonation(req, oneOff),
+  });
+  const [afterOneOff] = await pledgeService.pledgesFor("monthly@example.com");
+  assert.ok(
+    new Date(afterOneOff.lastPaid) > new Date(pledge.lastPaid),
+    "one-off gift moves the next reminder",
+  );
+
   res = await req("/account/pledges/stop", {
     method: "POST",
     form: { cause: "Anand Dham" },
@@ -1001,6 +1028,13 @@ test("monthly donation: pledge, one reminder a month, stop from account", async 
     0,
     "stopped pledges get no reminders",
   );
+
+  // A later one-off gift does not restart stopped reminders
+  await req("/donate/success", {
+    method: "POST",
+    form: await startDonation(req, oneOff),
+  });
+  assert.equal((await pledgeService.pledgesFor("monthly@example.com")).length, 0);
 });
 
 test("backup copies the data files", async () => {
@@ -1372,4 +1406,26 @@ test("a damaged line (cut-off write) is skipped, other records still read", asyn
     records.map((r) => r.n),
     [1, 2],
   );
+});
+
+test("forms posted from another website are refused, PayU callbacks are not", async () => {
+  const req = client();
+  const evil = { origin: "https://evil.example" };
+
+  let res = await req("/login", {
+    method: "POST",
+    form: { email: "a@example.com", password: "whatever1" },
+    headers: evil,
+  });
+  assert.equal(res.status, 403);
+
+  res = await req("/login", {
+    method: "POST",
+    form: { email: "a@example.com", password: "whatever1" },
+    headers: { referer: "https://evil.example/page" },
+  });
+  assert.equal(res.status, 403, "Referer used when Origin is missing");
+
+  res = await req("/donate/failure", { method: "POST", form: {}, headers: evil });
+  assert.equal(res.status, 303, "PayU posts from its own site");
 });

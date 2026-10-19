@@ -71,7 +71,7 @@
 
       <section class="panel">
         <h2>Download Excel (CSV)</h2>
-        <p class="muted small">Full records for accounts and audit. Form 10BD is for 80G reporting.</p>
+        <p class="muted small">Full records for accounts and audit.<% if (!trust.eightyG.approved) { %> Form 10BD appears here once 80G approval is entered in the settings.<% } %></p>
         <div class="filter-row">
           <% exportTypes.forEach((type) => { %>
             <a href="/admin/export/<%= type %>" class="csv-link"><%= type.replace(/-/g, ' ') %></a>
