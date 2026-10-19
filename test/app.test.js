@@ -1669,6 +1669,17 @@ test("admin corrects a mistyped donor email; history kept, receipt follows", asy
   res = await admin("/admin/dashboard?view=donations&q=kamla@example.com");
   assert.match(res.text, /Kamla Devi Gupta/);
 
+  // Same email in other case and a +91 phone are not changes
+  res = await admin(`/admin/records/donation/${txn}/edit`, {
+    method: "POST",
+    form: {
+      donorName: "Kamla Devi Gupta",
+      email: "KAMLA@Example.com",
+      phoneNumber: "+91 98765 43210",
+    },
+  });
+  assert.match(res.location, /saved=none/);
+
   // Amount cannot be changed through the form
   await admin(`/admin/records/donation/${txn}/edit`, {
     method: "POST",

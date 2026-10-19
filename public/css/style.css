@@ -2656,12 +2656,6 @@ html[lang="hi"] body {
 }
 
 /* Admin: buttons side by side in a table cell, wrapping on small screens */
-.action-cell {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  min-width: 170px;
-}
 
 .history > li {
   margin-bottom: 10px;
@@ -2730,8 +2724,10 @@ html[lang="hi"] body {
 
 /* Row actions stack one under another, same width */
 .action-cell {
+  display: flex;
   flex-direction: column;
   align-items: stretch;
+  gap: 6px;
   min-width: 190px;
 }
 

@@ -35,7 +35,9 @@ async function show(req, res, next) {
           ? "Receipt sent again."
           : req.query.saved === "none"
             ? "Nothing was changed."
-            : "";
+            : req.query.saved === "failed"
+              ? "Saved, but the email or receipt could not be sent. Check the email settings, then tick 'Send the receipt again' and save."
+              : "";
     return render(res, found, { kind, id, notice });
   } catch (error) {
     return next(error);
@@ -48,7 +50,13 @@ async function save(req, res, next) {
     const result = await recordEditService.save(kind, id, req.body || {});
     if (!result) return next();
 
-    const saved = result.changed ? "1" : result.resend ? "resent" : "none";
+    const saved = result.sendFailed
+      ? "failed"
+      : result.changed
+        ? "1"
+        : result.resend
+          ? "resent"
+          : "none";
     return res.redirect(
       `/admin/records/${kind}/${encodeURIComponent(id)}/edit?saved=${saved}`,
     );

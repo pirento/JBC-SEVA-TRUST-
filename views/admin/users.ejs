@@ -46,7 +46,7 @@
                     <% if (u.mustChangePassword) { %><br><small class="muted">Temporary password not yet changed</small><% } %>
                     <% if (u.googleId) { %><br><small class="muted">Uses Google login</small><% } %>
                   </td>
-                  <td class="action-cell">
+                  <td><div class="action-cell">
                     <form method="POST" action="/admin/users/reset" class="inline-form">
                       <input type="hidden" name="email" value="<%= u.email %>" />
                       <button type="submit" class="btn secondary small-btn">Send reset link</button>
@@ -57,7 +57,7 @@
                         <button type="submit" class="btn secondary small-btn">Send new login details</button>
                       </form>
                     <% } %>
-                  </td>
+                  </div></td>
                 </tr>
               <% }) %>
             </tbody>

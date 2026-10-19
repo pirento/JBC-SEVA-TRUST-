@@ -31,7 +31,7 @@ async function readCorrected(fileName) {
   const result = [];
   for (const record of records) {
     if (record.type === "EDIT") continue;
-    const list = edits.get(record[key]);
+    const list = edits.get(record[key] ?? record.txnid);
     result.push(
       list
         ? Object.assign({}, record, ...list.map((e) => e.changes), { edits: list })

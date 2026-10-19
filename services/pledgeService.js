@@ -85,6 +85,14 @@ async function pledgesFor(email) {
   );
 }
 
+// Whether the donor stopped reminders for this email and cause after `since`
+async function wasStopped(email, cause, since) {
+  const key = keyOf(email, cause);
+  return (await readRecords(FILE)).some(
+    (e) => e.key === key && e.type === "CANCEL" && time(e.createdAt) >= time(since),
+  );
+}
+
 async function cancelPledge(email, cause) {
   await appendRecord(FILE, {
     type: "CANCEL",
@@ -204,6 +212,7 @@ module.exports = {
   listPledges,
   pledgesFor,
   cancelPledge,
+  wasStopped,
   stopLink,
   readStopLink,
   sendDueReminders,
