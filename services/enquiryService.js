@@ -44,7 +44,7 @@ function contact(input) {
 }
 
 // Tell the trust inbox; a failed email must not lose the submission
-function notifyTrust(subject, rows) {
+function notifyTrust(subject, rows, replyTo) {
   if (!trustEmail) return;
 
   const html =
@@ -59,6 +59,7 @@ function notifyTrust(subject, rows) {
 
   sendEmail({
     to: trustEmail,
+    replyTo,
     subject: `${subject} - ${trust.name}`,
     text: rows.map(([k, v]) => `${k}: ${v}`).join("\n"),
     html,
@@ -100,15 +101,19 @@ async function registerVolunteer(input) {
 
   await enquiryModel.addVolunteer(record);
 
-  notifyTrust("New volunteer registration", [
-    ["Name", record.name],
-    ["Mobile", record.phone],
-    ["Email", record.email],
-    ["Village / city", record.city],
-    ["Areas", areas.join(", ")],
-    ["Availability", availability],
-    ["Message", record.message],
-  ]);
+  notifyTrust(
+    "New volunteer registration",
+    [
+      ["Name", record.name],
+      ["Mobile", record.phone],
+      ["Email", record.email],
+      ["Village / city", record.city],
+      ["Areas", areas.join(", ")],
+      ["Availability", availability],
+      ["Message", record.message],
+    ],
+    record.email,
+  );
 
   return record;
 }
@@ -142,13 +147,17 @@ async function sendMessage(input) {
 
   await enquiryModel.addMessage(record);
 
-  notifyTrust(`New message: ${enquiryType}`, [
-    ["Name", record.name],
-    ["Organisation", record.organisation],
-    ["Mobile", record.phone],
-    ["Email", record.email],
-    ["Message", record.message],
-  ]);
+  notifyTrust(
+    `New message: ${enquiryType}`,
+    [
+      ["Name", record.name],
+      ["Organisation", record.organisation],
+      ["Mobile", record.phone],
+      ["Email", record.email],
+      ["Message", record.message],
+    ],
+    record.email,
+  );
 
   return record;
 }

@@ -26,8 +26,34 @@ async function verifyEmailConnection() {
   }
 }
 
-async function sendEmail({ to, replyTo, subject, text, html, attachments = [] }) {
-  if (!to) {
+// Who receives a message. The trust inbox gets a hidden copy (BCC) only
+// of receipts (copyTrust: true), never of password or confirmation
+// links, which must reach the account owner alone.
+function buildMailOptions({
+  to,
+  replyTo,
+  subject,
+  text,
+  html,
+  attachments = [],
+  copyTrust = false,
+}) {
+  const bcc = copyTrust && trustEmail && trustEmail !== to ? trustEmail : undefined;
+
+  return {
+    from: `"JBC Seva Trust" <${user}>`,
+    to,
+    bcc,
+    replyTo: replyTo || undefined,
+    subject,
+    text,
+    html,
+    attachments,
+  };
+}
+
+async function sendEmail(options) {
+  if (!options.to) {
     throw new Error("Recipient email is required");
   }
 
@@ -36,21 +62,9 @@ async function sendEmail({ to, replyTo, subject, text, html, attachments = [] })
     throw new Error("Email is not configured (EMAIL_USER / EMAIL_PASS)");
   }
 
-  const info = await transporter.sendMail({
-    from: `"JBC Seva Trust" <${user}>`,
-
-    // Email will go to:
-    // 1. User's email
-    // 2. JBC Seva Trust email
-    to: [to, trustEmail].filter(Boolean),
-
-    replyTo: replyTo || to,
-
-    subject,
-    text,
-    html,
-    attachments,
-  });
+  const mail = buildMailOptions(options);
+  const { subject, attachments } = mail;
+  const info = await transporter.sendMail(mail);
 
   console.log("=================================");
   console.log("✅ Email sent successfully");
@@ -99,6 +113,7 @@ async function sendTestEmail() {
 }
 
 module.exports = {
+  buildMailOptions,
   sendEmail,
   verifyEmailConnection,
   sendTestEmail,

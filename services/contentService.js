@@ -117,6 +117,7 @@ async function registerForEvent(event, input) {
   if (trustEmail) {
     sendEmail({
       to: trustEmail,
+      replyTo: record.email,
       subject: `Event registration: ${event.title} - ${trust.name}`,
       text: `${record.name} (${record.phone}, ${record.email}) registered for ${event.title} on ${event.date}: ${people} person(s), ${role}.`,
     }).catch((error) => console.error("❌ Event email failed:", error.message));

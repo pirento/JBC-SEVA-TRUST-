@@ -145,7 +145,8 @@ JBC Seva Trust
 
   return sendEmail({
     to: donation.email,
-    replyTo: donation.email,
+    // Receipt: the trust keeps a hidden copy
+    copyTrust: true,
     subject,
     text,
     html,

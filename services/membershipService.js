@@ -638,7 +638,8 @@ async function sendMembershipEmail(membership, payuData, pdfBuffer) {
   await sendEmail({
     to: membership.email,
 
-    replyTo: membership.email,
+    // Receipt: the trust keeps a hidden copy
+    copyTrust: true,
 
     subject: "Membership Confirmation - JBC Seva Trust",
 
