@@ -135,6 +135,9 @@ async function create(data) {
     // SUBMISSION DATE & TIME
     // ======================================================
 
+    // Download name with a secret key (services/medicalService.js)
+    receiptFile: String(data.receiptFile || ""),
+
     submittedAt: new Date().toISOString(),
   });
 }

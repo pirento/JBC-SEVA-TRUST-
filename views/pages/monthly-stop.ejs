@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="<%= locals.lang || 'en' %>">
+<head>
+  <%- include('../partials/head', { title: 'Stop Monthly Reminders' }) %>
+  <meta name="robots" content="noindex" />
+</head>
+<body class="page-bg">
+  <%- include('../partials/header') %>
+
+  <main id="main" class="result-page">
+    <div class="result-card">
+      <% if (stopped) { %>
+        <div class="success-mark" aria-hidden="true"><%- include('../partials/icon', { name: 'check', size: 34 }) %></div>
+        <h1>Monthly reminders stopped</h1>
+        <p class="lead">You will not get any more reminders for <%= cause %>. Thank you for your support.</p>
+      <% } else { %>
+        <h1>Stop monthly reminders?</h1>
+        <p class="lead">Reminders for <strong><%= cause %></strong> are sent to <strong><%= email %></strong>.</p>
+        <form method="POST" action="/monthly/stop" class="button-row center">
+          <input type="hidden" name="k" value="<%= k %>" />
+          <input type="hidden" name="t" value="<%= t %>" />
+          <button type="submit" class="btn orange">Stop reminders</button>
+        </form>
+      <% } %>
+      <div class="button-row center">
+        <a href="/" class="btn secondary">Back to Home</a>
+      </div>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

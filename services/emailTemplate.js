@@ -54,7 +54,7 @@ const escape = (value) =>
  * Builds { html, text } for an email.
  * opts: {
  *   lang, preheader, heading, greeting, paragraphs: [],
- *   rows: [[label, value]], button: { label, url }, note,
+ *   rows: [[label, value]], button: { label, url }, note, noteLink: { label, url },
  *   closing (default "With gratitude,"), footerNote
  * }
  * Labels, heading, paragraphs, note and button label are translated;
@@ -100,7 +100,11 @@ function renderEmail(opts) {
 
   const noteHtml = opts.note
     ? `
-      <div style="margin:20px 0 4px;padding:12px 14px;background:${COLORS.cream};border-left:4px solid ${COLORS.saffron};font-size:13px;color:${COLORS.muted};line-height:1.5;">${escape(tr(opts.note))}</div>`
+      <div style="margin:20px 0 4px;padding:12px 14px;background:${COLORS.cream};border-left:4px solid ${COLORS.saffron};font-size:13px;color:${COLORS.muted};line-height:1.5;">${escape(tr(opts.note))}${
+        opts.noteLink
+          ? ` <a href="${escape(opts.noteLink.url)}" style="color:${COLORS.navy};font-weight:bold;">${escape(tr(opts.noteLink.label))}</a>`
+          : ""
+      }</div>`
     : "";
 
   const html = `<!DOCTYPE html>
@@ -169,6 +173,7 @@ function renderEmail(opts) {
     ...rows.map(([label, value]) => `${tr(label)}: ${value}`),
     opts.button ? `\n${tr(opts.button.label)}: ${opts.button.url}` : "",
     opts.note ? `\n${tr(opts.note)}` : "",
+    opts.noteLink ? `${tr(opts.noteLink.label)}: ${opts.noteLink.url}` : "",
     "",
     closing,
     lang === "hi" ? "जेबीसी सेवा ट्रस्ट" : trust.name,

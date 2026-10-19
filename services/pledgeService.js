@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const cron = require("node-cron");
 
 const { appendRecord, readRecords } = require("../models/fileStore");
@@ -91,6 +92,34 @@ async function cancelPledge(email, cause) {
   });
 }
 
+// Stop link for donors without an account (anyone can type an email
+// when donating). Signed, so only the reminder email can stop a pledge.
+const sign = (key) =>
+  crypto
+    .createHmac("sha256", String(process.env.SESSION_SECRET))
+    .update(key)
+    .digest("hex");
+
+function stopLink(pledge) {
+  const query = new URLSearchParams({ k: pledge.key, t: sign(pledge.key) });
+  return `${appUrl}/monthly/stop?${query}`;
+}
+
+// Returns { email, cause } for a genuine link, otherwise null
+function readStopLink(key, token) {
+  const k = String(key || "");
+  const t = Buffer.from(String(token || ""));
+  const expected = Buffer.from(sign(k));
+  if (
+    !k.includes("|") ||
+    t.length !== expected.length ||
+    !crypto.timingSafeEqual(t, expected)
+  )
+    return null;
+  const at = k.indexOf("|");
+  return { email: k.slice(0, at), cause: k.slice(at + 1) };
+}
+
 function payLink(pledge) {
   const page = donationPages.find((p) => p.title === pledge.cause) || donationPages[0];
   const query = new URLSearchParams({
@@ -131,7 +160,8 @@ async function sendDueReminders(now = Date.now()) {
           ["Amount", `₹${Number(pledge.amount).toFixed(2)}`],
         ],
         button: { label: "Give this month", url: link },
-        note: "To stop these reminders, log in to My Account and choose Stop next to this monthly donation.",
+        note: "Don't want these reminders?",
+        noteLink: { label: "Stop monthly reminders", url: stopLink(pledge) },
       });
 
       await sendEmail({
@@ -173,6 +203,8 @@ module.exports = {
   listPledges,
   pledgesFor,
   cancelPledge,
+  stopLink,
+  readStopLink,
   sendDueReminders,
   startPledgeScheduler,
   payLink,

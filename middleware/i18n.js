@@ -55,6 +55,11 @@ const patterns = [
     (m) => `${tr(m[1]) || m[1]} के लिए आपका दान मिल गया है।`,
   ],
   [/^(.+) - JBC Seva Trust$/, (m) => `${translateText(m[1]) || m[1]} - JBC Seva Trust`],
+  [
+    /^You will not get any more reminders for (.+)\. Thank you for your support\.$/,
+    (m) =>
+      `अब आपको ${tr(m[1]) || m[1]} के लिए कोई रिमाइंडर नहीं मिलेगा। आपके सहयोग के लिए धन्यवाद।`,
+  ],
   [/^Call: (.+)$/, (m) => `फ़ोन: ${m[1]}`],
   [/^WhatsApp: (.+)$/, (m) => `व्हाट्सऐप: ${m[1]}`],
   [/^Last updated: (.+)$/, (m) => `अंतिम अपडेट: ${m[1]}`],

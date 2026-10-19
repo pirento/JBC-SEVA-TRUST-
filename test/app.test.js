@@ -643,7 +643,13 @@ test("medical request is saved with an unguessable reference and shows in accoun
   const reference = new URL(res.location, base).searchParams.get("reference");
   assert.match(reference, /^MED-\d+-[0-9A-F]{8}$/);
 
+  const file = new URL(res.location, base).searchParams.get("file");
+  assert.match(file, /^Medical-Help-Receipt-MED-\d+-[0-9A-F]{8}-[0-9a-f]{32}\.pdf$/);
+
   res = await req(`/medical/receipt/Medical-Help-Receipt-${reference}.pdf`);
+  assert.equal(res.status, 404, "the reference alone does not open the receipt");
+
+  res = await req(`/medical/receipt/${file}`);
   assert.equal(res.status, 200);
 
   res = await req("/login", {
@@ -655,6 +661,7 @@ test("medical request is saved with an unguessable reference and shows in accoun
   res = await req("/account");
   assert.match(res.text, new RegExp(reference));
   assert.match(res.text, /Cataract/);
+  assert.match(res.text, new RegExp(file), "account links to the private receipt");
 });
 
 // ------------------------------------------------------------
@@ -1019,6 +1026,23 @@ test("monthly donation: pledge, one reminder a month, stop from account", async 
     new Date(afterOneOff.lastPaid) > new Date(pledge.lastPaid),
     "one-off gift moves the next reminder",
   );
+
+  // The reminder email's stop link works without logging in
+  const link = new URL(pledgeService.stopLink(pledge));
+  const guest = client();
+  res = await guest(
+    `/monthly/stop?k=${encodeURIComponent(link.searchParams.get("k"))}&t=bad`,
+  );
+  assert.equal(res.status, 400, "a forged link is refused");
+  res = await guest(link.pathname + link.search);
+  assert.match(res.text, /Stop monthly reminders\?/, "opening the link only asks");
+  assert.equal((await pledgeService.pledgesFor("monthly@example.com")).length, 1);
+  res = await guest("/monthly/stop", {
+    method: "POST",
+    form: { k: link.searchParams.get("k"), t: link.searchParams.get("t") },
+  });
+  assert.match(res.text, /Monthly reminders stopped/);
+  assert.equal((await pledgeService.pledgesFor("monthly@example.com")).length, 0);
 
   res = await req("/account/pledges/stop", {
     method: "POST",

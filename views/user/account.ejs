@@ -150,7 +150,7 @@
                   <td><%= r.nameDiseases %></td>
                   <td><%= r.hospitalName %></td>
                   <td class="mono"><%= r.referenceRegistrationNumber %></td>
-                  <td><a href="/medical/receipt/<%= encodeURIComponent(`Medical-Help-Receipt-${r.referenceRegistrationNumber}.pdf`) %>">Download</a></td>
+                  <td><a href="/medical/receipt/<%= encodeURIComponent(r.receiptFile || `Medical-Help-Receipt-${r.referenceRegistrationNumber}.pdf`) %>">Download</a></td>
                 </tr>
               <% }) %>
             </tbody>

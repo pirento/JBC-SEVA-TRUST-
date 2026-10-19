@@ -26,6 +26,8 @@ router.post("/reset-password/:token", passwordLimiter, controller.reset);
 
 router.get("/account", userAuth, controller.account);
 router.post("/account/pledges/stop", userAuth, controller.stopPledge);
+router.get("/monthly/stop", controller.monthlyStop);
+router.post("/monthly/stop", controller.monthlyStop);
 
 const verifyLimiter = createRateLimiter({ max: 5, windowMs: 60 * 60 * 1000 });
 router.get("/verify-email/:token", controller.verifyEmail);

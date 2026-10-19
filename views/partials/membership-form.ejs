@@ -11,7 +11,7 @@
     <div class="field">
       <label for="<%= p %>Phone">Mobile Number *</label>
       <input id="<%= p %>Phone" name="phoneNumber" type="tel" inputmode="numeric" autocomplete="tel-national"
-        maxlength="10" pattern="[6-9][0-9]{9}" title="10 digit mobile number"
+        maxlength="15" pattern="[6-9][0-9]{9}" title="10 digit mobile number"
         placeholder="10 digit mobile number" value="<%= v.phoneNumber || user.phone || '' %>" required />
     </div>
 

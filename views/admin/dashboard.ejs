@@ -148,7 +148,7 @@
                     <td><%= r.patientPhoneNumber %><br><small><%= r.patientEmail %></small></td>
                     <td><%= r.nameDiseases %><br><small><%= r.hospitalName %></small></td>
                     <td class="mono"><%= r.referenceRegistrationNumber %></td>
-                    <td><a href="/medical/receipt/<%= encodeURIComponent(`Medical-Help-Receipt-${r.referenceRegistrationNumber}.pdf`) %>">PDF</a></td>
+                    <td><a href="/medical/receipt/<%= encodeURIComponent(r.receiptFile || `Medical-Help-Receipt-${r.referenceRegistrationNumber}.pdf`) %>">PDF</a></td>
                   </tr>
                 <% }) %>
               </tbody>

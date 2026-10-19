@@ -90,7 +90,12 @@ document
   .querySelectorAll('input[inputmode="numeric"]:not([type="number"])')
   .forEach((input) => {
     input.addEventListener("input", () => {
-      const digits = input.value.replace(/\D/g, "");
+      let digits = input.value.replace(/\D/g, "");
+      // Mobile pasted as +91 98765 43210 or 098765 43210: keep the 10 digits
+      if (input.type === "tel") {
+        if (digits.length === 12 && digits.startsWith("91")) digits = digits.slice(2);
+        if (digits.length === 11 && digits.startsWith("0")) digits = digits.slice(1);
+      }
       if (digits !== input.value) input.value = digits;
     });
   });

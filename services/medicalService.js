@@ -13,20 +13,39 @@ async function submitMedical(data) {
   // Random suffix: receipts download by file name, so it must not be guessable
   const referenceNumber = `MED-${Date.now()}-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
 
-  await create({ ...data, referenceRegistrationNumber: referenceNumber });
-
-  const pdfData = {
-    ...data,
-    referenceRegistrationNumber: referenceNumber,
-    submissionDate: new Date(),
-  };
-
-  const pdfBuffer = await generateMedicalReceipt(pdfData);
-  await fs.mkdir(receiptsDir, { recursive: true });
-
-  const fileName = `Medical-Help-Receipt-${referenceNumber}.pdf`;
+  // The reference is shared with hospitals and printed everywhere, so
+  // the download link carries its own secret key as well
+  const fileName = `Medical-Help-Receipt-${referenceNumber}-${crypto.randomBytes(16).toString("hex")}.pdf`;
   const filePath = path.join(receiptsDir, fileName);
-  await fs.writeFile(filePath, pdfBuffer);
+
+  // Receipt first, record second: if the PDF fails nothing is saved,
+  // so the duplicate check does not block the patient's retry
+  let pdfBuffer;
+  try {
+    pdfBuffer = await generateMedicalReceipt({
+      ...data,
+      referenceRegistrationNumber: referenceNumber,
+      submissionDate: new Date(),
+    });
+    await fs.mkdir(receiptsDir, { recursive: true });
+    await fs.writeFile(filePath, pdfBuffer);
+  } catch (error) {
+    console.error("❌ Medical receipt failed:", error.message);
+    throw new Error(
+      "We could not create your receipt. Please try again in a few minutes.",
+    );
+  }
+
+  try {
+    await create({
+      ...data,
+      referenceRegistrationNumber: referenceNumber,
+      receiptFile: fileName,
+    });
+  } catch (error) {
+    await fs.unlink(filePath).catch(() => {});
+    throw error;
+  }
 
   sendMedicalEmail(data, referenceNumber, fileName, pdfBuffer).catch((err) => {
     console.error("❌ Background email failed:", err.message);

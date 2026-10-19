@@ -168,6 +168,8 @@ function normalizeMedical(record) {
 
     patientEmail: String(record.patientEmail || "").trim(),
 
+    receiptFile: String(record.receiptFile || ""),
+
     nameDiseases: String(record.nameDiseases || "").trim(),
 
     hospitalName: String(record.hospitalName || "").trim(),

@@ -521,6 +521,19 @@ module.exports = {
   // ---------- Emails ----------
   "Public Charitable Trust": "सार्वजनिक धर्मार्थ ट्रस्ट",
   "Form not accepted": "फ़ॉर्म स्वीकार नहीं हुआ",
+  "Stop Monthly Reminders": "मासिक रिमाइंडर बंद करें",
+  "Stop monthly reminders?": "मासिक रिमाइंडर बंद करें?",
+  "Monthly reminders stopped": "मासिक रिमाइंडर बंद हो गए",
+  "Stop reminders": "रिमाइंडर बंद करें",
+  "Reminders for": "इसके रिमाइंडर:",
+  "are sent to": "इस ईमेल पर जाते हैं:",
+  "Link not valid": "लिंक मान्य नहीं है",
+  "This link is not valid. Please use the link from your latest reminder email.":
+    "यह लिंक मान्य नहीं है। कृपया अपने नवीनतम रिमाइंडर ईमेल का लिंक इस्तेमाल करें।",
+  "Don't want these reminders?": "ये रिमाइंडर नहीं चाहिए?",
+  "Stop monthly reminders": "मासिक रिमाइंडर बंद करें",
+  "We could not create your receipt. Please try again in a few minutes.":
+    "हम आपकी रसीद नहीं बना पाए। कृपया कुछ मिनट बाद फिर से कोशिश करें।",
   "This form must be sent from the JBC Seva Trust website. Please try again.":
     "यह फ़ॉर्म जेबीसी सेवा ट्रस्ट की वेबसाइट से ही भेजा जा सकता है। कृपया फिर से कोशिश करें।",
   "Thank you for your donation": "आपके दान के लिए धन्यवाद",

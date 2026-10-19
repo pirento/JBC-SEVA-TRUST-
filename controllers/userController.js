@@ -217,6 +217,36 @@ async function stopPledge(req, res, next) {
   }
 }
 
+// From the link in a reminder email; works without an account.
+// GET only asks, POST stops (mail scanners open links by themselves).
+async function monthlyStop(req, res, next) {
+  try {
+    const input = req.method === "POST" ? req.body || {} : req.query;
+    const pledge = pledgeService.readStopLink(input.k, input.t);
+
+    if (!pledge) {
+      return res.status(400).render("pages/form-error", {
+        title: "Link not valid",
+        message:
+          "This link is not valid. Please use the link from your latest reminder email.",
+        backUrl: "/",
+      });
+    }
+
+    if (req.method === "POST")
+      await pledgeService.cancelPledge(pledge.email, pledge.cause);
+
+    return res.render("pages/monthly-stop", {
+      ...pledge,
+      k: input.k,
+      t: input.t,
+      stopped: req.method === "POST",
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 async function verifyEmail(req, res, next) {
   try {
     const user = await userAuthService.verifyEmail(req.params.token);
@@ -253,6 +283,7 @@ module.exports = {
   verifyEmail,
   resendVerification,
   stopPledge,
+  monthlyStop,
   showForgot,
   forgot,
   showReset,
