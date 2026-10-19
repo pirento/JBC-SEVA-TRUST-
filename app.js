@@ -17,6 +17,11 @@ if (!process.env.SESSION_SECRET) {
 
 const isProduction = nodeEnv === "production";
 
+// A short secret lets anyone forge a login cookie; refuse to go live with one
+if (isProduction && process.env.SESSION_SECRET.length < 32) {
+  throw new Error("SESSION_SECRET must be at least 32 characters in production");
+}
+
 const { verifyEmailConnection } = require("./services/emailService");
 
 const { startDailyReportScheduler } = require("./services/dailyReportScheduler");
@@ -246,7 +251,12 @@ app.use(errorHandler);
 // ========================================
 
 if (require.main === module) {
-  app.listen(port, async () => {
+  // Log a stray async error instead of letting it stop the whole site
+  process.on("unhandledRejection", (error) => {
+    console.error("❌ Unhandled error:", error?.stack || error);
+  });
+
+  const server = app.listen(port, () => {
     console.log("");
 
     console.log("=================================");
@@ -258,13 +268,7 @@ if (require.main === module) {
     console.log("");
 
     // ========================================
-    // VERIFY EMAIL CONNECTION
-    // ========================================
-
-    await verifyEmailConnection();
-
-    // ========================================
-    // START DAILY REPORT SCHEDULER
+    // SCHEDULERS (daily report, backup, monthly reminders)
     // ========================================
 
     startDailyReportScheduler();
@@ -274,7 +278,17 @@ if (require.main === module) {
     startPledgeScheduler();
 
     logGoLiveChecks();
+
+    // ========================================
+    // VERIFY EMAIL CONNECTION
+    // ========================================
+    // Not awaited: a slow or blocked mail server must not hold up the rest
+
+    verifyEmailConnection();
   });
+
+  // pm2 / the host sends SIGTERM on restart: finish open requests first
+  process.on("SIGTERM", () => server.close(() => process.exit(0)));
 }
 
 // ========================================

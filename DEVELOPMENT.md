@@ -144,7 +144,7 @@ Both certificates use `services/certificateDesign.js`. Donation text is in `serv
 ## 10. Going live
 
 1. Server with Node 20+, behind HTTPS (Nginx, Render, Railway, etc.).
-2. `.env`: `NODE_ENV=production`, `APP_URL=https://...`, live PayU keys with `PAYU_ENV=production` and the four callback URLs, Gmail app password, `TRUST_EMAIL`, `BACKUP_DIR` on another disk.
+2. `.env`: `NODE_ENV=production`, `APP_URL=https://...`, live PayU keys with `PAYU_ENV=production` and the four callback URLs, Gmail app password (`EMAIL_USER=jbcsevatrust@gmail.com`), `BACKUP_DIR` on another disk. `TRUST_EMAIL` is optional (defaults to the trust email).
 3. In the PayU dashboard set the webhook to `https://<your-site>/payu/webhook` (see `docs/payment-notes.md`).
 4. Start with `npm start` under a process manager (pm2 or the host's own) and check the startup log for missing settings.
 5. Make one small real donation and check the receipt email, the certificate and the admin dashboard.

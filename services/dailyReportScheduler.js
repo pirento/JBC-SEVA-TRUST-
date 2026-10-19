@@ -177,7 +177,6 @@ async function sendDailyReport() {
 
     console.log("=================================");
     console.log("✅ DAILY REPORT EMAIL SENT");
-    console.log("📧 To:", REPORT_EMAIL);
     console.log("📅 Date:", reportDate);
     console.log("=================================");
   } catch (error) {
@@ -210,7 +209,6 @@ function startDailyReportScheduler() {
   console.log("📅 Every day");
   console.log("🕚 11:59 PM");
   console.log("🇮🇳 Timezone: Asia/Kolkata");
-  console.log("📧 Recipient:", REPORT_EMAIL);
   console.log("=================================");
 }
 
