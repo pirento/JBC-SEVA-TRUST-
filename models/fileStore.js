@@ -231,10 +231,10 @@ async function readRecords(fileName) {
 
   const records = await readRecordsFromDisk(fileName, filePath);
 
-  // A legacy migration rewrites the file; take the stat after it
-  const fresh = await fs.stat(filePath).catch(() => stat);
-
-  cache.set(fileName, { size: fresh.size, mtimeMs: fresh.mtimeMs, records });
+  // Keyed by the size and time seen BEFORE reading: if a record is added
+  // while we read, the entry no longer matches and the next read reloads.
+  // (Keying by a stat taken after the read would keep the old records.)
+  cache.set(fileName, { size: stat.size, mtimeMs: stat.mtimeMs, records });
 
   return records.map((record) => ({ ...record }));
 }

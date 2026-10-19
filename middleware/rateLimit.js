@@ -12,7 +12,15 @@
 // ever run on more than one instance.
 // ========================================
 
-function createRateLimiter({ max = 5, windowMs = 15 * 60 * 1000 } = {}) {
+// key: what is counted (default the IP). resettable: whether a success
+// (req.rateLimit.reset()) clears the count; a cap that must hold no matter
+// what (e.g. all logins from one IP) is not resettable.
+function createRateLimiter({
+  max = 5,
+  windowMs = 15 * 60 * 1000,
+  key = (req) => req.ip,
+  resettable = true,
+} = {}) {
   const attempts = new Map();
 
   function entryFor(ip) {
@@ -37,7 +45,8 @@ function createRateLimiter({ max = 5, windowMs = 15 * 60 * 1000 } = {}) {
   }
 
   function middleware(req, res, next) {
-    const entry = entryFor(req.ip);
+    const id = key(req);
+    const entry = entryFor(id);
 
     if (entry.count >= max) {
       const minutes = Math.ceil((entry.resetAt - Date.now()) / 60000);
@@ -51,9 +60,11 @@ function createRateLimiter({ max = 5, windowMs = 15 * 60 * 1000 } = {}) {
 
     entry.count += 1;
 
-    req.rateLimit = {
-      reset: () => attempts.delete(req.ip),
-    };
+    if (resettable) {
+      req.rateLimit = {
+        reset: () => attempts.delete(id),
+      };
+    }
 
     return next();
   }

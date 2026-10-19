@@ -18,7 +18,9 @@ async function submitMedical(req, res) {
     // Show the form again with what they typed, so a long form is not lost
     const { aadharNumber, ...values } = req.body || {};
     return res.status(400).render("pages/medical", {
-      error: error.message,
+      error: error.expose
+        ? error.message
+        : "Something went wrong on our side. Please try again in a few minutes, or contact the trust.",
       values: {
         ...values,
         aadharNumber: /^\d{0,12}$/.test(aadharNumber || "") ? aadharNumber : "",

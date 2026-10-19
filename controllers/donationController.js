@@ -83,7 +83,9 @@ async function submitDonation(req, res) {
     const page = findPage("title", body.cause) || trust.donationPages[0];
 
     return renderCauseForm(res, page, {
-      error: error.message,
+      error: error.expose
+        ? error.message
+        : "Something went wrong on our side. Please try again in a few minutes, or contact the trust.",
       values: body,
       status: 400,
     });

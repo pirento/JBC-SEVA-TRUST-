@@ -168,7 +168,14 @@ function validateMembership(input) {
 // ============================================================
 
 async function initiateMembership(input) {
-  const membership = validateMembership(input);
+  let membership;
+  try {
+    membership = validateMembership(input);
+  } catch (error) {
+    // A validation message is for the member; other errors are not shown
+    error.expose = true;
+    throw error;
+  }
 
   const txnid = generateTxnId();
 

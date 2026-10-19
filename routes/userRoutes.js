@@ -5,7 +5,16 @@ const userAuth = require("../middleware/userAuth");
 const createRateLimiter = require("../middleware/rateLimit");
 const honeypot = require("../middleware/honeypot");
 
-const loginLimiter = createRateLimiter();
+// Failed guesses are counted per account and IP (a login to one's own
+// account must not reset the count for someone else's), plus a fixed cap
+// for all logins from one IP that a success does not clear
+const loginAccountLimiter = createRateLimiter({
+  key: (req) =>
+    `${req.ip}|${String((req.body || {}).email || "")
+      .trim()
+      .toLowerCase()}`,
+});
+const loginIpLimiter = createRateLimiter({ max: 100, resettable: false });
 const passwordLimiter = createRateLimiter();
 // Generous: many people may share one IP (cyber cafe, mobile network)
 const registerLimiter = createRateLimiter({ max: 20, windowMs: 60 * 60 * 1000 });
@@ -29,7 +38,7 @@ router.get("/register", controller.showRegister);
 router.post("/register", registerLimiter, honeypot, controller.register);
 
 router.get("/login", controller.showLogin);
-router.post("/login", loginLimiter, controller.login);
+router.post("/login", loginIpLimiter, loginAccountLimiter, controller.login);
 
 router.post("/logout", controller.logout);
 

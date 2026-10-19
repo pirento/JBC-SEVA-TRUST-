@@ -724,4 +724,7 @@ module.exports = {
   "Mobile number": "मोबाइल नंबर",
   "Hospital name": "अस्पताल का नाम",
   "Referred by": "किसने भेजा",
+  "Log in to confirm your email.": "अपना ईमेल पक्का करने के लिए लॉगिन करें।",
+  "Something went wrong on our side. Please try again in a few minutes, or contact the trust.":
+    "हमारी ओर से कुछ गड़बड़ हुई। कृपया कुछ मिनट बाद फिर से कोशिश करें, या ट्रस्ट से संपर्क करें।",
 };

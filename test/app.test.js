@@ -510,6 +510,19 @@ test("someone registering with another person's email cannot see their records",
     400,
     "a made-up link does not verify",
   );
+
+  // The real owner's link, opened while not logged in to that account
+  // (their own browser, or a mail scanner), does not confirm it
+  const ownerLink = await require("../services/userAuthService").requestEmailVerification(
+    "victim@example.com",
+  );
+  res = await client()(`/verify-email/${ownerLink}`);
+  assert.match(res.location, /^\/login\?next=/, "asks to log in to that account");
+  assert.equal(
+    (await require("../models/userModel").findByEmail("victim@example.com"))
+      .emailVerified,
+    false,
+  );
 });
 
 test("login ignores off-site redirect targets", async () => {
@@ -1894,6 +1907,26 @@ test(
     assert.equal(res.status, 302, "treated as logged out, not an error");
   },
 );
+
+test("guesses on one account are not reset by logging in to another", async () => {
+  const req = client();
+  for (let i = 0; i < 5; i += 1) {
+    await req("/login", {
+      method: "POST",
+      form: { email: "target@example.com", password: "wrong-pass1" },
+    });
+  }
+  // Logging in to one's own account in between
+  await client()("/login", {
+    method: "POST",
+    form: { email: "guest.donor@example.com", password: "mypass2026" },
+  });
+  const res = await req("/login", {
+    method: "POST",
+    form: { email: "target@example.com", password: "wrong-pass1" },
+  });
+  assert.equal(res.status, 429);
+});
 
 // Last: it leaves this IP blocked from logging in for 15 minutes
 test("too many failed logins are blocked with 429", async () => {
