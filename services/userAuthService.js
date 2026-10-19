@@ -160,6 +160,7 @@ async function ensureAccountForPayment({ name, email: rawEmail, phone: rawPhone,
         ),
         lang: lang === "hi" ? "hi" : "en",
       }),
+      { newAccount: true },
     );
   })().finally(() => creating.delete(cleanEmail));
 
@@ -170,7 +171,7 @@ async function ensureAccountForPayment({ name, email: rawEmail, phone: rawPhone,
 // Gives the account a fresh temporary password and emails it. Used after
 // a payment and by the admin ("send login details again"). Returns the
 // password too, so tests can log in without an inbox.
-async function sendLoginDetails(user) {
+async function sendLoginDetails(user, { newAccount = false } = {}) {
   const password = temporaryPassword();
 
   const updated = await userModel.updateUser(user, {
@@ -186,7 +187,9 @@ async function sendLoginDetails(user) {
     heading: "Your JBC Seva Trust account",
     greeting: lang === "hi" ? `नमस्ते ${user.name},` : `Namaste ${user.name},`,
     paragraphs: [
-      "Thank you for your support. We have made an account for you, where you can see your donations and download your receipts.",
+      newAccount
+        ? "Thank you for your support. We have made an account for you, where you can see your donations and download your receipts."
+        : "Here are new login details for your account. The temporary password below replaces your old password.",
     ],
     rows: [
       ["Email", user.email],

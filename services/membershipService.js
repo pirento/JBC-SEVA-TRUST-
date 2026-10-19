@@ -648,7 +648,8 @@ async function sendMembershipEmail(membership, payuData, pdfBuffer) {
 
   const { html, text } = renderEmail({
     lang,
-    preheader: `Your ${membership.membershipType} membership is confirmed`,
+    preheader:
+      lang === "hi" ? undefined : `Membership confirmed: ${membership.membershipType}`,
     heading: "Welcome to JBC Seva Trust",
     greeting: lang === "hi" ? `नमस्ते ${memberName},` : `Dear ${memberName},`,
     paragraphs: [

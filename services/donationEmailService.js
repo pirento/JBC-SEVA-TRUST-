@@ -26,7 +26,8 @@ async function sendDonationCertificateEmail({ donation, certificatePath }) {
 
   const { html, text } = renderEmail({
     lang,
-    preheader: `Receipt for your donation of Rs. ${amount}`,
+    // Inbox preview; in Hindi the (translated) heading is used
+    preheader: lang === "hi" ? undefined : `Receipt for your donation of Rs. ${amount}`,
     heading: "Thank you for your donation",
     greeting: lang === "hi" ? `नमस्ते ${donorName},` : `Dear ${donorName},`,
     paragraphs: [

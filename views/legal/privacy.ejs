@@ -8,7 +8,7 @@
 
 <h2>1. Data we collect</h2>
 <ul>
-  <li><strong>Account:</strong> name, email, mobile number and a hashed password (we never store your actual password).</li>
+  <li><strong>Account:</strong> name, email, mobile number and a hashed password (we never store your actual password). After a verified donation or membership we may make an account for the email you gave and send its login details (a temporary password that works for 7 days and must be changed at first login) to that email. If you choose "Continue with Google", Google sends us your name, email and Google account ID.</li>
   <li><strong>Donations:</strong> name, email, mobile number, amount, cause, purpose, and if you give them: address, PAN, dedication ("in memory of"), preferred seva date, gotra (for temple donations) and a message. We also keep the payment mode and transaction ID.</li>
   <li><strong>Membership:</strong> name, email, mobile number, amount and transaction ID.</li>
   <li><strong>Medical help requests:</strong> patient's name, Aadhaar number, date of birth, mobile number, email, illness, hospital and the name of the person who referred them.</li>
@@ -47,6 +47,7 @@
   <li>Passwords are hashed with bcrypt.</li>
   <li>Only the last 4 digits of an Aadhaar number are printed on receipts.</li>
   <li>Only the trustees can open the admin area, which is protected by a password.</li>
+  <li>Trustees may correct typing mistakes in your records (for example a mistyped email). The original entry is kept with the correction, for audit.</li>
 </ul>
 
 <h2>5. Who we share it with</h2>
@@ -54,6 +55,8 @@
   <li><strong>PayU</strong>, to process payments.</li>
   <li><strong>Our email provider (Google Gmail)</strong>, to send receipts and replies.</li>
   <li><strong>WhatsApp</strong>, only if you choose to message us there.</li>
+  <li><strong>Google</strong>, only if you choose to sign in with Google.</li>
+  <li><strong>Our hosting and database providers</strong> (such as MongoDB Atlas), which store the records in encrypted form.</li>
   <li>Hospitals, only to confirm a medical help request you sent.</li>
   <li>The Income Tax Department and other authorities, only when the law requires it.</li>
 </ul>

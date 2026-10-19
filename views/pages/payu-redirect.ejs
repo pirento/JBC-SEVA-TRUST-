@@ -21,9 +21,9 @@
       </form>
 
       <p id="payAgainNote" class="alert error" hidden>
-        This payment was already started. If money was debited, please do not pay again;
-        contact the Trust with transaction ID <strong class="mono"><%= paymentData.txnid %></strong>.
-        Otherwise, <a href="/donate">start a new payment</a>.
+        <span>This payment was already started. If money was debited, please do not pay again.</span>
+        <span>Contact the Trust with this transaction ID:</span> <strong class="mono"><%= paymentData.txnid %></strong>
+        <a href="<%= kind === 'Membership' ? '/donation' : '/donate' %>">Start a new payment</a>
       </p>
 
       <p class="muted small">Your card, UPI and bank details are handled only by PayU.</p>

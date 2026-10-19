@@ -61,7 +61,7 @@ async function sendMedicalEmail(data, referenceNumber, fileName, pdfBuffer) {
 
   const { html, text } = renderEmail({
     lang,
-    preheader: `Reference number ${referenceNumber}`,
+    preheader: lang === "hi" ? undefined : `Reference number ${referenceNumber}`,
     heading: "Medical help request received",
     greeting: lang === "hi" ? `नमस्ते,` : `Hello,`,
     paragraphs: [

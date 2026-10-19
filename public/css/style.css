@@ -2767,3 +2767,8 @@ html[lang="hi"] body {
     padding-bottom: 10px;
   }
 }
+
+.google-consent {
+  margin: 8px 0 0;
+  text-align: center;
+}
