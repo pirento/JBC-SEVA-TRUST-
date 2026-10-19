@@ -123,8 +123,9 @@ function validateMembership(input) {
     throw new Error("Payment mode is required");
   }
 
-  if (paymentMode === "Cash") {
-    throw new Error("Cash payment is not available through online PayU payment");
+  // The choices on the form; the value goes to PayU and onto the receipt
+  if (!["UPI", "Card", "Net Banking"].includes(paymentMode)) {
+    throw new Error("Please choose UPI, Card or Net Banking.");
   }
 
   if (!accepted(input.consent)) {
@@ -317,11 +318,24 @@ async function handlePaymentSuccess(data) {
     pending = await Membership.findByTransactionId(data.txnid);
   }
 
+  // Pending details lost (restart before a restore, cleanup): the hash is
+  // verified, so rebuild them from the signed callback rather than lose a
+  // payment that was taken
   if (!pending) {
-    return {
-      error: "Transaction could not be verified.",
-      status: 400,
+    pending = {
+      type: "MEMBERSHIP",
+      memberName: String(data.firstname || "").trim(),
+      phoneNumber: String(data.phone || "").trim(),
+      email: String(data.email || "").trim(),
+      amount: Number(data.amount),
+      paymentMode: String(data.udf2 || "").trim(),
+      txnid: String(data.txnid),
+      createdAt: Date.now(),
     };
+    console.warn(
+      "⚠️ Pending membership recovered from verified PayU callback:",
+      pending.txnid,
+    );
   }
 
   // ----------------------------------------------------------
@@ -426,7 +440,9 @@ async function handlePaymentSuccess(data) {
     membershipType,
 
     // A repeated callback keeps the original payment time (and Valid Till)
-    paymentDate: savedPayment.paymentDate || new Date(),
+    // (a new save returns { record }, an existing one is the record)
+    paymentDate:
+      savedPayment.record?.paymentDate || savedPayment.paymentDate || new Date(),
   };
 
   // ----------------------------------------------------------

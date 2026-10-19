@@ -179,6 +179,9 @@ async function sendLoginDetails(user, { newAccount = false } = {}) {
     mustChangePassword: true,
     tempPasswordExpires: Date.now() + TEMP_PASSWORD_DAYS * 24 * 60 * 60 * 1000,
     passwordChangedAt: Date.now(),
+    // An emailed reset link must not outlive the new password
+    resetTokenHash: "",
+    resetExpires: 0,
   });
 
   const lang = user.lang === "hi" ? "hi" : "en";
@@ -254,6 +257,8 @@ async function loginWithGoogle({ googleId, email: googleEmail, name, lang }) {
         SALT_ROUNDS,
       ),
       passwordChangedAt: Date.now(),
+      resetTokenHash: "",
+      resetExpires: 0,
     }),
   });
   return toSessionUser(updated);
@@ -276,6 +281,8 @@ async function setOwnPassword(sessionUser, input) {
     mustChangePassword: false,
     tempPasswordExpires: 0,
     passwordChangedAt: Date.now(),
+    resetTokenHash: "",
+    resetExpires: 0,
   });
 
   return toSessionUser(updated);
@@ -298,6 +305,8 @@ async function changePassword(sessionUser, input) {
   const updated = await userModel.updateUser(user, {
     passwordHash: await bcrypt.hash(newPassword, SALT_ROUNDS),
     passwordChangedAt: Date.now(),
+    resetTokenHash: "",
+    resetExpires: 0,
     mustChangePassword: false,
     tempPasswordExpires: 0,
   });

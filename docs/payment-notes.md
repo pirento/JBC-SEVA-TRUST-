@@ -26,4 +26,4 @@ Syntax validation passed for all project JavaScript files. Live PayU/Hostinger e
   is saved once and the confirmation email is sent once.
 - Payment pages no longer re-post an already used txnid to PayU (Back button / page restore).
 - Response hash supports PayU `additionalCharges` (convenience fee).
-- `/test-email` now requires admin login; donation certificate URLs validate the transaction ID.
+- The test email is sent from admin Settings (POST, admin only); donation certificate URLs validate the transaction ID.

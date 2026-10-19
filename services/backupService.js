@@ -40,14 +40,20 @@ async function copyFiles(from, to, previous, keep = () => true) {
   }
 }
 
+// Only our dated folders: a backup disk may also hold lost+found and others
+async function backupFolders() {
+  return (await fs.readdir(backupRoot()).catch(() => []))
+    .filter((name) => /^\d{4}(-\d{2}){4}$/.test(name))
+    .sort();
+}
+
 async function runBackup() {
-  const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
+  // India time (the app sets TZ), so the 02:30 run carries today's date
+  const stamp = new Date().toLocaleString("sv-SE").slice(0, 16).replace(/[ :]/g, "-");
   const target = path.join(backupRoot(), stamp);
 
   // Newest earlier backup, to link unchanged photos and receipts to
-  const earlier = (await fs.readdir(backupRoot()).catch(() => []))
-    .filter((name) => name !== stamp)
-    .sort();
+  const earlier = (await backupFolders()).filter((name) => name !== stamp);
   const previous = earlier.length ? path.join(backupRoot(), earlier.at(-1)) : null;
 
   await fs.mkdir(target, { recursive: true });
@@ -84,7 +90,7 @@ async function runBackup() {
   }
 
   // Keep only the newest KEEP backups
-  const all = (await fs.readdir(backupRoot())).sort();
+  const all = await backupFolders();
   for (const old of all.slice(0, Math.max(0, all.length - KEEP))) {
     await fs.rm(path.join(backupRoot(), old), { recursive: true, force: true });
   }

@@ -59,13 +59,13 @@ function buildMailOptions({
 }
 
 async function sendEmail(options) {
-  if (!options.to) {
-    throw new Error("Recipient email is required");
-  }
-
   // Fail fast instead of waiting minutes on an SMTP login that cannot work
   if (!user || !pass) {
     throw new Error("Email is not configured (EMAIL_USER / EMAIL_PASS)");
+  }
+
+  if (!options.to) {
+    throw new Error("Recipient email is required");
   }
 
   const mail = buildMailOptions(options);

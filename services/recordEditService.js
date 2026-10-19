@@ -217,16 +217,19 @@ async function save(kind, id, input) {
     .trim()
     .slice(0, 200);
   const changed = Object.keys(changes).length > 0;
-  if (changed && spec.extraChanges) Object.assign(changes, spec.extraChanges(record));
+  const resend = input.resend === "on";
+  // Also on a plain resend, which reprints the receipt too
+  if ((changed || resend) && spec.extraChanges) {
+    Object.assign(changes, spec.extraChanges(record));
+  }
 
   // The record's own id (older membership records only have txnid)
   const target = record[ID_KEY[spec.file]] ?? record.txnid ?? id;
-  if (changed) {
+  if (Object.keys(changes).length > 0) {
     await addEdit(spec.file, target, changes, { ...previous, reason });
   }
 
   const updated = { ...record, ...changes };
-  const resend = input.resend === "on";
   let sendFailed = false;
 
   // The correction is saved; an email or PDF problem must not hide that

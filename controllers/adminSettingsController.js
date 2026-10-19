@@ -1,4 +1,5 @@
 const settingsService = require("../services/settingsService");
+const { sendTestEmail } = require("../services/emailService");
 
 // ========================================
 // SETTINGS (Google login)
@@ -10,7 +11,12 @@ async function show(req, res, next) {
     return res.render("admin/settings", {
       settings,
       redirectUri: settingsService.googleRedirectUri(),
-      notice: req.query.saved === "1" ? "Settings saved." : "",
+      notice:
+        req.query.saved === "1"
+          ? "Settings saved."
+          : req.query.email === "sent"
+            ? "Test email sent. Check the trust's Gmail inbox."
+            : "",
       error: null,
     });
   } catch (error) {
@@ -25,7 +31,11 @@ async function save(req, res, next) {
     const clientId = String(body.googleClientId || "").trim();
     // The secret is never shown again; an empty box keeps the saved one
     const clientSecret =
-      String(body.googleClientSecret || "").trim() || current.googleClientSecret;
+      body.clearSecret === "on"
+        ? ""
+        : String(body.googleClientSecret || "").trim() ||
+          current.googleClientSecret ||
+          "";
     const enabled = body.googleEnabled === "on";
 
     const problem =
@@ -49,7 +59,7 @@ async function save(req, res, next) {
     await settingsService.saveSettings({
       googleEnabled: enabled,
       googleClientId: clientId,
-      googleClientSecret: body.clearSecret === "on" ? "" : clientSecret,
+      googleClientSecret: clientSecret,
     });
     return res.redirect("/admin/settings?saved=1");
   } catch (error) {
@@ -57,4 +67,24 @@ async function save(req, res, next) {
   }
 }
 
-module.exports = { show, save };
+// Sends one email to the trust's own address to check EMAIL_USER / EMAIL_PASS
+async function testEmail(req, res, next) {
+  try {
+    await sendTestEmail();
+    return res.redirect("/admin/settings?email=sent");
+  } catch (error) {
+    console.error("Test email failed:", error.message);
+    try {
+      return res.status(500).render("admin/settings", {
+        settings: await settingsService.getSettings(),
+        redirectUri: settingsService.googleRedirectUri(),
+        notice: "",
+        error: `Test email failed: ${error.message}`,
+      });
+    } catch (renderError) {
+      return next(renderError);
+    }
+  }
+}
+
+module.exports = { show, save, testEmail };
