@@ -15,6 +15,14 @@ const trust = require("../config/trustConfig");
 const logoPath = path.join(__dirname, "..", "public", "images", "logo-mark.png");
 
 const devanagariFontPath = path.join(__dirname, "..", "public", "fonts", "FreeSans.ttf");
+// Bold, for a donor name in Hindi (English names use Times bold italic)
+const devanagariBoldPath = path.join(
+  __dirname,
+  "..",
+  "public",
+  "fonts",
+  "FreeSansBold.ttf",
+);
 
 const PAGE = { width: 841.89, height: 595.28 };
 
@@ -71,9 +79,9 @@ function hasDevanagari(text) {
 function setDonorNameFont(doc, value) {
   const text = String(value || "");
 
-  if (hasDevanagari(text) && fs.existsSync(devanagariFontPath)) {
+  if (hasDevanagari(text) && fs.existsSync(devanagariBoldPath)) {
     try {
-      doc.font(devanagariFontPath);
+      doc.font(devanagariBoldPath);
       return;
     } catch (error) {
       console.error("⚠️ Devanagari font loading failed:", error.message);

@@ -2708,18 +2708,10 @@ html[lang="hi"] body {
    BUTTON ALIGNMENT (account page and admin)
 ========================================= */
 
-/* Buttons are as tall as the input beside them, text centred */
+/* Buttons are as tall as the input beside them (.btn already centres its text) */
 .date-form,
 .search-form {
   align-items: stretch;
-}
-
-.date-form .btn,
-.search-form .btn,
-.account-page .hero-actions .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 /* Row actions stack one under another, same width */

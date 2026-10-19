@@ -15,7 +15,7 @@ const trust = require("../config/trustConfig");
 
 const logoPath = path.join(__dirname, "..", "public", "images", "logo-mark.png");
 // Has both Devanagari and Latin letters (see CLAUDE.md for why not Noto)
-const hindiFontPath = path.join(__dirname, "..", "public", "fonts", "FreeSans.ttf");
+const hindiFontPath = path.join(__dirname, "..", "public", "fonts", "FreeSansBold.ttf");
 
 const COLORS = {
   navy: "#15375c",

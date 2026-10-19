@@ -12,7 +12,7 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 
 ## Brand
 - Logo (hands holding a heart): `public/images/logo-mark.png` (emblem; header, PDFs), `logo.jpeg` (emails), `logo-full.png`, `logo-wordmark.png`, `favicon-32.png`, `apple-touch-icon.png`.
-- PDFs use `public/fonts/FreeSans.ttf` for Hindi (GNU FreeFont, GPL with font exception): the Noto Devanagari font crashed fontkit on some names (e.g. हर्रैया). FreeSans also has Latin, so mixed names print.
+- PDFs use `public/fonts/FreeSans.ttf` (and `FreeSansBold.ttf` for names and values) for Hindi (GNU FreeFont, GPL with font exception): the Noto Devanagari font crashed fontkit on some names (e.g. हर्रैया). FreeSans also has Latin, so mixed names print.
 - Colours from the logo: navy `#15375c`, saffron `#dd870d` (text uses darker `#d97706`/`#b86304` for contrast). Headings Noto Serif, body Noto Sans.
 - Keep the look plain and factual: no emoji, no invented numbers; plans are labelled as plans.
 
