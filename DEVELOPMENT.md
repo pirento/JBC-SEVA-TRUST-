@@ -144,6 +144,8 @@ Both certificates use `services/certificateDesign.js`. Donation text is in `serv
 
 ## 10. Going live
 
+Step-by-step server guide (VPS, Nginx, HTTPS, pm2, PayU): [docs/deploy.md](docs/deploy.md).
+
 1. Server with Node 20+, behind HTTPS (Nginx, Render, Railway, etc.).
 2. `.env`: `NODE_ENV=production`, `APP_URL=https://...`, live PayU keys with `PAYU_ENV=production` and the four callback URLs, Gmail app password (`EMAIL_USER=jbcsevatrust@gmail.com`), `BACKUP_DIR` on its own empty folder on another disk (old backups there are pruned). Behind Cloudflare plus another proxy, set `TRUST_PROXY=2`. `TRUST_EMAIL` is optional (defaults to the trust email).
 3. In the PayU dashboard set the webhook to `https://<your-site>/payu/webhook` (see `docs/payment-notes.md`).
