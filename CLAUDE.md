@@ -26,6 +26,8 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 - Run `npm test` and `npm run format` before pushing.
 - Public forms: honeypot partial + middleware, rate limit, server validation, duplicate check, redirect after POST.
 - Account records need a confirmed email (`emailVerified`).
+- Password change/reset bumps `passwordChangedAt`; `middleware/userAuth.js` logs out older sessions.
+- App runs in Indian time (`process.env.TZ` set in app.js). Production: `TRUST_PROXY` = proxy hops (default 1), `SESSION_SECRET` >= 32 chars, `PAYU_ENV` test|production.
 
 ## Donations
 - Each cause has its own page `/donate/<slug>` driven by `donation` in `config/trustConfig.js` (purposes, suggested amounts, `sevaDate`, `gotra`, `religious`).
