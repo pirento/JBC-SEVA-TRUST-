@@ -1059,6 +1059,18 @@
   </section>
 
 
+  <% const pending = goLive.filter((c) => !c.ok); %>
+  <% if (pending.length) { %>
+    <section class="dashboard-card" style="padding:16px 20px;border-left:4px solid #dd870d;">
+      <strong>Go-live checklist — <%= goLive.length - pending.length %> of <%= goLive.length %> done</strong>
+      <ul style="margin:8px 0 0;padding-left:20px;columns:2;font-size:14px;">
+        <% goLive.forEach((c) => { %>
+          <li style="color:<%= c.ok ? '#1f6a35' : '#a12121' %>;"><%= c.ok ? '✓' : '✗' %> <%= c.label %></li>
+        <% }) %>
+      </ul>
+    </section>
+  <% } %>
+
   <section class="dashboard-card" style="padding:16px 20px;">
     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
       <strong style="margin-right:6px;">Download Excel (CSV):</strong>

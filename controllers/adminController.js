@@ -16,6 +16,10 @@ const {
 } = require("../models/userModel");
 
 const {
+  goLiveChecks,
+} = require("../services/configCheck");
+
+const {
   buildExport,
   exportTypes,
 } = require("../services/exportService");
@@ -1033,6 +1037,8 @@ exports.dashboard = async (
         fundTotals,
 
         exportTypes,
+
+        goLive: goLiveChecks(),
 
         // Membership
         memberships,

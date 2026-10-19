@@ -7,3 +7,6 @@ data/*.txt
 data/*.backup-*
 data/receipts/*
 !data/receipts/.gitkeep
+data/backups/
+data/uploads/*
+!data/uploads/.gitkeep

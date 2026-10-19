@@ -7,7 +7,8 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "test": "node --test --test-force-exit",
-    "hash-password": "node scripts/hashPassword.js"
+    "hash-password": "node scripts/hashPassword.js",
+    "backup": "node scripts/backup.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

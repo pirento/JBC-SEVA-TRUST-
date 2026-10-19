@@ -644,6 +644,20 @@ test("temple donation keeps purpose, dedication, seva date and gotra end to end"
   assert.equal((await client()("/admin/export/donations")).status, 302, "needs admin login");
 });
 
+test("backup copies the data files and admin sees the go-live checklist", async () => {
+  const { runBackup } = require("../services/backupService");
+  const target = await runBackup();
+  const files = fs.readdirSync(target);
+  assert.ok(files.includes("donations.txt"), files.join(","));
+  assert.ok(files.includes("accounts.txt"));
+
+  const req = client();
+  await req("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+  const res = await req("/admin/dashboard");
+  assert.match(res.text, /Go-live checklist/);
+  assert.doesNotMatch(res.text, /testsalt/, "secret values are never shown");
+});
+
 // ------------------------------------------------------------
 // Rate limiting (last: it blocks this IP for the rest of the run)
 // ------------------------------------------------------------

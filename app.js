@@ -28,6 +28,10 @@ const {
   startDailyReportScheduler,
 } = require("./services/dailyReportScheduler");
 
+const { startBackupScheduler } = require("./services/backupService");
+
+const { logGoLiveChecks } = require("./services/configCheck");
+
 const notFound = require("./middleware/notFound");
 
 const errorHandler = require("./middleware/errorHandler");
@@ -232,6 +236,10 @@ if (require.main === module) {
     // ========================================
 
     startDailyReportScheduler();
+
+    startBackupScheduler();
+
+    logGoLiveChecks();
   });
 }
 
