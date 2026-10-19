@@ -151,6 +151,8 @@ const userRoutes = require("./routes/userRoutes");
 
 const enquiryRoutes = require("./routes/enquiryRoutes");
 
+const contentRoutes = require("./routes/contentRoutes");
+
 // ========================================
 // DONATION ROUTES
 // ========================================
@@ -188,6 +190,12 @@ app.use(userRoutes);
 // ========================================
 
 app.use(enquiryRoutes);
+
+// ========================================
+// UPDATES + EVENTS ROUTES
+// ========================================
+
+app.use(contentRoutes);
 
 // ========================================
 // SYSTEM ROUTES

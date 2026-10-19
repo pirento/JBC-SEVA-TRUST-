@@ -10,15 +10,31 @@ const legalPages = {
 const LEGAL_UPDATED = "18 October 2026";
 
 const trust = require("../config/trustConfig");
+const contentModel = require("../models/contentModel");
+const { isUpcoming } = require("../services/contentService");
 
-function home(req, res) {
-  res.render("pages/index");
+async function home(req, res, next) {
+  try {
+    const [updates, events] = await Promise.all([contentModel.listUpdates(), contentModel.listEvents()]);
+    res.render("pages/index", {
+      latestUpdates: updates.slice(0, 3),
+      upcomingEvents: events.filter(isUpcoming).slice(0, 3),
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
-function programme(req, res, next) {
-  const item = trust.programmes.find((p) => p.slug === req.params.slug);
-  if (!item) return next();
-  return res.render("pages/programme", { programme: item, title: item.title });
+async function programme(req, res, next) {
+  try {
+    const item = trust.programmes.find((p) => p.slug === req.params.slug);
+    if (!item) return next();
+
+    const updates = (await contentModel.listUpdates()).filter((u) => u.programme === item.slug);
+    return res.render("pages/programme", { programme: item, title: item.title, updates: updates.slice(0, 4) });
+  } catch (error) {
+    return next(error);
+  }
 }
 
 function legal(req, res) {

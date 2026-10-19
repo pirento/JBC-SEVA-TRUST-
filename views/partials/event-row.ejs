@@ -1,0 +1,12 @@
+<% const d = new Date(event.date + 'T00:00:00'); const prog = trust.programmes.find((p) => p.slug === event.programme); %>
+<a class="event-row" href="/events/<%= event.id %>">
+  <span class="event-date">
+    <strong><%= d.getDate() %></strong>
+    <small><%= d.toLocaleDateString('en-IN', { month: 'short' }) %> <%= d.getFullYear() %></small>
+  </span>
+  <span class="event-info">
+    <strong><%= event.title %></strong>
+    <small><%= event.place %><% if (event.time) { %> · <%= event.time %><% } %><% if (prog) { %> · <%= prog.title %><% } %></small>
+  </span>
+  <% if (event.volunteersNeeded) { %><span class="tag">Volunteers needed</span><% } %>
+</a>

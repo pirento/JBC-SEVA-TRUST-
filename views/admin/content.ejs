@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+  <meta name="robots" content="noindex" />
+</head>
+<body class="page-bg">
+  <%- include('../partials/header') %>
+  <% const vu = (values || {}).form === 'update' ? values : {}; const ve = (values || {}).form === 'event' ? values : {}; const today = new Date().toISOString().slice(0, 10); %>
+
+  <main id="main" class="account-page">
+    <div class="account-head">
+      <div>
+        <h1>Updates &amp; Events</h1>
+        <p class="muted">Post photos and news from the field, and announce events.</p>
+      </div>
+      <a href="/admin/dashboard" class="btn navy-outline">← Back to Dashboard</a>
+    </div>
+
+    <% if (notice) { %><div class="alert success" role="status"><%= notice %></div><% } %>
+    <% if (error) { %><div class="alert error" role="alert"><%= error %></div><% } %>
+
+    <div class="admin-two">
+      <section class="panel">
+        <h2>Post an update</h2>
+        <form action="/admin/updates" method="POST" enctype="multipart/form-data" class="form-body compact js-once">
+          <input type="hidden" name="form" value="update" />
+          <div class="field">
+            <label for="uTitle">Title *</label>
+            <input id="uTitle" name="title" maxlength="120" required value="<%= vu.title || '' %>" placeholder="e.g. 120 neem saplings planted at Pursiya school" />
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="uProgramme">Programme</label>
+              <select id="uProgramme" name="programme">
+                <option value="">General</option>
+                <% trust.programmes.forEach((p) => { %><option value="<%= p.slug %>" <%= vu.programme === p.slug ? 'selected' : '' %>><%= p.title %></option><% }) %>
+              </select>
+            </div>
+            <div class="field">
+              <label for="uDate">Date</label>
+              <input id="uDate" name="date" type="date" max="<%= today %>" value="<%= vu.date || today %>" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="uPlace">Place</label>
+            <input id="uPlace" name="place" maxlength="100" value="<%= vu.place || '' %>" />
+          </div>
+          <div class="field">
+            <label for="uBody">Description *</label>
+            <textarea id="uBody" name="body" rows="4" maxlength="2000" required><%= vu.body || '' %></textarea>
+          </div>
+          <div class="field">
+            <label for="uPhoto">Photo (JPG, PNG or WebP, up to 5 MB)</label>
+            <input id="uPhoto" name="photo" type="file" accept="image/jpeg,image/png,image/webp" />
+            <small>Only use photos of people with their consent.</small>
+          </div>
+          <button type="submit" class="btn orange">Post update</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Announce an event</h2>
+        <form action="/admin/events" method="POST" class="form-body compact js-once">
+          <input type="hidden" name="form" value="event" />
+          <div class="field">
+            <label for="evTitle">Title *</label>
+            <input id="evTitle" name="title" maxlength="120" required value="<%= ve.title || '' %>" placeholder="e.g. Monsoon plantation drive" />
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="evDate">Date *</label>
+              <input id="evDate" name="date" type="date" min="<%= today %>" required value="<%= ve.date || '' %>" />
+            </div>
+            <div class="field">
+              <label for="evTime">Time</label>
+              <input id="evTime" name="time" type="time" value="<%= ve.time || '' %>" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="evPlace">Place *</label>
+            <input id="evPlace" name="place" maxlength="150" required value="<%= ve.place || '' %>" />
+          </div>
+          <div class="field">
+            <label for="evProgramme">Programme</label>
+            <select id="evProgramme" name="programme">
+              <option value="">General</option>
+              <% trust.programmes.forEach((p) => { %><option value="<%= p.slug %>"><%= p.title %></option><% }) %>
+            </select>
+          </div>
+          <div class="field">
+            <label for="evDesc">Description *</label>
+            <textarea id="evDesc" name="description" rows="4" maxlength="2000" required><%= ve.description || '' %></textarea>
+          </div>
+          <div class="field">
+            <label class="checkbox"><input type="checkbox" name="volunteersNeeded" /> <span>Volunteers needed</span></label>
+          </div>
+          <button type="submit" class="btn orange">Announce event</button>
+        </form>
+      </section>
+    </div>
+
+    <section class="panel">
+      <h2>Events (<%= events.length %>)</h2>
+      <% if (events.length === 0) { %>
+        <p class="empty">No events yet.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Event</th><th>Place</th><th>Registrations</th><th></th></tr></thead>
+            <tbody>
+              <% events.forEach((e) => { const regs = registrations.filter((r) => r.eventId === e.id); %>
+                <tr>
+                  <td><%= e.date %> <%= e.time %></td>
+                  <td><a href="/events/<%= e.id %>"><%= e.title %></a></td>
+                  <td><%= e.place %></td>
+                  <td>
+                    <%= regs.reduce((t, r) => t + Number(r.people || 1), 0) %> people (<%= regs.filter((r) => r.role === 'Volunteer').length %> volunteers)
+                    <% if (regs.length) { %>
+                      <details><summary>Show</summary>
+                        <ul class="reg-list"><% regs.forEach((r) => { %><li><%= r.name %>, <%= r.phone %>, <%= r.people %> · <%= r.role %></li><% }) %></ul>
+                      </details>
+                    <% } %>
+                  </td>
+                  <td>
+                    <form action="/admin/events/<%= e.id %>/delete" method="POST" onsubmit="return confirm('Delete this event?')">
+                      <button class="btn secondary small-btn" type="submit">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="panel">
+      <h2>Updates (<%= updates.length %>)</h2>
+      <% if (updates.length === 0) { %>
+        <p class="empty">No updates yet.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Photo</th><th>Title</th><th>Programme</th><th></th></tr></thead>
+            <tbody>
+              <% updates.forEach((u) => { %>
+                <tr>
+                  <td><%= u.date %></td>
+                  <td><% if (u.photo) { %><img src="/uploads/<%= u.photo %>" alt="" width="64" height="48" style="object-fit:cover;border-radius:4px;" /><% } else { %>-<% } %></td>
+                  <td><%= u.title %></td>
+                  <td><%= (trust.programmes.find((p) => p.slug === u.programme) || {}).title || 'General' %></td>
+                  <td>
+                    <form action="/admin/updates/<%= u.id %>/delete" method="POST" onsubmit="return confirm('Delete this update?')">
+                      <button class="btn secondary small-btn" type="submit">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body class="page-bg">
+  <%- include('../partials/header') %>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <h1>Events</h1>
+        <p class="lead">Mass marriages, plantation drives, eye camps and more. Come and join us.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container narrow-container">
+        <h2 class="list-title">Upcoming</h2>
+        <% if (upcoming.length === 0) { %>
+          <p class="empty-note">No upcoming events right now. <a href="/volunteer">Register as a volunteer</a> and we will call you before the next one.</p>
+        <% } else { %>
+          <div class="event-list">
+            <% upcoming.forEach((event) => { %><%- include('../partials/event-row', { event }) %><% }) %>
+          </div>
+        <% } %>
+
+        <% if (past.length) { %>
+          <h2 class="list-title">Past events</h2>
+          <div class="event-list past">
+            <% past.forEach((event) => { %><%- include('../partials/event-row', { event }) %><% }) %>
+          </div>
+        <% } %>
+      </div>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

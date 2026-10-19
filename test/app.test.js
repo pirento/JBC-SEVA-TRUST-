@@ -46,7 +46,7 @@ after(() => {
 function client() {
   let cookie = "";
 
-  const request = async function (url, { method = "GET", form, headers = {} } = {}) {
+  const request = async function (url, { method = "GET", form, multipart, headers = {} } = {}) {
     const res = await fetch(base + url, {
       method,
       redirect: "manual",
@@ -55,7 +55,7 @@ function client() {
         ...(form && { "content-type": "application/x-www-form-urlencoded" }),
         ...headers,
       },
-      body: form ? new URLSearchParams(form).toString() : undefined,
+      body: multipart || (form ? new URLSearchParams(form).toString() : undefined),
     });
 
     const setCookie = res.headers.get("set-cookie");
@@ -656,6 +656,80 @@ test("backup copies the data files and admin sees the go-live checklist", async 
   const res = await req("/admin/dashboard");
   assert.match(res.text, /Go-live checklist/);
   assert.doesNotMatch(res.text, /testsalt/, "secret values are never shown");
+});
+
+test("admin posts updates with photos and events; public can register", async () => {
+  const admin = client();
+  await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+
+  // 1x1 PNG
+  const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
+
+  const updateForm = (file, type) => {
+    const fd = new FormData();
+    fd.append("form", "update");
+    fd.append("title", "120 neem saplings planted");
+    fd.append("programme", "green-earth");
+    fd.append("body", "Planted with students of the village school.");
+    if (file) fd.append("photo", new Blob([file], { type }), "photo.png");
+    return fd;
+  };
+
+  // A text file pretending to be a PNG is refused
+  let res = await admin("/admin/updates", { method: "POST", multipart: updateForm(Buffer.from("not an image"), "image/png") });
+  assert.equal(res.status, 400);
+  assert.match(res.text, /Only JPG, PNG or WebP/);
+
+  res = await admin("/admin/updates", { method: "POST", multipart: updateForm(png, "image/png") });
+  assert.equal(res.status, 302);
+
+  res = await admin("/admin/content");
+  const photo = res.text.match(/\/uploads\/([a-f0-9]{32}\.png)/)?.[1];
+  assert.ok(photo, "photo stored with a random name");
+
+  const pub = client();
+  res = await pub(`/uploads/${photo}`);
+  assert.equal(res.status, 200);
+  assert.equal((await pub("/uploads/..%2Fdonations.txt")).status, 404, "no path tricks");
+
+  assert.match((await pub("/")).text, /120 neem saplings planted/, "shown on home");
+  assert.match((await pub("/work/green-earth")).text, /120 neem saplings planted/, "shown on programme page");
+  assert.match((await pub("/updates?programme=green-earth")).text, /120 neem saplings planted/);
+  assert.doesNotMatch((await pub("/updates?programme=temple")).text, /120 neem saplings planted/);
+
+  // Events
+  const soon = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
+  res = await admin("/admin/events", { method: "POST", form: { form: "event", title: "Eye camp", date: "2001-01-01", place: "Basti", description: "Free eye check-up" } });
+  assert.equal(res.status, 400);
+  assert.match(res.text, /cannot be in the past/);
+
+  res = await admin("/admin/events", { method: "POST", form: { form: "event", title: "Eye camp", date: soon, time: "09:00", place: "Anand Dham, Basti", programme: "anand-dham", description: "Free eye check-up and spectacles", volunteersNeeded: "on" } });
+  assert.equal(res.status, 302);
+
+  res = await pub("/events");
+  assert.match(res.text, /Eye camp/);
+  assert.match(res.text, /Volunteers needed/);
+  const eventId = res.text.match(/href="\/events\/([0-9a-f-]{36})"/)[1];
+
+  const reg = { name: "Sunita Devi", phone: "9012345678", email: "sunita@example.com", people: "2", role: "Volunteer", consent: "on" };
+  res = await pub(`/events/${eventId}/register`, { method: "POST", form: { ...reg, people: "50" } });
+  assert.equal(res.status, 400);
+  assert.match(res.text, /between 1 and 20/);
+
+  res = await pub(`/events/${eventId}/register`, { method: "POST", form: reg });
+  assert.equal(res.status, 302);
+  assert.match((await pub(`/events/${eventId}?done=1`)).text, /You are registered/);
+
+  res = await admin("/admin/content");
+  assert.match(res.text, /2 people \(1 volunteers\)/);
+  assert.match((await admin("/admin/export/event-registrations")).text, /Sunita Devi/);
+
+  // Delete removes the update everywhere
+  const updateId = res.text.match(/\/admin\/updates\/([0-9a-f-]{36})\/delete/)[1];
+  await admin(`/admin/updates/${updateId}/delete`, { method: "POST" });
+  assert.doesNotMatch((await pub("/updates")).text, /120 neem saplings planted/);
+
+  assert.equal((await pub("/admin/content")).status, 302, "admin only");
 });
 
 // ------------------------------------------------------------

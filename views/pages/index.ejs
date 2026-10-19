@@ -162,6 +162,36 @@
         </div>
       </section>
 
+      <% if (latestUpdates.length || upcomingEvents.length) { %>
+      <!-- FROM THE FIELD -->
+      <section class="section">
+        <div class="container field-grid<%= latestUpdates.length && upcomingEvents.length ? '' : ' single' %>">
+          <% if (latestUpdates.length) { %>
+            <div>
+              <header class="section-head">
+                <h2>From the field</h2>
+                <p>Recent photos and news. <a href="/updates">See all updates</a></p>
+              </header>
+              <div class="update-grid compact">
+                <% latestUpdates.forEach((update) => { %><%- include('../partials/update-card', { update }) %><% }) %>
+              </div>
+            </div>
+          <% } %>
+          <% if (upcomingEvents.length) { %>
+            <div>
+              <header class="section-head">
+                <h2>Upcoming events</h2>
+                <p><a href="/events">All events</a></p>
+              </header>
+              <div class="event-list">
+                <% upcomingEvents.forEach((event) => { %><%- include('../partials/event-row', { event }) %><% }) %>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </section>
+      <% } %>
+
       <!-- GET INVOLVED -->
       <section class="section cream">
         <div class="container">

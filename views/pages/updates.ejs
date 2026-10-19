@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body class="page-bg">
+  <%- include('../partials/header') %>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <h1><%= programme ? `${programme.title}: updates` : 'Updates from the field' %></h1>
+        <p class="lead">Photos and news from our work on the ground.</p>
+        <nav class="filter-row" aria-label="Filter by programme">
+          <a href="/updates" class="<%= !programme ? 'active' : '' %>">All</a>
+          <% trust.programmes.forEach((p) => { %>
+            <a href="/updates?programme=<%= p.slug %>" class="<%= programme && programme.slug === p.slug ? 'active' : '' %>"><%= p.title %></a>
+          <% }) %>
+        </nav>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <% if (updates.length === 0) { %>
+          <p class="empty-note">No updates yet. Photos and news will appear here as the work happens.</p>
+        <% } else { %>
+          <div class="update-grid">
+            <% updates.forEach((update) => { %>
+              <%- include('../partials/update-card', { update }) %>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

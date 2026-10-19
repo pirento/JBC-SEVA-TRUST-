@@ -45,6 +45,16 @@
             <div><dt>How we will measure it</dt><dd><%= programme.measure %></dd></div>
           </dl>
           <p class="muted small">These are plans and goals, not results yet. We will publish real figures as the work happens.</p>
+
+          <h2>Updates from the field</h2>
+          <% if (updates.length === 0) { %>
+            <p class="muted">No updates yet for <%= programme.title %>. Photos and news will appear here as the work happens.</p>
+          <% } else { %>
+            <div class="update-grid compact">
+              <% updates.forEach((update) => { %><%- include('../partials/update-card', { update }) %><% }) %>
+            </div>
+            <p><a href="/updates?programme=<%= programme.slug %>">All <%= programme.title %> updates →</a></p>
+          <% } %>
         </div>
 
         <aside class="detail-side">

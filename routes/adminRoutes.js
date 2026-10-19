@@ -37,6 +37,16 @@ router.get(
   adminController.exportCsv
 );
 
+// Updates (with photo) and events
+const content = require("../controllers/contentController");
+const { handlePhoto } = require("../middleware/upload");
+
+router.get("/content", adminAuth, content.adminContent);
+router.post("/updates", adminAuth, handlePhoto, content.createUpdate);
+router.post("/updates/:id/delete", adminAuth, content.deleteUpdate);
+router.post("/events", adminAuth, content.createEvent);
+router.post("/events/:id/delete", adminAuth, content.deleteEvent);
+
 router.post(
   "/logout",
   adminAuth,

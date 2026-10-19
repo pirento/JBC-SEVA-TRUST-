@@ -1,0 +1,15 @@
+<% const prog = trust.programmes.find((p) => p.slug === update.programme); %>
+<article class="update-card">
+  <% if (update.photo) { %>
+    <img src="/uploads/<%= update.photo %>" alt="<%= update.title %>" loading="lazy" class="update-photo" />
+  <% } %>
+  <div class="update-body">
+    <p class="update-meta">
+      <%= new Date(update.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+      <% if (prog) { %> · <a href="/work/<%= prog.slug %>"><%= prog.title %></a><% } %>
+      <% if (update.place) { %> · <%= update.place %><% } %>
+    </p>
+    <h3><%= update.title %></h3>
+    <p><%= update.body %></p>
+  </div>
+</article>

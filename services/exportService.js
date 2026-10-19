@@ -1,5 +1,6 @@
 const { readRecords } = require("../models/fileStore");
 const enquiryModel = require("../models/enquiryModel");
+const contentModel = require("../models/contentModel");
 const { toCsv } = require("../utils/csv");
 const { donationPages, GENERAL_CAUSE } = require("../config/trustConfig");
 const {
@@ -95,6 +96,17 @@ const exports_ = {
       ["Phone", (r) => r.phone],
       ["Email", (r) => r.email],
       ["Message", (r) => r.message],
+    ]),
+
+  "event-registrations": async () =>
+    toCsv(await contentModel.listRegistrations(), [
+      ["Date", (r) => r.createdAt],
+      ["Event", (r) => r.eventTitle],
+      ["Name", (r) => r.name],
+      ["Phone", (r) => r.phone],
+      ["Email", (r) => r.email],
+      ["People", (r) => r.people],
+      ["Role", (r) => r.role],
     ]),
 
   funds: async () => {

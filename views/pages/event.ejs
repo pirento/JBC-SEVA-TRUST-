@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { description: event.description }) %>
+</head>
+<body class="page-bg">
+  <%- include('../partials/header') %>
+  <% const user = currentUser || {}; const v = values || {}; const prog = trust.programmes.find((p) => p.slug === event.programme); %>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/events">Events</a> / <span><%= event.title %></span></nav>
+        <h1><%= event.title %></h1>
+        <p class="lead">
+          <%= new Date(event.date + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %><% if (event.time) { %>, <%= event.time %><% } %>
+          · <%= event.place %>
+        </p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container detail-grid">
+        <div class="detail-main">
+          <% if (prog) { %><p class="goal-note">Part of <a href="/work/<%= prog.slug %>"><%= prog.title %></a></p><% } %>
+          <p class="lead"><%= event.description %></p>
+        </div>
+
+        <aside class="detail-side">
+          <div class="side-card plain">
+            <% if (!open) { %>
+              <h2 class="side-title">This event is over</h2>
+              <p>See our <a href="/events">upcoming events</a>.</p>
+            <% } else if (done) { %>
+              <h2 class="side-title">You are registered</h2>
+              <p>Thank you! We will contact you with details before the event.</p>
+            <% } else { %>
+              <h2 class="side-title">Register</h2>
+              <% if (error) { %><div class="alert error" role="alert"><%= error %></div><% } %>
+              <form action="/events/<%= event.id %>/register" method="POST" class="form-body compact js-once">
+                <div class="field">
+                  <label for="eName">Full Name *</label>
+                  <input id="eName" name="name" maxlength="100" autocomplete="name" required value="<%= v.name || user.name || '' %>" />
+                </div>
+                <div class="field">
+                  <label for="ePhone">Mobile Number *</label>
+                  <input id="ePhone" name="phone" type="tel" inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" required value="<%= v.phone || user.phone || '' %>" />
+                </div>
+                <div class="field">
+                  <label for="eEmail">Email *</label>
+                  <input id="eEmail" name="email" type="email" autocomplete="email" required value="<%= v.email || user.email || '' %>" />
+                </div>
+                <div class="field">
+                  <label for="ePeople">Number of people *</label>
+                  <input id="ePeople" name="people" type="number" min="1" max="20" value="<%= v.people || 1 %>" required />
+                </div>
+                <% if (event.volunteersNeeded) { %>
+                  <fieldset class="field">
+                    <legend>I will</legend>
+                    <div class="radio-row">
+                      <label class="radio-pill"><input type="radio" name="role" value="Attend" <%= v.role !== 'Volunteer' ? 'checked' : '' %> /><span>Attend</span></label>
+                      <label class="radio-pill"><input type="radio" name="role" value="Volunteer" <%= v.role === 'Volunteer' ? 'checked' : '' %> /><span>Volunteer</span></label>
+                    </div>
+                  </fieldset>
+                <% } %>
+                <%- include('../partials/consent') %>
+                <button type="submit" class="btn orange full">Register</button>
+              </form>
+            <% } %>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

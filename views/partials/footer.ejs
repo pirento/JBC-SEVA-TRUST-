@@ -16,6 +16,8 @@
     <div>
       <h3>Our Work</h3>
       <ul class="footer-list">
+        <li><a href="/#about">About the Trust</a></li>
+        <li><a href="/updates">Updates from the Field</a></li>
         <% trust.programmes.forEach((p) => { %>
           <li><a href="/work/<%= p.slug %>"><%= p.title %></a></li>
         <% }) %>
@@ -28,6 +30,7 @@
         <li><a href="/donate">Donate</a></li>
         <li><a href="/donation">Become a Member</a></li>
         <li><a href="/volunteer">Volunteer</a></li>
+        <li><a href="/events">Events</a></li>
         <li><a href="/contact?type=csr">CSR Partnership</a></li>
         <li><a href="/medical">Medical Help Request</a></li>
       </ul>
