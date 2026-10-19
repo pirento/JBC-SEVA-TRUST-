@@ -103,7 +103,7 @@ Pehli baar jaanch ke liye PayU ki **test** keys aur `PAYU_ENV=test` rakh sakte h
 
 ## Step 6b: Purana data MongoDB mein laana (sirf ek baar)
 
-Agar website pehle files par chal rahi thi (`DATA_DIR` mein `.txt` files hain), to unhe MongoDB mein copy karein:
+Agar website pehle files par chal rahi thi (`DATA_DIR` mein `.txt` files hain), to unhe MongoDB mein copy karein. **Ye website ko `MONGODB_URI` ke saath chalane se pehle karein**, warna nayi entries aur purani files mix ho jaayengi:
 
 ```bash
 cd /var/www/jbc
@@ -111,13 +111,13 @@ pm2 stop jbc            # agar pehle se chal rahi hai
 npm run migrate:mongo   # har file ke records ginti ke saath copy hote hain
 ```
 
-Har line par ✔ aana chahiye. Dobara chalane par kuch bhi do baar copy nahi hota. Purani `.txt` files kuch hafte sambhaal kar rakhein. Nayi website par ye step chhod dein.
+Har line par ✔ aana chahiye. Dobara chalane par kuch bhi do baar copy nahi hota. Agar kisi line par ✖ aaye (beech mein connection toota tha), to message mein likhi collection Atlas mein hata kar dobara chalayein. "skipped damaged line" jaisa message aaye to us file ki ek adhoori line chhodi gayi hai (crash ke waqt likhi gayi thi); baaki records copy ho gaye. Purani `.txt` files kuch hafte sambhaal kar rakhein. Nayi website par ye step chhod dein.
 
 ## Step 7: Website chalu karein
 
 ```bash
 cd /var/www/jbc
-pm2 start app.js --name jbc
+pm2 start app.js --name jbc   # ek hi process; cluster mode (-i) na lagayein
 pm2 save
 pm2 startup        # ye ek command dikhayega, use copy karke chalayein
 pm2 logs jbc       # dekhein: "Go-live checklist" mein kuch bacha to wahi likha aayega
@@ -177,6 +177,8 @@ Restart par koi logout nahi hota (login MongoDB mein rehte hain). Data par koi a
 
 ## Yaad rakhein
 
+- Website ka **ek hi process** chalayein (`pm2 start app.js`, bina `-i`). Payment ka lock aur records ka kram ek process ke andar hi sahi rehta hai.
+- Server par `npm test` chalana surakshit hai: tests kabhi `.env` wala database nahi chhoote.
 - Cloudflare lagayenge to `.env` mein `TRUST_PROXY=2` karein.
 - `.env` aur `DATA_ENCRYPTION_KEY` kabhi GitHub par na daalein. `.env` pehle se gitignore mein hai.
 - Backup restore karna ho: us din ke folder ke `uploads` aur `receipts` ko `DATA_DIR` mein copy karein, aur records ke liye ek khaali database (naya `MONGODB_DB`) mein `npm run migrate:mongo -- <backup folder>` chalayein.

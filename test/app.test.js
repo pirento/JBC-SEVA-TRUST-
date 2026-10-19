@@ -25,6 +25,10 @@ Object.assign(process.env, {
   PAYU_DONATION_FAILURE_URL: "http://localhost/donate/failure",
   EMAIL_USER: "",
   EMAIL_PASS: "",
+  // Never the database in .env (dotenv does not override keys already set,
+  // even empty ones); npm run test:mongo passes a temporary one
+  MONGODB_URI: process.env.TEST_MONGODB_URI || "",
+  MONGODB_DB: "jbc_test",
 });
 
 const app = require("../app");
@@ -1464,7 +1468,7 @@ test("only genuine data is saved: bot trap, spam names, duplicates", async () =>
 // Only the file store can have a half-written line
 test(
   "a damaged line (cut-off write) is skipped, other records still read",
-  { skip: process.env.MONGODB_URI && "file storage only" },
+  { skip: process.env.MONGODB_URI ? "file storage only" : false },
   async () => {
     const store = require("../models/fileStore");
 
@@ -1859,6 +1863,37 @@ test("Google login: set up in admin settings, verified email logs in", async () 
     "switched off",
   );
 });
+
+test(
+  "MongoDB: sessions are stored encrypted; an unreadable old session just logs out",
+  { skip: process.env.MONGODB_URI ? false : "MongoDB only" },
+  async () => {
+    const { getClient, DB_NAME } = require("../models/mongoStore");
+    const sessions = (await getClient()).db(DB_NAME).collection("sessions");
+
+    const req = client();
+    await req("/login", {
+      method: "POST",
+      form: { email: user.email, password: "newpass123" },
+    });
+    const stored = await sessions.find({}).sort({ expires: -1 }).limit(1).next();
+    assert.match(String(stored.session), /"authTag"/, "encrypted");
+    assert.doesNotMatch(String(stored.session), /asha@example/i);
+
+    // A session saved in plain JSON (older format) is not readable
+    await sessions.insertOne({
+      _id: "old-session",
+      expires: new Date(Date.now() + 3600e3),
+      session: JSON.stringify({ cookie: {}, user: { email: "x@example.com" } }),
+    });
+    const sid = require("cookie-signature").sign("old-session", "test-secret");
+    const res = await fetch(base + "/account", {
+      headers: { cookie: `connect.sid=s%3A${encodeURIComponent(sid)}` },
+      redirect: "manual",
+    });
+    assert.equal(res.status, 302, "treated as logged out, not an error");
+  },
+);
 
 // Last: it leaves this IP blocked from logging in for 15 minutes
 test("too many failed logins are blocked with 429", async () => {

@@ -8,6 +8,7 @@ const express = require("express");
 const session = require("express-session");
 const compression = require("compression");
 const MemoryStore = require("memorystore")(session);
+const { encrypt, decrypt } = require("./services/encryptionService");
 
 const { port, nodeEnv, appUrl, viewsDir, publicDir } = require("./config/appConfig");
 
@@ -129,6 +130,17 @@ app.use(
           dbName: require("./models/mongoStore").DB_NAME,
           collectionName: "sessions",
           ttl: 2 * 60 * 60,
+          // Session contents encrypted with the data key, like every record
+          serialize: (data) => encrypt(data),
+          // A session that cannot be read (older format, other key) is
+          // treated as logged out instead of failing the request
+          unserialize: (text) => {
+            try {
+              return decrypt(text);
+            } catch {
+              return null;
+            }
+          },
         })
       : new MemoryStore({ checkPeriod: 1000 * 60 * 15 }),
 

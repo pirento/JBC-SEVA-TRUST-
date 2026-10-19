@@ -7,7 +7,7 @@ const { MongoMemoryServer } = require("mongodb-memory-server");
   const mongo = await MongoMemoryServer.create();
   const child = spawn(process.execPath, ["--test", "--test-force-exit"], {
     stdio: "inherit",
-    env: { ...process.env, MONGODB_URI: mongo.getUri(), MONGODB_DB: "jbc_test" },
+    env: { ...process.env, TEST_MONGODB_URI: mongo.getUri() },
   });
   child.on("exit", async (code) => {
     await mongo.stop();

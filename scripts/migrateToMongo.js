@@ -4,8 +4,10 @@
 //   npm run migrate:mongo                 data files in DATA_DIR
 //   npm run migrate:mongo -- <folder>     e.g. a backup folder to restore
 //
-// A collection that already has records is skipped, so running it twice
-// does not copy anything twice. Photos and PDFs stay in DATA_DIR.
+// A collection that already holds the same number of records is skipped,
+// so running it twice copies nothing twice; a different number is
+// reported, never mixed. Photos and PDFs stay in DATA_DIR.
+// Run it BEFORE starting the site with MONGODB_URI.
 require("dotenv").config();
 
 const fs = require("fs");
@@ -33,8 +35,18 @@ const mongo = require("../models/mongoStore");
     const records = await store.files.readRecords(fileName);
     const already = (await mongo.readRecords(fileName)).length;
 
+    if (already === records.length) {
+      console.log(`- ${fileName}: already in MongoDB (${already} record(s)), skipped`);
+      continue;
+    }
+    // A cut-off earlier run, or the site already wrote here: copying again
+    // would mix or double records, so stop and say what to do
     if (already > 0) {
-      console.log(`- ${fileName}: skipped, MongoDB already has ${already} record(s)`);
+      problems += 1;
+      console.log(
+        `✖ ${fileName}: MongoDB has ${already} record(s), the file ${records.length}. ` +
+          `Check which is right; to copy again, drop the "${fileName.replace(/\.txt$/, "")}" collection and rerun.`,
+      );
       continue;
     }
 

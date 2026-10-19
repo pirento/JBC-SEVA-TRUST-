@@ -22,6 +22,11 @@ const { encrypt, decrypt } = require("../services/encryptionService");
 
 const DB_NAME = process.env.MONGODB_DB || "jbc_seva_trust";
 
+// Second guard: tests must never write into the live database
+if (process.env.NODE_ENV === "test" && !/test/.test(DB_NAME)) {
+  throw new Error(`Tests may only use a test database, not "${DB_NAME}".`);
+}
+
 let clientPromise = null;
 
 // One connection for the whole app, opened on first use
