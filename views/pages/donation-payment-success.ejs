@@ -317,6 +317,18 @@
 
     </div>
 
+    <%
+      const certLink = `${appUrl}/donate/certificate/${encodeURIComponent(transactionId)}`;
+      const causeName = donation?.cause || "JBC Seva Trust";
+      const page = trust.donationPages.find((p) => p.title === donation?.cause);
+      const selfText = `My donation receipt from JBC Seva Trust (${causeName}, Rs. ${Number(donation?.amount || 0).toFixed(2)}, Txn ${transactionId}): ${certLink}`;
+      const shareText = `I just supported ${causeName} at JBC Seva Trust, Basti. You can help too: ${appUrl}/donate${page ? '/' + page.slug : ''}`;
+    %>
+    <div class="buttons" style="margin-top:12px;">
+      <a class="btn secondary" target="_blank" rel="noopener" href="https://wa.me/?text=<%= encodeURIComponent(selfText) %>">Save receipt on WhatsApp</a>
+      <a class="btn secondary" target="_blank" rel="noopener" href="https://wa.me/?text=<%= encodeURIComponent(shareText) %>">Tell friends on WhatsApp</a>
+    </div>
+
   </div>
 
 </body>

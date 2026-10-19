@@ -11,6 +11,8 @@ module.exports = function errorHandler(err, req, res, next) {
   res.locals.currentPath ??= req.path;
   res.locals.trustEmail ??= "";
   res.locals.year ??= new Date().getFullYear();
+  res.locals.appUrl ??= "";
+  res.locals.trustWhatsapp ??= "";
 
   const status = err.status >= 400 && err.status < 500 ? err.status : 500;
 

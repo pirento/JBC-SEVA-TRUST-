@@ -613,6 +613,8 @@ test("temple donation keeps purpose, dedication, seva date and gotra end to end"
   assert.equal(res.status, 200, res.text.slice(0, 300));
   assert.match(res.text, /for <strong>Community Temple<\/strong>/);
   assert.match(res.text, /In memory of Late Shri Ram Prasad/);
+  assert.match(res.text, /https:\/\/wa\.me\/\?text=[^"]*donate%2Fcertificate%2F/, "WhatsApp receipt link");
+  assert.match(res.text, /donate%2Ftemple/, "share link points to the temple page");
   assert.match(res.text, new RegExp(sevaDate));
 
   const certificate = await req(`/donate/certificate/${callback.txnid}`);
