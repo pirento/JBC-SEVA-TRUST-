@@ -209,6 +209,7 @@ function validateDonationDetails(page, input) {
     gotra,
     pan,
     address,
+    monthly: input.monthly === "on" || input.monthly === "true",
   };
 }
 

@@ -1,5 +1,6 @@
 const userAuthService = require("../services/userAuthService");
 const accountService = require("../services/accountService");
+const pledgeService = require("../services/pledgeService");
 
 // Only same-site paths, so ?next= cannot send users to another site
 function safeNext(value) {
@@ -97,9 +98,11 @@ function logout(req, res) {
 async function account(req, res, next) {
   try {
     const activity = await accountService.getActivity(req.session.user.email);
+    activity.pledges = await pledgeService.pledgesFor(req.session.user.email);
 
     return res.render("user/account", {
       activity,
+      pledgeStopped: req.query.pledge === "stopped",
       welcome: req.query.welcome === "1",
       passwordChanged: req.query.password === "changed",
       passwordError: null,
@@ -121,9 +124,11 @@ async function changePassword(req, res, next) {
 
     try {
       const activity = await accountService.getActivity(req.session.user.email);
+      activity.pledges = await pledgeService.pledgesFor(req.session.user.email);
 
       return res.status(400).render("user/account", {
         activity,
+        pledgeStopped: false,
         welcome: false,
         passwordChanged: false,
         passwordError: error.message,
@@ -184,7 +189,17 @@ async function reset(req, res, next) {
   }
 }
 
+async function stopPledge(req, res, next) {
+  try {
+    await pledgeService.cancelPledge(req.session.user.email, String((req.body || {}).cause || ""));
+    return res.redirect("/account?pledge=stopped#monthly");
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
+  stopPledge,
   showForgot,
   forgot,
   showReset,

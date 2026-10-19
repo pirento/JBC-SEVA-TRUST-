@@ -37,7 +37,9 @@ function showCauseForm(req, res, next) {
   if (!page) return next();
 
   const amount = /^\d{3,7}$/.test(String(req.query.amount || "")) ? req.query.amount : "";
-  return renderCauseForm(res, page, { values: { amount } });
+  const purpose = page.donation.purposes.includes(req.query.purpose) ? req.query.purpose : "";
+  const monthly = req.query.monthly === "1" ? "on" : "";
+  return renderCauseForm(res, page, { values: { amount, purpose, monthly } });
 }
 
 

@@ -675,6 +675,42 @@ test("tax note claims 80G only after approval, never for the temple", () => {
   }
 });
 
+test("monthly donation: pledge, one reminder a month, stop from account", async () => {
+  const pledgeService = require("../services/pledgeService");
+  const req = client();
+  await req("/register", { method: "POST", form: { ...user, email: "monthly@example.com" } });
+
+  const callback = await startDonation(req, {
+    ...donation, email: "monthly@example.com", cause: "Anand Dham", purpose: "Meals for elders (annadaan)", amount: "1100", monthly: "on",
+  });
+  assert.equal((await req("/donate/success", { method: "POST", form: callback })).status, 200);
+
+  let res = await req("/account");
+  assert.match(res.text, /Monthly donations/);
+  assert.match(res.text, /Meals for elders/);
+
+  const [pledge] = await pledgeService.pledgesFor("monthly@example.com");
+  assert.match(pledgeService.payLink(pledge), /\/donate\/anand-dham\?amount=1100&monthly=1&purpose=Meals/);
+
+  const page = await req("/donate/anand-dham?amount=1100&monthly=1&purpose=Meals+for+elders+%28annadaan%29");
+  assert.match(page.text, /name="monthly" checked/);
+  assert.match(page.text, /value="Meals for elders \(annadaan\)" checked/);
+
+  const now = Date.now();
+  assert.equal(pledgeService.isDue(pledge, now), false, "not due right after paying");
+
+  const month = now + 31 * 864e5;
+  assert.equal(await pledgeService.sendDueReminders(month), 1);
+  assert.equal(await pledgeService.sendDueReminders(month + 864e5), 0, "only one reminder per month");
+
+  res = await req("/account/pledges/stop", { method: "POST", form: { cause: "Anand Dham" } });
+  assert.equal(res.status, 302);
+  res = await req("/account?pledge=stopped");
+  assert.match(res.text, /has been stopped/);
+  assert.doesNotMatch(res.text, /Monthly donations/);
+  assert.equal(await pledgeService.sendDueReminders(month + 62 * 864e5), 0, "stopped pledges get no reminders");
+});
+
 test("backup copies the data files and admin sees the go-live checklist", async () => {
   const { runBackup } = require("../services/backupService");
   const target = await runBackup();

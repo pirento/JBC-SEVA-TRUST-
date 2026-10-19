@@ -2367,3 +2367,10 @@ fieldset.field {
   color: #fff;
   background: #188a45;
 }
+
+.monthly-box {
+  padding: 12px 14px;
+  background: var(--navy-50);
+  border: 1px solid var(--navy-100);
+  border-radius: 6px;
+}

@@ -37,6 +37,36 @@
 
     <p class="muted small-note">Records are matched by the email <strong><%= currentUser.email %></strong>. Use the same email when you donate.</p>
 
+    <% if (pledgeStopped) { %>
+      <div class="alert success" role="status">Your monthly donation reminder has been stopped.</div>
+    <% } %>
+    <% if (activity.pledges.length) { %>
+      <section class="panel" id="monthly">
+        <h2>Monthly donations</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Cause</th><th>Amount</th><th>Last paid</th><th>Next reminder</th><th></th></tr></thead>
+            <tbody>
+              <% activity.pledges.forEach((p) => { %>
+                <tr>
+                  <td><%= p.cause %><% if (p.purpose) { %><br><small class="muted"><%= p.purpose %></small><% } %></td>
+                  <td><%= rupees(p.amount) %></td>
+                  <td><%= new Date(p.lastPaid).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+                  <td><%= new Date(p.nextDue).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+                  <td>
+                    <form action="/account/pledges/stop" method="POST" onsubmit="return confirm('Stop monthly reminders for <%= p.cause %>?')">
+                      <input type="hidden" name="cause" value="<%= p.cause %>" />
+                      <button type="submit" class="btn secondary small-btn">Stop</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    <% } %>
+
     <section class="panel">
       <h2>Donations</h2>
       <% if (activity.donations.length === 0) { %>

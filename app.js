@@ -31,6 +31,8 @@ const {
 
 const { startBackupScheduler } = require("./services/backupService");
 
+const { startPledgeScheduler } = require("./services/pledgeService");
+
 const { logGoLiveChecks } = require("./services/configCheck");
 
 const notFound = require("./middleware/notFound");
@@ -250,6 +252,8 @@ if (require.main === module) {
     startDailyReportScheduler();
 
     startBackupScheduler();
+
+    startPledgeScheduler();
 
     logGoLiveChecks();
   });

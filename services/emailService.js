@@ -38,6 +38,11 @@ async function sendEmail({
     throw new Error("Recipient email is required");
   }
 
+  // Fail fast instead of waiting minutes on an SMTP login that cannot work
+  if (!user || !pass) {
+    throw new Error("Email is not configured (EMAIL_USER / EMAIL_PASS)");
+  }
+
   const info = await transporter.sendMail({
     from: `"JBC Seva Trust" <${user}>`,
 

@@ -107,6 +107,7 @@ async function create(data) {
     gotra: String(data.gotra || "").trim(),
     pan: String(data.pan || "").trim(),
     address: String(data.address || "").trim(),
+    monthly: data.monthly === true,
 
     paymentDate:
       data.paymentDate ||

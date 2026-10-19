@@ -24,6 +24,7 @@ router.get("/reset-password/:token", controller.showReset);
 router.post("/reset-password/:token", passwordLimiter, controller.reset);
 
 router.get("/account", userAuth, controller.account);
+router.post("/account/pledges/stop", userAuth, controller.stopPledge);
 router.post("/account/password", userAuth, passwordLimiter, controller.changePassword);
 
 module.exports = router;

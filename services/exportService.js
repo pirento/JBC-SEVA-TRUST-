@@ -148,6 +148,18 @@ const exports_ = {
     ]);
   },
 
+  "monthly-pledges": async () =>
+    toCsv(await require("./pledgeService").listPledges(), [
+      ["Donor", (r) => r.name],
+      ["Email", (r) => r.email],
+      ["Fund", (r) => r.cause],
+      ["Purpose", (r) => r.purpose],
+      ["Amount", (r) => r.amount],
+      ["Last Paid", (r) => r.lastPaid],
+      ["Next Due", (r) => r.nextDue],
+      ["Status", (r) => (r.active ? "Active" : "Stopped")],
+    ]),
+
   funds: async () => {
     const donations = await successfulDonations();
     const rows = donationPages.map((page) => {
