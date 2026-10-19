@@ -25,10 +25,10 @@ const devanagariFontPath = path.join(
 const PAGE = { width: 841.89, height: 595.28 };
 
 const COLORS = {
-  navy: "#14365d",
+  navy: "#15375c",
   navyDark: "#0c2340",
   saffron: "#d97706",
-  saffronLight: "#e88c09",
+  saffronLight: "#dd870d",
   paper: "#fffdf8",
   cream: "#faf3e3",
   text: "#1d2733",

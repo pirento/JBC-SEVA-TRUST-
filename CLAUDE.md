@@ -10,8 +10,8 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 - Not yet known: registration no., PAN, 12A/80G, helpline, email, website. Never invent these or claim 80G/FCRA before approval.
 
 ## Brand
-- Logo: `public/images/logo-mark.png` (emblem, header/favicon), `logo.jpeg` (emails; PDFs use logo-mark.png), `logo-full.png` (with wordmark).
-- Colours from the logo: navy `#14365d`, saffron `#d97706` / `#e88c09`. Headings Noto Serif, body Noto Sans.
+- Logo (hands holding a heart): `public/images/logo-mark.png` (emblem; header, PDFs), `logo.jpeg` (emails), `logo-full.png`, `logo-wordmark.png`, `favicon-32.png`, `apple-touch-icon.png`.
+- Colours from the logo: navy `#15375c`, saffron `#dd870d` (text uses darker `#d97706`/`#b86304` for contrast). Headings Noto Serif, body Noto Sans.
 - Keep the look plain and factual: no emoji, no invented numbers; plans are labelled as plans.
 
 ## Code notes
