@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= locals.lang || 'en' %>">
   <head>
     <%- include('../partials/head') %>
   </head>
@@ -14,7 +14,7 @@
       <section class="hero">
         <div class="container hero-grid">
           <div class="hero-copy">
-            <p class="hero-hindi" lang="hi"><%= trust.taglineHindi %></p>
+            <% if (lang !== 'hi') { %><p class="hero-hindi" lang="hi"><%= trust.taglineHindi %></p><% } %>
             <h1><%= trust.tagline %></h1>
             <p class="lead"><%= trust.mission %></p>
 
@@ -64,7 +64,7 @@
               <article class="programme" id="<%= p.slug %>">
                 <div class="programme-top">
                   <span class="programme-icon"><%- include('../partials/icon', { name: p.icon, size: 28 }) %></span>
-                  <span class="programme-hindi" lang="hi"><%= p.hindi %></span>
+                  <% if (lang !== 'hi') { %><span class="programme-hindi" lang="hi"><%= p.hindi %></span><% } %>
                 </div>
                 <h3><a href="/work/<%= p.slug %>"><%= p.title %></a></h3>
                 <p class="programme-area"><%= p.area %></p>

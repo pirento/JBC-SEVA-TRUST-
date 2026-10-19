@@ -2374,3 +2374,27 @@ fieldset.field {
   border: 1px solid var(--navy-100);
   border-radius: 6px;
 }
+
+.topbar-links .lang-switch {
+  padding: 1px 10px;
+  border: 1px solid rgb(255 255 255 / 0.4);
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* Language link lives in the top bar on wide screens */
+.site-nav a.nav-lang {
+  display: none;
+}
+
+@media (max-width: 1080px) {
+  .site-nav a.nav-lang {
+    display: block;
+    font-weight: 600;
+    color: var(--orange-600);
+  }
+}
+
+html[lang="hi"] body {
+  font-size: 17px;
+}

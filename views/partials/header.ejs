@@ -4,6 +4,7 @@
   <div class="topbar-inner">
     <span><%= trust.legalForm %> · <%= trust.location %></span>
     <span class="topbar-links">
+      <a href="<%= langSwitchUrl %>" class="lang-switch" lang="<%= lang === 'hi' ? 'en' : 'hi' %>"><%= lang === 'hi' ? 'English' : 'हिन्दी' %></a>
       <% if (trustEmail) { %><a href="mailto:<%= trustEmail %>"><%= trustEmail %></a><% } %>
       <% if (currentUser) { %>
         <a href="/account">My Account</a>
@@ -67,6 +68,7 @@
         <% } %>
       </span>
 
+      <a href="<%= langSwitchUrl %>" class="nav-lang" lang="<%= lang === 'hi' ? 'en' : 'hi' %>"><%= lang === 'hi' ? 'English' : 'हिन्दी' %></a>
       <a href="/donate" class="btn nav-donate">Donate</a>
     </nav>
   </div>

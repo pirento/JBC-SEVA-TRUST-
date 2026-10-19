@@ -1,3 +1,7 @@
+// Words set from script follow the page language
+const HI = document.documentElement.lang === "hi";
+const say = (en, hi) => (HI ? hi : en);
+
 // ========================================
 // MOBILE NAVIGATION
 // ========================================
@@ -11,7 +15,7 @@
   const setOpen = (open) => {
     nav.classList.toggle("open", open);
     toggle.setAttribute("aria-expanded", String(open));
-    toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    toggle.setAttribute("aria-label", open ? say("Close menu", "मेन्यू बंद करें") : say("Open menu", "मेन्यू खोलें"));
   };
 
   toggle.addEventListener("click", () => {
@@ -67,8 +71,8 @@ document.querySelectorAll("[data-toggle-password]").forEach((button) => {
   button.addEventListener("click", () => {
     const hidden = input.type === "password";
     input.type = hidden ? "text" : "password";
-    button.textContent = hidden ? "Hide" : "Show";
-    button.setAttribute("aria-label", hidden ? "Hide password" : "Show password");
+    button.textContent = hidden ? say("Hide", "छिपाएँ") : say("Show", "दिखाएँ");
+    button.setAttribute("aria-label", hidden ? say("Hide password", "पासवर्ड छिपाएँ") : say("Show password", "पासवर्ड दिखाएँ"));
   });
 });
 
@@ -95,7 +99,7 @@ document.querySelectorAll("form.js-once").forEach((form) => {
     form.querySelectorAll('button[type="submit"]').forEach((button) => {
       button.disabled = true;
       button.dataset.label = button.textContent;
-      button.textContent = "Please wait…";
+      button.textContent = say("Please wait…", "कृपया प्रतीक्षा करें…");
     });
   });
 });

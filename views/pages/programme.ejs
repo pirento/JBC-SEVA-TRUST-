@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= locals.lang || 'en' %>">
 <head>
   <%- include('../partials/head', { description: `${programme.title}: ${programme.summary}` }) %>
 </head>
@@ -15,7 +15,7 @@
         <div class="page-hero-title">
           <span class="programme-icon large"><%- include('../partials/icon', { name: programme.icon, size: 36 }) %></span>
           <div>
-            <p class="programme-hindi" lang="hi"><%= programme.hindi %></p>
+            <% if (lang !== 'hi') { %><p class="programme-hindi" lang="hi"><%= programme.hindi %></p><% } %>
             <h1><%= programme.title %></h1>
             <p class="lead"><%= programme.area %></p>
           </div>

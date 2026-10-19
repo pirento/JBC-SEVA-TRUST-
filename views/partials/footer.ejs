@@ -6,7 +6,7 @@
         <img src="/images/logo-mark.png" alt="" width="48" height="48">
         <span><strong>JBC</strong> <em>SEVA TRUST</em></span>
       </a>
-      <p class="footer-hindi" lang="hi"><%= trust.taglineHindi %></p>
+      <% if (lang !== 'hi') { %><p class="footer-hindi" lang="hi"><%= trust.taglineHindi %></p><% } %>
       <p class="muted">
         A <%= trust.legalForm.toLowerCase() %> in <%= trust.location %>, working for
         elders, poor families, children and the environment.

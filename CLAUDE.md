@@ -25,6 +25,18 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 - Cause goes to PayU as udf4 and purpose as udf5 (both signed); other details live in the pending store.
 - Temple (`religious`) receipts say the money is in the separate Temple Fund and generally not 80G eligible.
 
+## Hindi
+- `?lang=hi` / cookie `lang`. `middleware/i18n.js` translates rendered HTML text nodes and placeholder/title/aria-label/alt via `locales/hi.js` (keyed by the English text) plus a few sentence patterns. Form `value`s are never translated.
+- When adding visible English text, add its Hindi to `locales/hi.js`. Legal pages and `/admin` stay English.
+
+## Features added later
+- Forgot password (`/forgot-password`, hashed one-hour tokens, needs `APP_URL`).
+- Admin CSV exports `/admin/export/:type` incl. Form 10BD; 80G switch `eightyG` in trustConfig (keep `approved: false` until granted).
+- Updates with photos and events: `/admin/content`, `/updates`, `/events`; photos in `DATA_DIR/uploads` (byte-checked).
+- Monthly giving = email reminders (`services/pledgeService.js`), not auto-debit.
+- Nightly backups (`services/backupService.js`, `BACKUP_DIR`), go-live checklist on the admin dashboard.
+
 ## Pending
-- Forgot-password by email (needs working email config).
+- Move storage to a real database (PostgreSQL) before traffic grows.
+- PayU standing instructions for automatic monthly debits (needs merchant enablement).
 - Add real helpline/email/website to `views/partials/footer.ejs`; set `TRUST_EMAIL` in `.env`.

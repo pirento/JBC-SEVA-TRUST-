@@ -13,6 +13,8 @@ module.exports = function errorHandler(err, req, res, next) {
   res.locals.year ??= new Date().getFullYear();
   res.locals.appUrl ??= "";
   res.locals.trustWhatsapp ??= "";
+  res.locals.lang ??= "en";
+  res.locals.langSwitchUrl ??= "/?lang=hi";
 
   const status = err.status >= 400 && err.status < 500 ? err.status : 500;
 

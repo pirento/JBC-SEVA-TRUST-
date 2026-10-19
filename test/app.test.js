@@ -799,6 +799,45 @@ test("admin posts updates with photos and events; public can register", async ()
   assert.equal((await pub("/admin/content")).status, 302, "admin only");
 });
 
+test("Hindi version: switch, translated pages, English form values, admin stays English", async () => {
+  const req = client();
+
+  let res = await req("/?lang=hi");
+  assert.match(res.headers.get("set-cookie") || "", /lang=hi/);
+  assert.match(res.text, /<html lang="hi">/);
+  assert.match(res.text, /हमारा काम/);
+  assert.match(res.text, /हरित धरा के लिए दान करें/, "pattern-based sentence");
+  assert.match(res.text, /href="\/\?lang=en"/, "switch back to English");
+
+  // The cookie keeps Hindi on the next page; option values stay English
+  const temple = await fetch(`${base}/donate/temple`, { headers: { cookie: "lang=hi" } }).then((r) => r.text());
+  assert.match(temple, /दैनिक आरती और भोग/);
+  assert.match(temple, /value="Daily aarti and bhog"/);
+  assert.match(temple, /name="cause" value="Community Temple"/);
+
+  // A donation submitted from the Hindi page still works
+  const pay = await fetch(`${base}/donate`, {
+    method: "POST",
+    headers: { cookie: "lang=hi", "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ ...donation, cause: "Community Temple", purpose: "Daily aarti and bhog" }).toString(),
+  });
+  assert.equal(pay.status, 200);
+
+  // Errors are shown in Hindi
+  const bad = await fetch(`${base}/donate`, {
+    method: "POST",
+    headers: { cookie: "lang=hi", "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ ...donation, pan: "BAD" }).toString(),
+  }).then((r) => r.text());
+  assert.match(bad, /कृपया सही 10 अक्षरों का पैन लिखें/);
+
+  const adminLogin = await fetch(`${base}/admin/login`, { headers: { cookie: "lang=hi" } }).then((r) => r.text());
+  assert.match(adminLogin, /Admin Login/, "admin pages are not translated");
+
+  res = await req("/?lang=en");
+  assert.match(res.text, /What we do/);
+});
+
 // ------------------------------------------------------------
 // Rate limiting (last: it blocks this IP for the rest of the run)
 // ------------------------------------------------------------
