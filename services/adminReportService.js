@@ -28,12 +28,25 @@ function getRecordDate(record) {
 // FORMAT DATE
 // ========================================
 
+// Formatters are built once; creating one per call is slow on large lists
+const DATE_FORMAT = new Intl.DateTimeFormat("en-IN", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+  timeZone: "Asia/Kolkata",
+});
+
+const TIME_FORMAT = new Intl.DateTimeFormat("en-IN", {
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: true,
+  timeZone: "Asia/Kolkata",
+});
+
+const DAY_FORMAT = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" });
+
 function formatDate(date) {
-  return date.toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  return DATE_FORMAT.format(date);
 }
 
 // ========================================
@@ -41,11 +54,7 @@ function formatDate(date) {
 // ========================================
 
 function formatTime(date) {
-  return date.toLocaleTimeString("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
+  return TIME_FORMAT.format(date);
 }
 
 // ========================================
@@ -59,18 +68,12 @@ function isSameDate(record, selectedDate) {
     return false;
   }
 
-  const recordDate = date.toLocaleDateString("en-IN");
+  return indiaDate(date) === selectedDate;
+}
 
-  const selected = new Date(`${selectedDate}T00:00:00`);
-
-  if (Number.isNaN(selected.getTime())) {
-    return false;
-  }
-
-  const selectedDateString =
-    selected.toLocaleDateString("en-IN");
-
-  return recordDate === selectedDateString;
+// YYYY-MM-DD in India time, whatever the server's own time zone is
+function indiaDate(date) {
+  return DAY_FORMAT.format(date);
 }
 
 // ========================================
@@ -386,6 +389,9 @@ async function getDailyReport(selectedDate) {
 
 module.exports = {
   getDailyReport,
+  getRecordDate,
+  isSameDate,
+  indiaDate,
   normalizeMembership,
   normalizeDonation,
   normalizeMedical,

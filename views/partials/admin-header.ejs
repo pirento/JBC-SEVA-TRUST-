@@ -1,0 +1,22 @@
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header admin-bar">
+  <div class="header-inner">
+    <a class="brand" href="/admin/dashboard">
+      <img src="/images/logo-mark.png" alt="" width="46" height="46" class="brand-mark">
+      <span class="brand-text">
+        <strong>JBC</strong>
+        <small>ADMIN</small>
+      </span>
+    </a>
+
+    <nav class="admin-nav" aria-label="Admin">
+      <a href="/admin/dashboard" class="<%= currentPath === '/admin/dashboard' ? 'active' : '' %>">Dashboard</a>
+      <a href="/admin/content" class="<%= currentPath === '/admin/content' ? 'active' : '' %>">Updates &amp; Events</a>
+      <a href="/" target="_blank" rel="noopener">View site</a>
+      <form action="/admin/logout" method="POST" class="inline-form">
+        <button type="submit" class="btn navy small-btn">Logout</button>
+      </form>
+    </nav>
+  </div>
+</header>

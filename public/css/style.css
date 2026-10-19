@@ -2398,3 +2398,133 @@ fieldset.field {
 html[lang="hi"] body {
   font-size: 17px;
 }
+
+/* =========================================
+   ADMIN
+========================================= */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.admin-page {
+  background: #f5f6f8;
+}
+
+.admin-bar .brand-text small {
+  letter-spacing: 0.2em;
+}
+
+.admin-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.admin-nav a {
+  padding: 8px 12px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+.admin-nav a.active,
+.admin-nav a:hover {
+  background: var(--navy-50);
+  color: var(--navy);
+}
+
+.date-form,
+.search-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-form input,
+.search-form input {
+  padding: 8px 10px;
+  border: 1px solid #cdd3db;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.search-form {
+  margin: 16px 0 8px;
+}
+
+.search-form input {
+  flex: 1;
+  min-width: 220px;
+}
+
+.admin-stats {
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 20px;
+}
+
+.stat small {
+  display: block;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.csv-link {
+  text-transform: capitalize;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tabs a {
+  padding: 10px 16px;
+  margin-bottom: -1px;
+  border: 1px solid transparent;
+  border-radius: 6px 6px 0 0;
+  color: var(--muted);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.tabs a.active {
+  border-color: var(--border);
+  border-bottom-color: #fff;
+  background: #fff;
+  color: var(--navy);
+}
+
+.admin-table td {
+  white-space: normal;
+  font-size: 14.5px;
+}
+
+.admin-table td.wrap {
+  min-width: 220px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  margin-top: 16px;
+  font-weight: 600;
+}
+
+@media (max-width: 1080px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

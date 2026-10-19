@@ -412,9 +412,10 @@ test("admin login: wrong password rejected, right password opens dashboard", asy
 
   res = await req("/admin/dashboard");
   assert.equal(res.status, 200);
-  assert.match(res.text, /Registered Users/);
-  assert.match(res.text, /Ravi Kumar/, "volunteer listed");
-  assert.match(res.text, /Example Industries/, "message listed");
+  assert.match(res.text, /Registered users/);
+  assert.match((await req("/admin/dashboard?view=volunteers")).text, /Ravi Kumar/, "volunteer listed");
+  assert.match((await req("/admin/dashboard?view=messages")).text, /Example Industries/, "message listed");
+  assert.match((await req("/admin/dashboard?view=messages&q=nomatch")).text, /0 record\(s\)/, "server-side search");
 
   res = await req("/admin/logout", { method: "POST" });
   assert.equal(res.status, 302);
@@ -623,7 +624,7 @@ test("temple donation keeps purpose, dedication, seva date and gotra end to end"
 
   await req("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
   res = await req("/admin/dashboard");
-  assert.match(res.text, /Fund-wise Collection/);
+  assert.match(res.text, /Fund-wise collection/);
   assert.match(res.text, /Gotra: Kashyap/);
   assert.match(res.text, /PAN: ABCDE1234F/, "PAN stored uppercased");
   assert.match(res.text, /<td><strong>Community Temple<\/strong><\/td>\s*<td>1<\/td>\s*<td>₹501<\/td>/);

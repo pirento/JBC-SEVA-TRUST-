@@ -4,8 +4,8 @@
   <%- include('../partials/head') %>
   <meta name="robots" content="noindex" />
 </head>
-<body class="page-bg">
-  <%- include('../partials/header') %>
+<body class="page-bg admin-page">
+  <%- include('../partials/admin-header') %>
   <% const vu = (values || {}).form === 'update' ? values : {}; const ve = (values || {}).form === 'event' ? values : {}; const today = new Date().toISOString().slice(0, 10); %>
 
   <main id="main" class="account-page">
@@ -14,7 +14,6 @@
         <h1>Updates &amp; Events</h1>
         <p class="muted">Post photos and news from the field, and announce events.</p>
       </div>
-      <a href="/admin/dashboard" class="btn navy-outline">← Back to Dashboard</a>
     </div>
 
     <% if (notice) { %><div class="alert success" role="status"><%= notice %></div><% } %>
@@ -164,6 +163,6 @@
     </section>
   </main>
 
-  <%- include('../partials/footer') %>
+  <script src="/js/main.js" defer></script>
 </body>
 </html>
