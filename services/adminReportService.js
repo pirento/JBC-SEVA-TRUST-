@@ -85,12 +85,7 @@ function indiaDate(date) {
 function normalizeMembership(record) {
   const date = getRecordDate(record);
 
-  const memberName = String(
-    record.memberName ||
-      record.donorName ||
-      (Array.isArray(record.memberNames) ? record.memberNames[0] : "") ||
-      "",
-  ).trim();
+  const memberName = String(record.memberName || record.donorName || "").trim();
 
   const amount = Number(record.amount) || 0;
 

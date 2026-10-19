@@ -104,7 +104,7 @@ async function googleStart(req, res, next) {
   }
 }
 
-async function googleCallback(req, res, next) {
+async function googleCallback(req, res) {
   const saved = req.session.googleState;
   delete req.session.googleState;
 

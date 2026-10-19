@@ -58,116 +58,6 @@ function isEncryptedRecord(line) {
 }
 
 // ========================================
-// PARSE OLD PLAINTEXT FILE
-// ========================================
-
-function parseLegacyContent(content) {
-  const lines = content
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  if (lines.length === 0) {
-    return [];
-  }
-
-  // ----------------------------------------
-  // First line = old header
-  // ----------------------------------------
-
-  const headers = lines[0].split("\t");
-
-  const records = [];
-
-  // ----------------------------------------
-  // Remaining lines = records
-  // ----------------------------------------
-
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split("\t");
-
-    const record = {};
-
-    headers.forEach((header, index) => {
-      record[header] = values[index] ?? "";
-    });
-
-    records.push(record);
-  }
-
-  return records;
-}
-
-// ========================================
-// CREATE BACKUP BEFORE MIGRATION
-// ========================================
-
-async function createBackup(filePath) {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-
-  const backupPath = `${filePath}.backup-${timestamp}`;
-
-  await fs.copyFile(filePath, backupPath);
-
-  console.log("📦 Legacy data backup created:", path.basename(backupPath));
-
-  return backupPath;
-}
-
-// ========================================
-// MIGRATE LEGACY DATA
-// ========================================
-
-async function migrateLegacyFile(filePath, content) {
-  console.log("");
-  console.log("=================================");
-
-  console.log("🔄 Legacy data detected");
-
-  console.log("📄 File:", path.basename(filePath));
-
-  // ----------------------------------------
-  // Parse old plaintext records
-  // ----------------------------------------
-
-  const records = parseLegacyContent(content);
-
-  if (records.length === 0) {
-    console.log("ℹ️ No legacy records found");
-
-    console.log("=================================");
-
-    return [];
-  }
-
-  // ----------------------------------------
-  // Backup old file
-  // ----------------------------------------
-
-  await createBackup(filePath);
-
-  // ----------------------------------------
-  // Encrypt every record
-  // ----------------------------------------
-
-  const encryptedLines = records.map((record) => encrypt(record));
-
-  // ----------------------------------------
-  // Write encrypted file
-  // ----------------------------------------
-
-  await fs.writeFile(filePath, encryptedLines.join("\n") + "\n", "utf8");
-
-  console.log(`✅ ${records.length} legacy record(s) migrated`);
-
-  console.log("🔐 File is now encrypted");
-
-  console.log("=================================");
-
-  return records;
-}
-
-// ========================================
 // APPEND NEW ENCRYPTED RECORD
 // ========================================
 
@@ -266,33 +156,14 @@ async function readRecordsFromDisk(fileName, filePath) {
     .filter(Boolean);
 
   // ========================================
-  // CHECK IF FILE IS LEGACY
+  // DAMAGED LINES
   // ========================================
+  // Usually a write cut off by a crash or a full disk. Skip it and keep
+  // reading; never rewrite the file here, because a record appended
+  // meanwhile would be lost.
 
-  const containsLegacyData = lines.some((line) => !isEncryptedRecord(line));
-
-  if (containsLegacyData) {
-    // ------------------------------------
-    // Old plaintext file: migrate once
-    // ------------------------------------
-
-    const allLinesAreLegacy = lines.every((line) => !isEncryptedRecord(line));
-
-    if (allLinesAreLegacy) {
-      return await migrateLegacyFile(filePath, content);
-    }
-
-    // ------------------------------------
-    // Damaged line
-    // ------------------------------------
-    // Usually a write cut off by a crash or a full disk. Skip it and
-    // keep reading; never rewrite the file here, because a record
-    // appended meanwhile would be lost.
-    // ------------------------------------
-
-    const bad = lines.filter((line) => !isEncryptedRecord(line)).length;
-    console.error(`❌ ${fileName}: skipped ${bad} damaged line(s)`);
-  }
+  const bad = lines.filter((line) => !isEncryptedRecord(line)).length;
+  if (bad > 0) console.error(`❌ ${fileName}: skipped ${bad} damaged line(s)`);
 
   // ========================================
   // NORMAL ENCRYPTED FILE

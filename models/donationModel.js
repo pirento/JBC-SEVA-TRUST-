@@ -101,18 +101,6 @@ async function create(data) {
 }
 
 // ========================================
-// GET ALL DONATIONS
-// ========================================
-
-async function findAll() {
-  const records = await readCorrected(FILE_NAME);
-
-  return records.filter(
-    (record) => String(record.type || "").toUpperCase() === "DONATION",
-  );
-}
-
-// ========================================
 // FIND BY TRANSACTION ID
 // ========================================
 
@@ -135,6 +123,5 @@ async function findByTransactionId(transactionId) {
 module.exports = {
   FILE_NAME,
   create,
-  findAll,
   findByTransactionId,
 };

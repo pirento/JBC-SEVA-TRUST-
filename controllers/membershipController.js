@@ -150,15 +150,6 @@ async function downloadReceipt(req, res) {
     }
 
     // --------------------------------------------------------
-    // Support old/new certificate prefixes
-    // --------------------------------------------------------
-
-    transactionId = transactionId
-      .replace(/^donation-receipt-/i, "")
-      .replace(/^membership-certificate-/i, "")
-      .replace(/\.pdf$/i, "");
-
-    // --------------------------------------------------------
     // Validate transaction ID
     // --------------------------------------------------------
 
