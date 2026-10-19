@@ -47,6 +47,7 @@ function toSessionUser(user) {
     name: user.name,
     email: user.email,
     phone: user.phone,
+    emailVerified: user.emailVerified === true,
   };
 }
 
@@ -81,6 +82,8 @@ async function register(input) {
     phone: cleanPhone,
     passwordHash,
   });
+
+  await requestEmailVerification(user.email);
 
   return toSessionUser(user);
 }
@@ -118,6 +121,61 @@ async function changePassword(sessionUser, input) {
   await userModel.updateUser(user, {
     passwordHash: await bcrypt.hash(newPassword, SALT_ROUNDS),
   });
+}
+
+// ============================================================
+// EMAIL VERIFICATION
+// ============================================================
+
+const VERIFY_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+// Sends a link that proves the email belongs to the account owner.
+// Returns the token (or null) so tests can follow it without an inbox.
+async function requestEmailVerification(email) {
+  const user = await userModel.findByEmail(email);
+  if (!user || user.emailVerified) return null;
+
+  const token = crypto.randomBytes(32).toString("hex");
+
+  await userModel.updateUser(user, {
+    verifyTokenHash: hashToken(token),
+    verifyExpires: Date.now() + VERIFY_TTL_MS,
+  });
+
+  const link = `${appUrl}/verify-email/${token}`;
+
+  sendEmail({
+    to: user.email,
+    subject: "Confirm your email - JBC Seva Trust",
+    text: `Namaste ${user.name},\n\nPlease confirm your email by opening this link:\n${link}\n\nAfter that you can see your donations and receipts in My Account.\n\nJBC Seva Trust`,
+    html: `<p>Namaste ${user.name.replace(/[<>&"]/g, "")},</p><p>Please confirm your email by opening this link:</p><p><a href="${link}">${link}</a></p><p>After that you can see your donations and receipts in My Account.</p><p>JBC Seva Trust</p>`,
+  }).catch((error) => console.error("❌ Verification email failed:", error.message));
+
+  return token;
+}
+
+async function verifyEmail(token) {
+  if (!/^[a-f0-9]{64}$/.test(String(token || ""))) return null;
+
+  const hash = hashToken(token);
+  const user = (await userModel.listUsers()).find(
+    (u) => u.verifyTokenHash === hash && Number(u.verifyExpires) > Date.now(),
+  );
+
+  if (!user) return null;
+
+  const updated = await userModel.updateUser(user, {
+    emailVerified: true,
+    verifyTokenHash: "",
+    verifyExpires: 0,
+  });
+
+  return toSessionUser(updated);
+}
+
+async function isEmailVerified(email) {
+  const user = await userModel.findByEmail(email);
+  return Boolean(user && user.emailVerified);
 }
 
 // ============================================================
@@ -178,6 +236,8 @@ async function resetPassword(token, input) {
     passwordHash: await bcrypt.hash(password, SALT_ROUNDS),
     resetTokenHash: "",
     resetExpires: 0,
+    // Opening the emailed link proves the address
+    emailVerified: true,
   });
 }
 
@@ -188,4 +248,7 @@ module.exports = {
   requestPasswordReset,
   findByResetToken,
   resetPassword,
+  requestEmailVerification,
+  verifyEmail,
+  isEmailVerified,
 };

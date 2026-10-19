@@ -2614,3 +2614,19 @@ html[lang="hi"] body {
   height: 1px;
   overflow: hidden;
 }
+
+.verify-box {
+  background: var(--orange-50);
+  border: 1px solid #f2dcb4;
+  color: var(--text);
+}
+
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--navy-700);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}

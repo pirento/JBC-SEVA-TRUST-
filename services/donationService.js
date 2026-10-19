@@ -117,6 +117,13 @@ function validateDonation(input) {
     );
   }
 
+  // Catches typing mistakes (an extra zero); large gifts go through the trust directly
+  if (amount > 1000000) {
+    throw new Error(
+      "For amounts above ₹10,00,000 please contact the Trust directly."
+    );
+  }
+
   if (!required(paymentMode)) {
     throw new Error(
       "Payment mode is required."

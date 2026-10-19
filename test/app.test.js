@@ -290,6 +290,13 @@ test("full user journey: register, logout, login, change password", async () => 
   res = await req("/account?welcome=1");
   assert.equal(res.status, 200);
   assert.match(res.text, /Namaste, Asha Verma/);
+  assert.match(res.text, /Please confirm your email/, "records hidden until the email is confirmed");
+
+  const verifyToken = await require("../services/userAuthService").requestEmailVerification(user.email);
+  res = await req(`/verify-email/${verifyToken}`);
+  assert.equal(res.location, "/account?verify=done");
+  res = await req("/account?verify=done");
+  assert.match(res.text, /Your email is confirmed/);
   assert.match(res.text, /asha@example.com/, "email stored lowercased");
   assert.match(res.text, /My Account/);
 
@@ -364,6 +371,21 @@ test("forgot password: same answer for unknown email, link resets password once"
 
   res = await req("/login", { method: "POST", form: { email: "reset@example.com", password: "fresh2026pw" } });
   assert.equal(res.status, 302, "new password works");
+});
+
+test("someone registering with another person's email cannot see their records", async () => {
+  // A medical request and a donation exist for victim@example.com
+  const victim = client();
+  await victim("/medical", { method: "POST", form: { ...medical, patientEmail: "victim@example.com", aadharNumber: "999988887777" } });
+
+  const attacker = client();
+  let res = await attacker("/register", { method: "POST", form: { ...user, name: "Someone Else", email: "victim@example.com" } });
+  assert.equal(res.status, 302);
+
+  res = await attacker("/account");
+  assert.match(res.text, /Please confirm your email/);
+  assert.doesNotMatch(res.text, /Cataract/, "medical details stay hidden");
+  assert.equal((await attacker("/verify-email/" + "f".repeat(64))).status, 400, "a made-up link does not verify");
 });
 
 test("login ignores off-site redirect targets", async () => {
@@ -693,6 +715,9 @@ test("monthly donation: pledge, one reminder a month, stop from account", async 
   const pledgeService = require("../services/pledgeService");
   const req = client();
   await req("/register", { method: "POST", form: { ...user, email: "monthly@example.com" } });
+
+  const token = await require("../services/userAuthService").requestEmailVerification("monthly@example.com");
+  await req(`/verify-email/${token}`);
 
   const callback = await startDonation(req, {
     ...donation, email: "monthly@example.com", cause: "Anand Dham", purpose: "Meals for elders (annadaan)", amount: "1100", monthly: "on",

@@ -95,13 +95,25 @@ function logout(req, res) {
   req.session.save(() => res.redirect("/"));
 }
 
+// Records are matched by email; show them only once the email is proven
+async function loadActivity(email) {
+  if (!(await userAuthService.isEmailVerified(email))) {
+    return { verified: false, memberships: [], donations: [], medicalRequests: [], pledges: [], totalGiven: 0 };
+  }
+
+  const activity = await accountService.getActivity(email);
+  activity.pledges = await pledgeService.pledgesFor(email);
+  activity.verified = true;
+  return activity;
+}
+
 async function account(req, res, next) {
   try {
-    const activity = await accountService.getActivity(req.session.user.email);
-    activity.pledges = await pledgeService.pledgesFor(req.session.user.email);
+    const activity = await loadActivity(req.session.user.email);
 
     return res.render("user/account", {
       activity,
+      verifyNotice: req.query.verify || "",
       pledgeStopped: req.query.pledge === "stopped",
       welcome: req.query.welcome === "1",
       passwordChanged: req.query.password === "changed",
@@ -123,11 +135,11 @@ async function changePassword(req, res, next) {
     req.rateLimit?.hit();
 
     try {
-      const activity = await accountService.getActivity(req.session.user.email);
-      activity.pledges = await pledgeService.pledgesFor(req.session.user.email);
+      const activity = await loadActivity(req.session.user.email);
 
       return res.status(400).render("user/account", {
         activity,
+        verifyNotice: "",
         pledgeStopped: false,
         welcome: false,
         passwordChanged: false,
@@ -198,7 +210,41 @@ async function stopPledge(req, res, next) {
   }
 }
 
+async function verifyEmail(req, res, next) {
+  try {
+    const user = await userAuthService.verifyEmail(req.params.token);
+
+    if (!user) {
+      return res.status(400).render("pages/form-error", {
+        title: "Link expired",
+        message: "This confirmation link is invalid or has expired. Log in and ask for a new one from My Account.",
+        backUrl: "/account",
+      });
+    }
+
+    if (req.session.user && req.session.user.email === user.email) {
+      req.session.user = user;
+    }
+
+    return res.redirect(req.session.user ? "/account?verify=done" : "/login");
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function resendVerification(req, res, next) {
+  try {
+    req.rateLimit?.hit();
+    await userAuthService.requestEmailVerification(req.session.user.email);
+    return res.redirect("/account?verify=sent");
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
+  verifyEmail,
+  resendVerification,
   stopPledge,
   showForgot,
   forgot,

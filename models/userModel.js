@@ -48,6 +48,9 @@ async function createUser({ name, email, phone, passwordHash }) {
     email: normalizeEmail(email),
     phone,
     passwordHash,
+    // Records are matched by email, so they stay hidden until the
+    // owner proves the address is theirs
+    emailVerified: false,
     createdAt: now,
     updatedAt: now,
   };

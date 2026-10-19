@@ -17,6 +17,24 @@
       <div class="alert success" role="status">Your password has been changed.</div>
     <% } %>
 
+    <% if (verifyNotice === 'done') { %>
+      <div class="alert success" role="status">Thank you! Your email is confirmed.</div>
+    <% } %>
+    <% if (!activity.verified) { %>
+      <div class="alert verify-box" role="status">
+        <strong>Please confirm your email.</strong>
+        We sent a link to <strong><%= currentUser.email %></strong>. Your donations, memberships and requests
+        will show here once the email is confirmed.
+        <% if (verifyNotice === 'sent') { %>
+          <br>A new link has been sent.
+        <% } else { %>
+          <form action="/account/verify" method="POST" class="inline-form">
+            <button type="submit" class="link-button">Send the link again</button>
+          </form>
+        <% } %>
+      </div>
+    <% } %>
+
     <section class="account-head">
       <div>
         <h1>Namaste, <%= currentUser.name %></h1>
