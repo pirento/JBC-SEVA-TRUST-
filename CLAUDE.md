@@ -7,7 +7,8 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 - Trustees: Jang Bahadur Chaudhary ("JBC", founder) and Ravikant Soni (managing trustee).
 - Tagline: "Serving humanity. Preserving nature."
 - Programmes: Green Earth, Anand Dham (old age home), Kanyadaan, Vidya and Poshan, Community Temple (separate fund head).
-- Not yet known: registration no., PAN, 12A/80G, helpline, email, website. Never invent these or claim 80G/FCRA before approval.
+- Contact: email jbcsevatrust@gmail.com, phone and WhatsApp 9648191111 (`email`, `phone`, `phoneDisplay` in trustConfig; used in header, footer, contact page, legal pages, emails and the WhatsApp button).
+- Not yet known: registration no., PAN, 12A/80G, website. Never invent these or claim 80G/FCRA before approval.
 
 ## Brand
 - Logo (hands holding a heart): `public/images/logo-mark.png` (emblem; header, PDFs), `logo.jpeg` (emails), `logo-full.png`, `logo-wordmark.png`, `favicon-32.png`, `apple-touch-icon.png`.
@@ -19,6 +20,7 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 
 ## Code notes
 - Trust facts used by pages live in `config/trustConfig.js`; change them there, not in views.
+- Legal pages (`views/legal/*`) are written around the trust's actual work (causes, temple fund, seva dates, Kanyadaan, volunteers, photos); bump `LEGAL_UPDATED` in `controllers/webController.js` when editing.
 - Every page uses `views/partials/head|header|footer`; `res.locals` gives `trust`, `currentUser`, `isAdmin`, `trustEmail`.
 - Storage is encrypted append-only text files (`models/fileStore.js`); accounts in `accounts.txt`, latest record per email wins.
 - Run `npm test` and `npm run format` before pushing.
@@ -44,4 +46,4 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 ## Pending
 - Move storage to a real database (PostgreSQL) before traffic grows.
 - PayU standing instructions for automatic monthly debits (needs merchant enablement).
-- Add real helpline/email/website to `views/partials/footer.ejs`; set `TRUST_EMAIL` in `.env`.
+- Website domain (set `APP_URL` once known).

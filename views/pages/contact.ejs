@@ -14,9 +14,9 @@
         <p>For questions, CSR partnerships, large donations or support for an event, write to us and a trustee will reply.</p>
         <ul class="contact-list">
           <li><%- include('../partials/icon', { name: 'pin' }) %> <span><%= trust.name %><br><%= trust.location %></span></li>
-          <% if (trustEmail) { %>
-            <li><%- include('../partials/icon', { name: 'mail' }) %> <a href="mailto:<%= trustEmail %>"><%= trustEmail %></a></li>
-          <% } %>
+          <li><%- include('../partials/icon', { name: 'phone' }) %> <a href="tel:+91<%= trust.phone %>">Call: <%= trust.phoneDisplay %></a></li>
+          <li><%- include('../partials/icon', { name: 'chat' }) %> <a href="https://wa.me/91<%= trust.phone %>" target="_blank" rel="noopener">WhatsApp: <%= trust.phoneDisplay %></a></li>
+          <li><%- include('../partials/icon', { name: 'mail' }) %> <a href="mailto:<%= trust.email %>"><%= trust.email %></a></li>
         </ul>
         <h2>Trustees</h2>
         <ul class="plain-list">

@@ -7,7 +7,7 @@ const legalPages = {
 };
 
 // Last time the legal text was changed; update when editing it
-const LEGAL_UPDATED = "18 October 2026";
+const LEGAL_UPDATED = "19 October 2026";
 
 const trust = require("../config/trustConfig");
 const contentModel = require("../models/contentModel");

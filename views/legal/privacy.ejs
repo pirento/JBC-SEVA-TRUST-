@@ -8,10 +8,14 @@
 
 <h2>1. Data we collect</h2>
 <ul>
-  <li><strong>Account:</strong> name, email, mobile number and a securely hashed password (we never store your actual password).</li>
-  <li><strong>Donations and membership:</strong> name, email, mobile number, amount, cause, payment mode, message and transaction ID.</li>
-  <li><strong>Medical help requests:</strong> patient's name, Aadhaar number, date of birth, mobile number, email, illness, hospital and referrer's name.</li>
-  <li><strong>Technical:</strong> a session cookie that keeps you logged in, and basic server logs (such as IP address) for security.</li>
+  <li><strong>Account:</strong> name, email, mobile number and a hashed password (we never store your actual password).</li>
+  <li><strong>Donations:</strong> name, email, mobile number, amount, cause, purpose, and if you give them: address, PAN, dedication ("in memory of"), preferred seva date, gotra (for temple donations) and a message. We also keep the payment mode and transaction ID.</li>
+  <li><strong>Membership:</strong> name, email, mobile number, amount and transaction ID.</li>
+  <li><strong>Medical help requests:</strong> patient's name, Aadhaar number, date of birth, mobile number, email, illness, hospital and the name of the person who referred them.</li>
+  <li><strong>Volunteers:</strong> name, mobile number, email, city, areas of interest and availability.</li>
+  <li><strong>Event registrations and messages:</strong> name, mobile number, email, number of people and your message.</li>
+  <li><strong>People we help</strong> (Anand Dham residents, Kanyadaan families, children in Vidya and Poshan): the details needed to check need and give help, collected in person and kept in the Trust's records.</li>
+  <li><strong>Technical:</strong> a session cookie that keeps you logged in, a language cookie, and basic server logs (such as IP address) for security.</li>
 </ul>
 <p>
   We do not collect card numbers, UPI PINs or bank passwords. These are handled
@@ -21,49 +25,61 @@
 <h2>2. Why we use it</h2>
 <ul>
   <li>To process donations and memberships and send receipts and certificates.</li>
-  <li>To review and respond to medical help requests.</li>
-  <li>To run your account and show your history with the Trust.</li>
-  <li>To keep accounts as required by law and to prevent fraud.</li>
+  <li>To use your donation for the cause, purpose and seva date you chose, and to print your dedication on the receipt.</li>
+  <li>To prepare donor statements the law asks of a charitable trust (such as Form 10BD, which needs PAN and address), once the Trust is registered for it.</li>
+  <li>To check and respond to requests for help.</li>
+  <li>To contact volunteers about drives and events, and to manage event registrations.</li>
+  <li>To send monthly reminders, only if you chose monthly giving.</li>
+  <li>To run your account, keep the Trust's accounts and prevent fraud.</li>
 </ul>
-<p>We use your data only with your consent, which you give by ticking the consent box on our forms.</p>
+<p>We use your data only with your consent, which you give by ticking the consent box on our forms, or where the law requires us to keep it.</p>
 
-<h2>3. How we protect it</h2>
+<h2>3. Children and elders</h2>
 <ul>
-  <li>Stored records are encrypted (AES-256-GCM).</li>
+  <li>Data about children in our programmes is collected from their parent or guardian and used only for their education and nutrition support.</li>
+  <li>We do not publish names, addresses or Aadhaar numbers of children, elders or families we help.</li>
+  <li>Photos of beneficiaries are published only with their consent (or a guardian's, for children).</li>
+</ul>
+
+<h2>4. How we protect it</h2>
+<ul>
+  <li>Stored records are encrypted (AES-256-GCM) and backed up regularly.</li>
   <li>Passwords are hashed with bcrypt.</li>
   <li>Only the last 4 digits of an Aadhaar number are printed on receipts.</li>
-  <li>Admin access is limited to authorised trustees and protected by a password.</li>
+  <li>Only the trustees can open the admin area, which is protected by a password.</li>
 </ul>
 
-<h2>4. Who we share it with</h2>
+<h2>5. Who we share it with</h2>
 <ul>
   <li><strong>PayU</strong>, to process payments.</li>
-  <li><strong>Our email provider</strong>, to send receipts and replies.</li>
-  <li>Government authorities, only when the law requires it.</li>
+  <li><strong>Our email provider (Google Gmail)</strong>, to send receipts and replies.</li>
+  <li><strong>WhatsApp</strong>, only if you choose to message us there.</li>
+  <li>Hospitals, only to confirm a medical help request you sent.</li>
+  <li>The Income Tax Department and other authorities, only when the law requires it.</li>
 </ul>
 <p>We never sell, rent or publish your personal data.</p>
 
-<h2>5. How long we keep it</h2>
+<h2>6. How long we keep it</h2>
 <p>
   Donation and payment records are kept for at least 8 years, as required for
-  a charitable trust's accounts and audits. Other data is kept only as long as
-  needed for the purpose it was collected for.
+  a charitable trust's accounts and audits. Volunteer, event and message
+  records are kept for as long as they are useful for that purpose, and then deleted.
 </p>
 
-<h2>6. Your rights</h2>
+<h2>7. Your rights</h2>
 <p>
   You can ask us to see, correct or delete your personal data, or withdraw
-  your consent, by contacting us. Records we must keep by law (such as
+  your consent, by contacting us below. Records we must keep by law (such as
   donation records) cannot be deleted before the legal period ends.
 </p>
 
-<h2>7. Cookies</h2>
+<h2>8. Cookies</h2>
 <p>
-  We use one essential cookie to keep you logged in. We do not use advertising
-  or tracking cookies.
+  We use one cookie to keep you logged in and one to remember your language.
+  We do not use advertising or tracking cookies.
 </p>
 
-<h2>8. Changes</h2>
+<h2>9. Changes</h2>
 <p>We may update this policy. The date at the top shows the latest version.</p>
 
 <%- include('../partials/legal-bottom') %>

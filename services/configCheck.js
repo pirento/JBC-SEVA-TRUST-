@@ -25,7 +25,6 @@ function goLiveChecks() {
       label: "Email sending (EMAIL_USER, EMAIL_PASS)",
       ok: has("EMAIL_USER") && has("EMAIL_PASS"),
     },
-    { label: "Trust inbox (TRUST_EMAIL)", ok: has("TRUST_EMAIL") },
     {
       label: "PayU live keys (PAYU_KEY, PAYU_SALT)",
       ok: has("PAYU_KEY") && has("PAYU_SALT"),

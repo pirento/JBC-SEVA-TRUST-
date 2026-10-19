@@ -25,13 +25,12 @@ Open `http://localhost:3000`.
 | `DATA_ENCRYPTION_KEY` | 64 hex characters; encrypts every stored record. Back it up, data cannot be read without it |
 | `ADMIN_PASSWORD_HASH` | bcrypt hash of the admin password: `npm run hash-password -- "your-password"` |
 | `EMAIL_USER`, `EMAIL_PASS` | Gmail address and app password used to send emails |
-| `TRUST_EMAIL` | Trust inbox: gets a copy of every email and the daily report; shown in the footer |
+| `TRUST_EMAIL` | Optional: inbox for copies of emails and the daily report (default: the trust email in `config/trustConfig.js`) |
 | `PAYU_KEY`, `PAYU_SALT`, `PAYU_ENV` | PayU merchant key/salt; `PAYU_ENV=production` for live payments |
 | `PAYU_*_URL` | PayU success/failure callback URLs for membership and donation |
 | `DATA_DIR` | Optional: folder for data files (default `data/`) |
 | `APP_URL` | Public address, e.g. `https://jbcsevatrust.org` (links in emails) |
 | `BACKUP_DIR` | Folder for nightly backups, ideally another disk (default `data/backups`) |
-| `TRUST_WHATSAPP` | Optional 10-digit WhatsApp number for the chat button |
 
 ## Tests
 

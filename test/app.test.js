@@ -109,6 +109,8 @@ test("public pages render with navbar, footer and legal links", async () => {
     assert.equal(res.status, 200, url);
     assert.match(res.text, /class="site-nav"/, `${url} navbar`);
     assert.match(res.text, /href="\/privacy-policy"/, `${url} footer`);
+    assert.match(res.text, /href="https:\/\/wa\.me\/919648191111/, `${url} WhatsApp`);
+    assert.match(res.text, /mailto:jbcsevatrust@gmail\.com/, `${url} email`);
   }
 });
 

@@ -152,10 +152,7 @@ app.use((req, res, next) => {
   res.locals.currentPath = req.path;
   res.locals.trustEmail = trustEmail || "";
   res.locals.appUrl = appUrl;
-  // 10-digit Indian number for a "chat on WhatsApp" link, if set
-  res.locals.trustWhatsapp = /^[6-9]\d{9}$/.test(process.env.TRUST_WHATSAPP || "")
-    ? process.env.TRUST_WHATSAPP
-    : "";
+  res.locals.trustWhatsapp = trust.phone;
   res.locals.year = new Date().getFullYear();
   next();
 });

@@ -4,81 +4,160 @@
   These Terms and Conditions apply to everyone who uses this website, run by
   <%= trust.name %> ("the Trust", "we", "us"), a <%= trust.legalForm.toLowerCase() %>
   based in <%= trust.location %>. By using the website, creating an account,
-  making a donation or payment, or submitting a request, you agree to these terms.
+  donating, becoming a member, volunteering or sending a request, you agree to
+  these terms.
 </p>
 
 <h2>1. About the Trust</h2>
 <p>
-  The Trust works on tree plantation and environment (Green Earth), an old age
-  home (Anand Dham), marriage support for girls from poor families (Kanyadaan),
-  child education and nutrition (Vidya and Poshan) and a community temple. The
-  Trust is an independent body and is not linked to any company.
+  The Trust is managed by its trustees, <%= trust.trustees.map((t) => `${t.name} (${t.role})`).join(' and ') %>.
+  It is an independent body and is not linked to any company, including
+  Venturecore Solutions Pvt Ltd, or to any political party. Its work is:
+</p>
+<ul>
+  <% trust.programmes.forEach((p) => { %>
+    <li><strong><%= p.title %></strong>: <%= p.area.toLowerCase() %>.</li>
+  <% }) %>
+</ul>
+<p>
+  Goals and plans shown on the website (for example the number of trees to be
+  planted) are targets, not results already achieved.
 </p>
 
 <h2>2. Using the website</h2>
 <ul>
-  <li>You must give true, complete and current information in every form.</li>
-  <li>You must not misuse the website, try to break its security, or submit false requests.</li>
+  <li>Give true, complete and current information in every form.</li>
+  <li>Do not misuse the website, try to break its security, or send false or fake requests.</li>
   <li>If you are under 18, use the website only with a parent or guardian.</li>
 </ul>
 
 <h2>3. Accounts</h2>
 <ul>
-  <li>You are responsible for keeping your password secret and for all activity on your account.</li>
-  <li>Tell us at once if you think someone else has used your account.</li>
-  <li>We may suspend an account that is used for fraud or misuse.</li>
+  <li>Keep your password secret. You are responsible for activity on your account.</li>
+  <li>Your donation and membership records are shown in your account only after you confirm your email address.</li>
+  <li>Tell us at once if you think someone else has used your account. We may suspend an account used for fraud or misuse.</li>
 </ul>
 
-<h2>4. Donations and membership</h2>
+<h2>4. Donations</h2>
 <ul>
-  <li>Donations and membership fees are voluntary contributions to the Trust's charitable work.</li>
+  <li>Donations are voluntary gifts to the Trust's charitable work.</li>
   <li>
-    Money given for a specific cause is used only for that cause. Money given
-    "Where Most Needed" is used where the trustees decide it is most needed.
-  </li>
-  <li>Membership does not give any ownership, voting or management rights in the Trust.</li>
-  <li>
-    Payments are processed by PayU, a third-party payment gateway. The Trust does
-    not see or store your card, UPI PIN or net banking details.
+    Money given for a cause (such as Anand Dham or Green Earth) is used only for
+    that cause. Money given "Where Most Needed" is used where the trustees
+    decide it is most needed.
   </li>
   <li>
-    You will receive a donation receipt or membership certificate by email.
-    Tax-exemption (80G) receipts will be issued only after the Trust receives
-    80G approval from the Income Tax Department; until then, no tax benefit is
-    promised.
+    If you choose a purpose within a cause (such as meals for elders or tree
+    plantation), we use the money for that purpose where we can. If that need is
+    already met, the trustees use it for another need within the same cause.
+  </li>
+  <li>
+    A preferred seva date (for example, meals at Anand Dham on a birthday or a
+    death anniversary) is a request. We try our best to keep the date, and will
+    tell you if we have to move it.
+  </li>
+  <li>
+    A dedication ("in memory of", "in honour of") is printed on your receipt as
+    you typed it. Please check spelling before paying.
+  </li>
+  <li>
+    <strong>Community Temple:</strong> donations to the temple are kept in a
+    separate Temple Fund and used only for the temple. Religious donations are
+    generally not eligible for tax exemption under Section 80G.
+  </li>
+  <li>
+    <strong>Monthly giving:</strong> choosing "monthly" means we send you a
+    reminder email each month. Nothing is debited automatically. You can stop
+    the reminders at any time from My Account.
+  </li>
+  <li>
+    <strong>Tax receipts:</strong> the Trust does not yet have 80G approval.
+    Receipts issued now are not 80G receipts and no tax benefit is promised.
+    80G receipts will be issued only after approval from the Income Tax Department.
+  </li>
+  <li>
+    The Trust does not accept foreign contributions, because it does not have
+    FCRA registration.
+  </li>
+</ul>
+
+<h2>5. Membership</h2>
+<ul>
+  <li>Membership is a contribution to support the Trust's work. You receive a membership certificate by email.</li>
+  <li>Membership does not give any ownership, voting or management rights in the Trust, and does not make you a trustee.</li>
+</ul>
+
+<h2>6. Payments</h2>
+<ul>
+  <li>
+    Payments are processed by PayU, a third-party payment gateway. The Trust
+    does not see or store your card, UPI PIN or net banking details.
   </li>
   <li>Refunds are handled under our <a href="/refund-policy">Refund Policy</a>.</li>
 </ul>
 
-<h2>5. Medical help requests</h2>
+<h2>7. Help from the Trust</h2>
+<p>
+  This covers medical help requests, admission to Anand Dham, Kanyadaan
+  support and help under Vidya and Poshan.
+</p>
 <ul>
-  <li>Submitting a request does not guarantee financial or medical help.</li>
-  <li>The Trust decides on each request after checking the details and its available funds.</li>
+  <li>Sending a request does not guarantee help. Each request is checked, and the trustees decide based on need and the funds available.</li>
+  <li>We may visit, call, or ask for documents (such as identity proof, income details or hospital papers) before deciding.</li>
+  <li>Anand Dham is for senior citizens who are abandoned or have no means of support. Admission depends on a check of the person's situation and on space.</li>
+  <li>Kanyadaan support is given only for marriages where both bride and groom are of legal age (18 and 21). The Trust does not support dowry in any form.</li>
   <li>The Trust does not give medical advice. Always follow your doctor's advice.</li>
-  <li>Giving false information can lead to the request being rejected.</li>
+  <li>Giving false information can lead to a request being rejected, and help already given may be stopped.</li>
 </ul>
 
-<h2>6. Content</h2>
+<h2>8. Volunteers and events</h2>
+<ul>
+  <li>Volunteering is unpaid and voluntary. Signing up does not create a job or contract.</li>
+  <li>
+    At plantation drives, clean-ups, camps and other events, follow the
+    instructions of the Trust's coordinator. You take part at your own risk;
+    the Trust is not liable for injury or loss of belongings, except where
+    caused by its own negligence.
+  </li>
+  <li>Volunteers under 18 need a parent or guardian's permission.</li>
+  <li>Volunteers must treat elders, children and beneficiaries with respect, and must not share their photos or personal details without the Trust's permission.</li>
+</ul>
+
+<h2>9. Photos and content</h2>
+<ul>
+  <li>
+    The text, logo and images on this website belong to the Trust or are used
+    with permission. You may share them for non-commercial purposes with credit
+    to the Trust.
+  </li>
+  <li>
+    We take photos at our work and events to report to donors. We publish photos
+    of beneficiaries only with their consent (or a guardian's, for children), and
+    we do not show the faces of children or elders where they or their families
+    ask us not to.
+  </li>
+</ul>
+
+<h2>10. Communication</h2>
 <p>
-  The text, logo and images on this website belong to the Trust or are used
-  with permission. You may share them for non-commercial purposes with credit
-  to the Trust.
+  We contact you by email, phone or WhatsApp only about your donation,
+  membership, request or registration. You can ask us to stop at any time.
 </p>
 
-<h2>7. Limitation of liability</h2>
+<h2>11. Limitation of liability</h2>
 <p>
-  The website is provided "as is". The Trust is not liable for any indirect
-  loss from using the website, for delays or failures of third-party services
-  such as the payment gateway or email, or for events outside its control.
+  The website is provided "as is". The Trust is not liable for indirect loss
+  from using the website, for delays or failures of third-party services such
+  as the payment gateway, email or WhatsApp, or for events outside its control.
 </p>
 
-<h2>8. Changes</h2>
+<h2>12. Changes</h2>
 <p>
   We may update these terms. The date at the top shows the latest version.
   Using the website after a change means you accept the updated terms.
 </p>
 
-<h2>9. Governing law</h2>
+<h2>13. Governing law</h2>
 <p>
   These terms are governed by the laws of India. Courts in Basti, Uttar Pradesh
   have jurisdiction over any dispute.

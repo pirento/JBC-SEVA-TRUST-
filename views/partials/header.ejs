@@ -5,7 +5,8 @@
     <span><%= trust.legalForm %> · <%= trust.location %></span>
     <span class="topbar-links">
       <a href="<%= langSwitchUrl %>" class="lang-switch" lang="<%= lang === 'hi' ? 'en' : 'hi' %>"><%= lang === 'hi' ? 'English' : 'हिन्दी' %></a>
-      <% if (trustEmail) { %><a href="mailto:<%= trustEmail %>"><%= trustEmail %></a><% } %>
+      <a href="tel:+91<%= trust.phone %>" class="topbar-phone"><%= trust.phoneDisplay %></a>
+      <a href="mailto:<%= trust.email %>" class="topbar-email"><%= trust.email %></a>
       <% if (currentUser) { %>
         <a href="/account">My Account</a>
         <form action="/logout" method="POST" class="inline-form">

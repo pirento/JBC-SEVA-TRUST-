@@ -147,6 +147,7 @@ function renderEmail(opts) {
             <td style="background:${COLORS.cream};padding:16px 28px;font-size:12px;line-height:1.6;color:${COLORS.muted};border-top:1px solid ${COLORS.line};">
               <strong style="color:${COLORS.saffronText};">${escape(tagline)}</strong><br>
               ${escape(tr(trust.legalForm))} · ${escape(tr(trust.location))}<br>
+              <a href="mailto:${trust.email}" style="color:${COLORS.navy};">${trust.email}</a> · <a href="tel:+91${trust.phone}" style="color:${COLORS.navy};">${trust.phoneDisplay}</a><br>
               <a href="${escape(appUrl)}" style="color:${COLORS.navy};">${escape(appUrl.replace(/^https?:\/\//, ""))}</a>
               ${opts.footerNote ? `<br>${escape(tr(opts.footerNote))}` : ""}
             </td>
@@ -171,7 +172,7 @@ function renderEmail(opts) {
     "",
     closing,
     lang === "hi" ? "जेबीसी सेवा ट्रस्ट" : trust.name,
-    `${tagline} · ${tr(trust.location)} · ${appUrl}`,
+    `${tagline} · ${tr(trust.location)} · ${trust.email} · ${trust.phoneDisplay} · ${appUrl}`,
   ]
     .filter((line) => line !== undefined && line !== null)
     .join("\n")

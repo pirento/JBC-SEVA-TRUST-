@@ -1,9 +1,14 @@
-      <h2>Contact</h2>
+      <h2>Contact and grievances</h2>
       <p>
-        For any question about this page, contact <%= trust.name %>,
-        <%= trust.location %><% if (trustEmail) { %>, by email at
-        <a href="mailto:<%= trustEmail %>"><%= trustEmail %></a><% } %>.
+        For any question or complaint about this page, or about how the Trust
+        handles your money or personal data, contact the Managing Trustee,
+        <%= trust.trustees[1].name %>, <%= trust.name %>, <%= trust.location %>:
       </p>
+      <ul>
+        <li>Email: <a href="mailto:<%= trust.email %>"><%= trust.email %></a></li>
+        <li>Phone and WhatsApp: <a href="tel:+91<%= trust.phone %>"><%= trust.phoneDisplay %></a></li>
+      </ul>
+      <p>We reply within 7 working days.</p>
     </article>
   </main>
 

@@ -3,7 +3,7 @@
 // ========================================
 //
 // Facts from "JBC Seva Trust — Profile, Work Plan & Governance".
-// Registration no., PAN, 12A/80G and helpline are not public yet;
+// Registration no., PAN and 12A/80G are not public yet;
 // add them here only once they are real. Targets are goals, not
 // results achieved, and must be shown as such.
 // ========================================
@@ -214,6 +214,10 @@ module.exports = {
     "To be present on the ground with the people who need help most — forgotten elders, poor families with daughters to marry, children at risk of dropping out — while restoring green cover in our villages, with every rupee accounted for.",
   legalForm: "Public Charitable Trust",
   location: "Basti, Uttar Pradesh, India",
+  email: "jbcsevatrust@gmail.com",
+  // 10-digit mobile, also the trust's WhatsApp
+  phone: "9648191111",
+  phoneDisplay: "+91 96481 91111",
   trustees: [
     {
       name: "Jang Bahadur Chaudhary",

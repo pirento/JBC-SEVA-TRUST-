@@ -2375,14 +2375,16 @@ fieldset.field {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #1fa855;
+  background: var(--orange);
   color: #fff;
-  box-shadow: 0 8px 20px rgb(0 0 0 / 0.2);
+  border: 3px solid #fff;
+  box-shadow: 0 8px 20px rgb(12 35 64 / 0.3);
 }
 
-.whatsapp-float:hover {
+.whatsapp-float:hover,
+.whatsapp-float:focus-visible {
   color: #fff;
-  background: #188a45;
+  background: var(--navy);
 }
 
 .monthly-box {

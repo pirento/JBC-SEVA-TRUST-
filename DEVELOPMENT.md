@@ -23,7 +23,7 @@ Fill `.env`. The minimum to start the site locally:
 | `DATA_ENCRYPTION_KEY` | 64 hex characters, made the same way. **Never change it once data exists**: old records could no longer be read. |
 | `ADMIN_PASSWORD_HASH` | `npm run hash-password -- "your-admin-password"` and paste the printed line |
 
-Optional for local work: `PAYU_*` (PayU test keys), `EMAIL_USER`/`EMAIL_PASS` (Gmail app password), `TRUST_EMAIL`, `APP_URL`, `TRUST_WHATSAPP`, `BACKUP_DIR`, `DATA_DIR`. Without email settings, emails are skipped with an error in the log and everything else still works.
+Optional for local work: `PAYU_*` (PayU test keys), `EMAIL_USER`/`EMAIL_PASS` (Gmail app password), `TRUST_EMAIL`, `APP_URL`, `BACKUP_DIR`, `DATA_DIR`. Without email settings, emails are skipped with an error in the log and everything else still works.
 
 ## 3. Run
 
