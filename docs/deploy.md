@@ -93,11 +93,9 @@ EMAIL_PASS=<16 akshar ka app password, bina space>
 PAYU_ENV=production
 PAYU_KEY=<PayU live key>
 PAYU_SALT=<PayU live salt>
-PAYU_SUCCESS_URL=https://jbcsevatrust.org/donation/success
-PAYU_FAILURE_URL=https://jbcsevatrust.org/donation/failure
-PAYU_DONATION_SUCCESS_URL=https://jbcsevatrust.org/donate/success
-PAYU_DONATION_FAILURE_URL=https://jbcsevatrust.org/donate/failure
 ```
+
+PayU ke success/failure URLs `APP_URL` se apne aap bante hain, inhe alag se daalne ki zaroorat nahi. Purani `.env` mein `PAYU_..._URL` wali lines hon to hata dein. Agar rakhni hon to dhyan dein ki donation wale `/donate/success` par aur membership wale `/donation/success` par khatam hon; galat hone par payment save nahi hota.
 
 Pehli baar jaanch ke liye PayU ki **test** keys aur `PAYU_ENV=test` rakh sakte hain. Sab theek chale to live keys daal dein.
 
@@ -164,7 +162,7 @@ Certbot muft HTTPS certificate lagata hai aur use apne aap renew bhi karta hai.
 1. Website kholein. Hindi button, WhatsApp button aur footer ka number check karein.
 2. Ek account banayein. Confirm karne ka email aana chahiye.
 3. `/admin/login` par admin password se login karein.
-4. **₹100 ka ek asli daan** karein. Thank-you page, rasid ka email, certificate download aur admin dashboard, chaaron check karein.
+4. **₹100 ka ek asli daan** karein. Thank-you page, rasid ka email, certificate download aur admin dashboard, chaaron check karein. Daan admin mein na dikhe to **Unfinished payments** tab dekhein: wahan wo payments hain jo shuru hue par PayU ne confirm nahi kiye (fail, cancel, ya PayU ka jawab website tak nahi pahuncha).
 5. Backup chala kar dekhein: `cd /var/www/jbc && npm run backup && ls /srv/jbc-backups`. Har din ke folder mein MongoDB ke records (`.txt`, encrypted), photos aur medical receipts hote hain.
 
 ## Baad mein code update karna

@@ -76,7 +76,7 @@ const patterns = [
     /^Password must be at least (\d+) characters\.$/,
     (m) => `पासवर्ड कम से कम ${m[1]} अक्षरों का होना चाहिए।`,
   ],
-  [/^(.+) is required$/, known((m, t) => `${t} ज़रूरी है`)],
+  [/^(.+) is required(\.?)$/, known((m, t) => `${t} ज़रूरी है${m[2] ? "।" : ""}`)],
   [/^(.+) is too long$/, known((m, t) => `${t} बहुत लंबा है`)],
   [/^Call: (.+)$/, (m) => `फ़ोन: ${m[1]}`],
   [/^WhatsApp: (.+)$/, (m) => `व्हाट्सऐप: ${m[1]}`],
@@ -150,7 +150,8 @@ function i18n(req, res, next) {
   res.locals.lang = lang;
 
   // Link to the same page in the other language
-  const url = new URL(req.originalUrl, "http://x");
+  // One leading slash: "//[" or "//host/x" must not parse as a host
+  const url = new URL("http://x" + req.originalUrl.replace(/^\/+/, "/"));
   url.searchParams.set("lang", lang === "hi" ? "en" : "hi");
   res.locals.langSwitchUrl = url.pathname + url.search;
 

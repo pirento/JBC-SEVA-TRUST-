@@ -1,3 +1,5 @@
+const { appUrl } = require("./appConfig");
+
 const PAYU_KEY = process.env.PAYU_KEY;
 const PAYU_SALT = process.env.PAYU_SALT;
 
@@ -17,17 +19,20 @@ const PAYU_PAYMENT_URL =
 // MEMBERSHIP CALLBACK URLS
 // ============================================================
 
-const PAYU_SUCCESS_URL = process.env.PAYU_SUCCESS_URL;
+// Callback URLs follow APP_URL; the PAYU_*_URL settings are optional overrides
+const PAYU_SUCCESS_URL = process.env.PAYU_SUCCESS_URL || `${appUrl}/donation/success`;
 
-const PAYU_FAILURE_URL = process.env.PAYU_FAILURE_URL;
+const PAYU_FAILURE_URL = process.env.PAYU_FAILURE_URL || `${appUrl}/donation/failure`;
 
 // ============================================================
 // DONATION CALLBACK URLS
 // ============================================================
 
-const PAYU_DONATION_SUCCESS_URL = process.env.PAYU_DONATION_SUCCESS_URL;
+const PAYU_DONATION_SUCCESS_URL =
+  process.env.PAYU_DONATION_SUCCESS_URL || `${appUrl}/donate/success`;
 
-const PAYU_DONATION_FAILURE_URL = process.env.PAYU_DONATION_FAILURE_URL;
+const PAYU_DONATION_FAILURE_URL =
+  process.env.PAYU_DONATION_FAILURE_URL || `${appUrl}/donate/failure`;
 
 module.exports = {
   PAYU_KEY,

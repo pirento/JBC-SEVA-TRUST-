@@ -29,6 +29,7 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 - Account records need a confirmed email (`emailVerified`).
 - No account is needed to pay. After a verified donation or membership, `userAuthService.ensureAccountForPayment` makes an account for that email (if none) and emails a temporary password (7 days, `mustChangePassword` forces `/account/set-password`; logging in with it confirms the email).
 - Google login: admin `/admin/settings` (client ID/secret in encrypted `settings.txt`); `services/googleAuthService.js` does the OAuth code flow with fetch, no package.
+- PayU callback URLs default to `APP_URL` + `/donate/success|failure` (donations) and `/donation/success|failure` (membership); `PAYU_*_URL` only override. Admin "Unfinished payments" tab lists pending records PayU never confirmed.
 - Admin: `/admin/users` (reset link, new login details), `/admin/records/:kind/:id/edit` (correct typed details). Corrections are EDIT records applied on read by `models/records.js` `readCorrected()`; always read donations/payment/user files through it, never `readRecords` directly.
 - Password change/reset bumps `passwordChangedAt`; `middleware/userAuth.js` logs out older sessions.
 - App runs in Indian time (`process.env.TZ` set in app.js). Production: `TRUST_PROXY` = proxy hops (default 1), `SESSION_SECRET` >= 32 chars, `PAYU_ENV` test|production.

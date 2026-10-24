@@ -33,15 +33,17 @@ function goLiveChecks() {
       label: "PayU in live mode (PAYU_ENV=production)",
       ok: process.env.PAYU_ENV === "production",
     },
-    {
-      label: "PayU callback URLs (4 × PAYU_*_URL)",
-      ok: [
-        "PAYU_SUCCESS_URL",
-        "PAYU_FAILURE_URL",
-        "PAYU_DONATION_SUCCESS_URL",
-        "PAYU_DONATION_FAILURE_URL",
-      ].every(has),
-    },
+    // Optional overrides; a donation URL pointing at the membership
+    // callback (or the reverse) makes every payment fail to save
+    ...[
+      ["PAYU_SUCCESS_URL", "/donation/success"],
+      ["PAYU_FAILURE_URL", "/donation/failure"],
+      ["PAYU_DONATION_SUCCESS_URL", "/donate/success"],
+      ["PAYU_DONATION_FAILURE_URL", "/donate/failure"],
+    ].map(([name, end]) => ({
+      label: `${name} must end with ${end} (or leave it out)`,
+      ok: !has(name) || process.env[name].trim().replace(/\/+$/, "").endsWith(end),
+    })),
     { label: "Backups on a separate disk (BACKUP_DIR)", ok: has("BACKUP_DIR") },
     { label: "Database: MongoDB (MONGODB_URI)", ok: has("MONGODB_URI") },
   ];

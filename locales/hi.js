@@ -171,6 +171,9 @@ module.exports = {
   "Give online by UPI, card or net banking and choose the cause your money goes to.":
     "UPI, कार्ड या नेट बैंकिंग से ऑनलाइन दान दें और चुनें कि आपका पैसा किस काम में लगे।",
   "Become a member": "सदस्य बनें",
+  Membership: "सदस्यता",
+  "No login needed. After payment, login details for your account are emailed to you.":
+    "लॉगिन की ज़रूरत नहीं। भुगतान के बाद आपके खाते की लॉगिन जानकारी ईमेल पर भेज दी जाती है।",
   "Plant trees, spend time with elders, help at weddings or teach children. Volunteers get a certificate.":
     "पेड़ लगाइए, बुज़ुर्गों के साथ समय बिताइए, विवाह में मदद कीजिए या बच्चों को पढ़ाइए। स्वयंसेवकों को प्रमाण-पत्र मिलता है।",
   "Register as volunteer": "स्वयंसेवक के रूप में रजिस्टर करें",
@@ -346,6 +349,7 @@ module.exports = {
   "Thank you for registering! Our team will contact you soon.":
     "रजिस्टर करने के लिए धन्यवाद! हमारी टीम जल्द आपसे संपर्क करेगी।",
   "Village / City *": "गाँव / शहर *",
+  "Village / city": "गाँव / शहर",
   "e.g. Basti": "जैसे बस्ती",
   "I would like to help with *": "मैं इसमें मदद करना चाहूँगा/चाहूँगी *",
   "Elder companionship": "बुज़ुर्गों का साथ",
@@ -674,6 +678,7 @@ module.exports = {
   "Minimum membership amount is ₹100": "न्यूनतम सदस्यता राशि ₹100 है",
   "Payment mode is required": "भुगतान का तरीका चुनना ज़रूरी है",
   "Payment mode is required.": "भुगतान का तरीका चुनना ज़रूरी है।",
+  "Please choose UPI, Card or Net Banking.": "कृपया UPI, कार्ड या नेट बैंकिंग चुनें।",
   "Please accept the Terms, Privacy Policy and Refund Policy":
     "कृपया नियम, गोपनीयता नीति और रिफ़ंड नीति स्वीकार करें",
   "Password is too long (maximum 72 characters).":

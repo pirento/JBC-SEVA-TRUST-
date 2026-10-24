@@ -16,15 +16,16 @@ const { renderEmail } = require("./emailTemplate");
 // GET TODAY'S DATE IN INDIA
 // ============================================================
 
-// Yesterday in India. The report runs just after midnight for the day
-// that has fully ended, so a payment at 11:59:30 PM is not missed.
-function getIndiaYesterday() {
+// A past date in India (1 = yesterday). The report runs just after
+// midnight for the day that has fully ended, so a payment at 11:59:30 PM
+// is not missed.
+function getIndiaDate(daysAgo = 1) {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Kolkata",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(new Date(Date.now() - 24 * 60 * 60 * 1000));
+  }).format(new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000));
 }
 
 // ============================================================
@@ -58,12 +59,30 @@ async function isReportAlreadySent(reportDate) {
 // SEND DAILY REPORT
 // ============================================================
 
-// The 12:10 AM run and the startup catch-up can meet; send once
-let sending = null;
+// One report at a time: the 12:10 AM run and the startup catch-up can
+// meet, and the already-sent check must see the earlier one's log
+let queue = Promise.resolve();
 
-function sendDailyReport(reportDate = getIndiaYesterday()) {
-  if (!sending) sending = runDailyReport(reportDate).finally(() => (sending = null));
-  return sending;
+function sendDailyReport(reportDate = getIndiaDate(1)) {
+  const run = queue.then(() => runDailyReport(reportDate));
+  queue = run.catch(() => {});
+  return run;
+}
+
+// Every day after the last sent report, up to a week back, so a day
+// missed by downtime or an email failure is still sent. With no report
+// sent yet (a new site) only yesterday is sent.
+async function catchUpReports() {
+  const sent = (await readRecords("daily-report-email.txt").catch(() => []))
+    .filter((record) => record?.type === "DAILY_REPORT_EMAIL" && record.status === "SENT")
+    .map((record) => record.reportDate)
+    .sort();
+  const lastSent = sent.at(-1) || getIndiaDate(2);
+
+  for (let daysAgo = 7; daysAgo >= 1; daysAgo -= 1) {
+    const date = getIndiaDate(daysAgo);
+    if (date > lastSent) await sendDailyReport(date);
+  }
 }
 
 async function runDailyReport(reportDate) {
@@ -208,7 +227,9 @@ function startDailyReportScheduler() {
     "10 0 * * *",
 
     async () => {
-      await sendDailyReport();
+      await catchUpReports().catch((error) =>
+        console.error("❌ Daily report failed:", error.message),
+      );
     },
 
     {
@@ -216,10 +237,10 @@ function startDailyReportScheduler() {
     },
   );
 
-  // If the server was down at 12:10 AM, send yesterday's report now
-  // (already-sent days are skipped; nothing to do without email settings)
+  // If the server was down at 12:10 AM, send the missed reports now
+  // (nothing to do without email settings)
   if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-    sendDailyReport().catch((error) =>
+    catchUpReports().catch((error) =>
       console.error("❌ Daily report catch-up failed:", error.message),
     );
   }

@@ -121,7 +121,13 @@ test("public pages render with navbar, footer and legal links", async () => {
 test("legal pages exist and do not claim 80G approval", async () => {
   const get = client();
 
-  for (const url of ["/terms", "/privacy-policy", "/refund-policy", "/disclaimer"]) {
+  for (const url of [
+    "/terms",
+    "/privacy-policy",
+    "/refund-policy",
+    "/disclaimer",
+    "/Terms/",
+  ]) {
     const res = await get(url);
     assert.equal(res.status, 200, url);
     assert.match(res.text, /Last updated/);
@@ -841,6 +847,12 @@ test("verified PayU donation is saved with its cause and listed in the account",
   assert.match(res.text, new RegExp(txnid));
   assert.match(res.text, /Green Earth/);
   assert.match(res.text, /₹1,100/);
+
+  // The admin dashboard lists it too (donations tab is the default)
+  const admin = client();
+  await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+  res = await admin("/admin/dashboard");
+  assert.match(res.text, new RegExp(txnid), "donation on admin dashboard");
 });
 
 // Starts a donation and returns the signed callback PayU would send back
@@ -870,6 +882,22 @@ async function startDonation(req, form) {
   callback.hash = crypto.createHash("sha512").update(reverse).digest("hex");
   return callback;
 }
+
+test("admin sees payments PayU never confirmed until they are confirmed", async () => {
+  const req = client();
+  const callback = await startDonation(req, { ...donation, donorName: "Meera Unpaid" });
+  const admin = client();
+  await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+
+  let res = await admin("/admin/dashboard?view=unfinished");
+  assert.match(res.text, new RegExp(callback.txnid), "listed as unfinished");
+  assert.match(res.text, /Meera Unpaid/);
+
+  res = await req("/donate/success", { method: "POST", form: callback });
+  assert.equal(res.status, 303);
+  res = await admin("/admin/dashboard?view=unfinished");
+  assert.doesNotMatch(res.text, new RegExp(callback.txnid), "gone once paid");
+});
 
 test("temple donation keeps purpose, dedication, seva date and gotra end to end", async () => {
   const req = client();
@@ -1136,12 +1164,15 @@ test("backup copies the data files", async () => {
     "pdf",
   );
   const first = await runBackup();
-  const earlier = path.join(path.dirname(first), "0000-earlier");
+  const earlier = path.join(path.dirname(first), "2000-01-01-00-00");
   fs.renameSync(first, earlier);
+  // Other folders on a backup disk are neither linked to nor deleted
+  fs.mkdirSync(path.join(path.dirname(first), "lost+found"));
   const second = await runBackup();
 
   const photo = (dir) => fs.statSync(path.join(dir, "uploads", "a".repeat(32) + ".jpg"));
   assert.equal(photo(second).ino, photo(earlier).ino, "photo linked, not copied");
+  assert.ok(fs.existsSync(path.join(path.dirname(first), "lost+found")));
   assert.ok(
     fs.existsSync(path.join(second, "receipts", "Medical-Help-Receipt-MED-1.pdf")),
   );
@@ -1410,6 +1441,53 @@ test("membership: errors keep typed values, success redirects to thank-you", asy
   const pdf = await req(`/donation/receipt/${cb.txnid}`);
   assert.equal(pdf.status, 200);
   assert.match(pdf.headers.get("content-type"), /pdf/);
+
+  // Joined without logging in: an account is made for the email afterwards
+  const userModel = require("../models/userModel");
+  let made = null;
+  for (let i = 0; i < 50 && !made?.mustChangePassword; i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    made = await userModel.findByEmail("kamla@example.com");
+  }
+  assert.equal(made?.mustChangePassword, true, "member account with temporary password");
+});
+
+test("a verified membership payment whose pending details were lost is still saved", async () => {
+  const req = client();
+  const cb = {
+    key: "testkey",
+    status: "success",
+    mihpayid: "PAYUM2",
+    txnid: "TXN_LOST_1",
+    amount: "500.00",
+    productinfo: "membership",
+    firstname: "Sita Devi",
+    email: "sita@example.com",
+    phone: "9876501299",
+    udf1: "1 Year Member",
+    udf2: "UPI",
+    udf3: "",
+    udf4: "",
+    udf5: "",
+  };
+  cb.hash = crypto
+    .createHash("sha512")
+    .update(
+      `testsalt|success||||||${cb.udf5}|${cb.udf4}|${cb.udf3}|${cb.udf2}|${cb.udf1}|${cb.email}|${cb.firstname}|${cb.productinfo}|${cb.amount}|${cb.txnid}|testkey`,
+    )
+    .digest("hex");
+
+  const res = await req("/donation/success", { method: "POST", form: cb });
+  assert.equal(res.status, 303, res.text.slice(0, 200));
+  const pdf = await req(`/donation/receipt/${cb.txnid}`);
+  assert.equal(pdf.status, 200);
+
+  // A forged callback (wrong hash) is still refused
+  const forged = await req("/donation/success", {
+    method: "POST",
+    form: { ...cb, txnid: "TXN_LOST_2" },
+  });
+  assert.notEqual(forged.status, 303);
 });
 
 test("only genuine data is saved: bot trap, spam names, duplicates", async () => {

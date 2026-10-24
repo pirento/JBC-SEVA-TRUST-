@@ -109,8 +109,9 @@ function validateDonation(input) {
     throw new Error("Payment mode is required.");
   }
 
-  if (paymentMode === "Cash") {
-    throw new Error("Cash payment is not available through online PayU payment.");
+  // The choices on the form; the value goes to PayU and onto the receipt
+  if (!["UPI", "Card", "Net Banking"].includes(paymentMode)) {
+    throw new Error("Please choose UPI, Card or Net Banking.");
   }
 
   if (!accepted(input.consent)) {

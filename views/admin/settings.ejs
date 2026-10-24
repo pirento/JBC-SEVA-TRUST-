@@ -64,9 +64,9 @@
       <section class="panel">
         <h2>Email</h2>
         <p>Emails are sent from the Gmail account in the server settings (<code>EMAIL_USER</code>, <code>EMAIL_PASS</code>).</p>
-        <div class="actions">
-          <a href="/test-email" class="btn navy small-btn">Send a test email</a>
-        </div>
+        <form method="POST" action="/admin/settings/test-email" class="actions">
+          <button type="submit" class="btn navy small-btn">Send a test email</button>
+        </form>
       </section>
     </div>
   </main>

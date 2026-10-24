@@ -27,7 +27,7 @@ Open `http://localhost:3000`.
 | `EMAIL_USER`, `EMAIL_PASS` | Gmail address and app password used to send emails |
 | `TRUST_EMAIL` | Optional: inbox for copies of emails and the daily report (default: the trust email in `config/trustConfig.js`) |
 | `PAYU_KEY`, `PAYU_SALT`, `PAYU_ENV` | PayU merchant key/salt; `PAYU_ENV=production` for live payments |
-| `PAYU_*_URL` | PayU success/failure callback URLs for membership and donation |
+| `PAYU_*_URL` | Optional: PayU callback URLs; by default built from `APP_URL` (`/donation/success`, `/donation/failure` for membership, `/donate/success`, `/donate/failure` for donations) |
 | `MONGODB_URI` | MongoDB connection string (e.g. Atlas). Without it records are kept in encrypted files in `DATA_DIR` (fine for local work) |
 | `MONGODB_DB` | Optional: database name (default `jbc_seva_trust`) |
 | `DATA_DIR` | Folder for photos and PDF receipts (and records when no MongoDB); default `data/` |

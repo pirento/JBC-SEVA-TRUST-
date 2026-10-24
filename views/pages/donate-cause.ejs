@@ -9,7 +9,8 @@
     const opt = page.donation;
     const user = currentUser || {};
     const v = values || {};
-    const today = new Date().toISOString().slice(0, 10);
+    // India date (the app sets TZ); toISOString would give yesterday before 5:30 AM
+    const today = new Date().toLocaleDateString('en-CA');
     const yearAhead = new Date(Date.now() + 365 * 864e5).toISOString().slice(0, 10);
     const purpose = v.purpose || (opt.purposes.length === 1 ? opt.purposes[0] : '');
   %>
@@ -117,7 +118,7 @@
               <input id="dPan" name="pan" type="text" maxlength="10" autocomplete="off"
                 pattern="[A-Za-z]{5}[0-9]{4}[A-Za-z]" title="10 character PAN, e.g. ABCDE1234F"
                 value="<%= v.pan || '' %>" />
-              <small><%= opt.religious ? 'Optional, for our records.' : trust.eightyG.approved ? 'Needed for your 80G receipt.' : 'Needed for an 80G receipt once the trust is approved.' %> Stored encrypted.</small>
+              <small><%= opt.religious ? 'Optional, for our records.' : trust.eightyGCovers() ? 'Needed for your 80G receipt.' : 'Needed for an 80G receipt once the trust is approved.' %> Stored encrypted.</small>
             </div>
           </div>
 
@@ -157,9 +158,11 @@
           <ol class="steps-list">
             <li>You pay securely on PayU.</li>
             <li>Your receipt is emailed to you and can be downloaded.</li>
+            <% if (!currentUser) { %><li>No login needed. After payment, login details for your account are emailed to you.</li><% } %>
             <li>The money goes into the <strong><%= page.title %></strong> fund<%= opt.religious ? ', kept apart from the charitable programmes' : '' %>.</li>
           </ol>
-          <p class="muted small"><%= trust.taxNote(page.title) %></p>
+          <%# Before giving there is no gift date yet; outside the approval period no 80G is claimed %>
+          <p class="muted small"><%= !opt.religious && trust.eightyG.approved && !trust.eightyGCovers() ? trust.taxNotes.default : trust.taxNote(page.title) %></p>
         </div>
       </aside>
     </div>

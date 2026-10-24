@@ -49,6 +49,7 @@ const settings = require("../controllers/adminSettingsController");
 
 router.get("/settings", adminAuth, settings.show);
 router.post("/settings", adminAuth, settings.save);
+router.post("/settings/test-email", adminAuth, settings.testEmail);
 
 router.post("/logout", adminAuth, adminController.logout);
 

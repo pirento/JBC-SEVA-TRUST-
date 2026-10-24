@@ -49,7 +49,8 @@ function aadhar(value) {
 
 function positiveAmount(value) {
   const amount = Number(value);
-  return Number.isFinite(amount) && amount > 0;
+  // Whole rupees: the receipt prints the amount in words
+  return Number.isInteger(amount) && amount > 0;
 }
 
 // YYYY-MM-DD that exists on the calendar (no 2026-02-30 or 2026-13-01)

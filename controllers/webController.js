@@ -47,7 +47,8 @@ async function programme(req, res, next) {
 }
 
 function legal(req, res) {
-  const page = legalPages[req.path];
+  // Express matches "/Terms/" too; req.path keeps the case and the slash
+  const page = legalPages[req.path.toLowerCase().replace(/(.)\/+$/, "$1")];
   res.render(page.view, { title: page.title, updated: LEGAL_UPDATED });
 }
 
