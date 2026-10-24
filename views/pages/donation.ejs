@@ -10,6 +10,9 @@
     <section class="form-card narrow">
       <h1 class="form-title">Become a Member</h1>
       <p class="form-intro">Join <%= trust.name %> and receive a membership certificate by email.</p>
+      <% if (!currentUser) { %>
+        <p class="form-intro">No login needed. After payment, login details for your account are emailed to you.</p>
+      <% } %>
       <% if (locals.error) { %>
         <div class="alert error" role="alert"><%= error %></div>
       <% } %>

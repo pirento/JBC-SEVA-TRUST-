@@ -3,6 +3,7 @@ const { realDate } = require("../utils/validation");
 const enquiryModel = require("../models/enquiryModel");
 const { listUsers } = require("../models/userModel");
 const { listPledges } = require("./pledgeService");
+const { listPending } = require("../models/pendingPaymentStore");
 const { donationPages, GENERAL_CAUSE } = require("../config/trustConfig");
 const {
   normalizeMembership,
@@ -23,7 +24,14 @@ const {
 
 const PAGE_SIZE = 50;
 
-const VIEWS = ["donations", "memberships", "medical", "volunteers", "messages"];
+const VIEWS = [
+  "donations",
+  "memberships",
+  "unfinished",
+  "medical",
+  "volunteers",
+  "messages",
+];
 
 const isSuccess = (record) =>
   String(record.paymentStatus || "SUCCESS").toUpperCase() === "SUCCESS";
@@ -87,6 +95,7 @@ async function getDashboard({ date = "", view = "donations", q = "", page = 1 } 
     messages,
     users,
     pledges,
+    pending,
   ] = await Promise.all([
     readCorrected("payment.txt"),
     readCorrected("donations.txt"),
@@ -95,6 +104,7 @@ async function getDashboard({ date = "", view = "donations", q = "", page = 1 } 
     enquiryModel.listMessages(),
     listUsers(),
     listPledges(),
+    listPending(),
   ]);
 
   const memberships = newestFirst(onDate(payments.filter(isSuccess), day));
@@ -102,6 +112,18 @@ async function getDashboard({ date = "", view = "donations", q = "", page = 1 } 
   const medical = newestFirst(
     onDate(
       medicalRecords.filter((r) => String(r.type || "").toUpperCase() === "MEDICAL_HELP"),
+      day,
+    ),
+  );
+  // Started but not saved as paid: shows when PayU never confirmed a payment
+  const paid = new Set(
+    [...payments, ...donationRecords].map((r) =>
+      String(r.transactionId || r.txnid || ""),
+    ),
+  );
+  const unfinished = newestFirst(
+    onDate(
+      pending.filter((r) => !paid.has(String(r.txnid))),
       day,
     ),
   );
@@ -122,6 +144,7 @@ async function getDashboard({ date = "", view = "donations", q = "", page = 1 } 
     messageCount: dayMessages.length,
     userCount: users.length,
     activePledges: pledges.filter((p) => p.active).length,
+    unfinishedCount: unfinished.length,
   };
 
   const funds = donationPages.map((p) => {
@@ -136,6 +159,19 @@ async function getDashboard({ date = "", view = "donations", q = "", page = 1 } 
       (r) => ({ ...normalizeDonation(r), gotra: r.gotra || "", pan: r.pan || "" }),
     ],
     memberships: [memberships, normalizeMembership],
+    unfinished: [
+      unfinished,
+      (r) => ({
+        kind: r.type === "DONATION" ? "Donation" : "Membership",
+        name: r.donorName || r.memberName || "",
+        phoneNumber: r.phoneNumber || "",
+        email: r.email || "",
+        amount: Number(r.amount) || 0,
+        cause: r.cause || "",
+        txnid: r.txnid,
+        startedAt: r.createdAt,
+      }),
+    ],
     medical: [medical, normalizeMedical],
     volunteers: [newestFirst(dayVolunteers), (r) => r],
     messages: [newestFirst(dayMessages), (r) => r],

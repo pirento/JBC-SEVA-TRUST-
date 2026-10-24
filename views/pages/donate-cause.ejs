@@ -158,6 +158,7 @@
           <ol class="steps-list">
             <li>You pay securely on PayU.</li>
             <li>Your receipt is emailed to you and can be downloaded.</li>
+            <% if (!currentUser) { %><li>No login needed. After payment, login details for your account are emailed to you.</li><% } %>
             <li>The money goes into the <strong><%= page.title %></strong> fund<%= opt.religious ? ', kept apart from the charitable programmes' : '' %>.</li>
           </ol>
           <%# Before giving there is no gift date yet; outside the approval period no 80G is claimed %>

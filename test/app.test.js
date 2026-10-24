@@ -847,6 +847,12 @@ test("verified PayU donation is saved with its cause and listed in the account",
   assert.match(res.text, new RegExp(txnid));
   assert.match(res.text, /Green Earth/);
   assert.match(res.text, /₹1,100/);
+
+  // The admin dashboard lists it too (donations tab is the default)
+  const admin = client();
+  await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+  res = await admin("/admin/dashboard");
+  assert.match(res.text, new RegExp(txnid), "donation on admin dashboard");
 });
 
 // Starts a donation and returns the signed callback PayU would send back
@@ -876,6 +882,22 @@ async function startDonation(req, form) {
   callback.hash = crypto.createHash("sha512").update(reverse).digest("hex");
   return callback;
 }
+
+test("admin sees payments PayU never confirmed until they are confirmed", async () => {
+  const req = client();
+  const callback = await startDonation(req, { ...donation, donorName: "Meera Unpaid" });
+  const admin = client();
+  await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+
+  let res = await admin("/admin/dashboard?view=unfinished");
+  assert.match(res.text, new RegExp(callback.txnid), "listed as unfinished");
+  assert.match(res.text, /Meera Unpaid/);
+
+  res = await req("/donate/success", { method: "POST", form: callback });
+  assert.equal(res.status, 303);
+  res = await admin("/admin/dashboard?view=unfinished");
+  assert.doesNotMatch(res.text, new RegExp(callback.txnid), "gone once paid");
+});
 
 test("temple donation keeps purpose, dedication, seva date and gotra end to end", async () => {
   const req = client();
@@ -1419,6 +1441,15 @@ test("membership: errors keep typed values, success redirects to thank-you", asy
   const pdf = await req(`/donation/receipt/${cb.txnid}`);
   assert.equal(pdf.status, 200);
   assert.match(pdf.headers.get("content-type"), /pdf/);
+
+  // Joined without logging in: an account is made for the email afterwards
+  const userModel = require("../models/userModel");
+  let made = null;
+  for (let i = 0; i < 50 && !made?.mustChangePassword; i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    made = await userModel.findByEmail("kamla@example.com");
+  }
+  assert.equal(made?.mustChangePassword, true, "member account with temporary password");
 });
 
 test("a verified membership payment whose pending details were lost is still saved", async () => {

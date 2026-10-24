@@ -15,7 +15,7 @@
       const text = params.toString();
       return '/admin/dashboard' + (text ? '?' + text : '');
     };
-    const tabLabels = { donations: 'Donations', memberships: 'Memberships', medical: 'Medical', volunteers: 'Volunteers', messages: 'Messages' };
+    const tabLabels = { donations: 'Donations', memberships: 'Memberships', unfinished: 'Unfinished payments', medical: 'Medical', volunteers: 'Volunteers', messages: 'Messages' };
     const prog = (slug) => (trust.programmes.find((p) => p.slug === slug) || {}).title;
   %>
 
@@ -135,6 +135,20 @@
                     <td><strong><%= rupees(m.amount) %></strong></td>
                     <td><%= m.paymentMode %><br><small class="mono"><%= m.transactionId %></small></td>
                     <td><a href="/donation/receipt/<%= encodeURIComponent(m.transactionId) %>">PDF</a> · <a href="/admin/records/membership/<%= encodeURIComponent(m.transactionId) %>/edit">Edit</a></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            <% } else if (view === 'unfinished') { %>
+              <caption class="muted small">Started on the website but not confirmed by PayU: failed, cancelled, or the confirmation never arrived. Check the transaction in the PayU dashboard; nothing here has been counted as received.</caption>
+              <thead><tr><th>Started</th><th>Type</th><th>Name</th><th>Amount</th><th>Transaction</th></tr></thead>
+              <tbody>
+                <% list.rows.forEach((u) => { %>
+                  <tr>
+                    <td><%= new Date(u.startedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' }) %></td>
+                    <td><%= u.kind %><% if (u.cause) { %><br><small><%= u.cause %></small><% } %></td>
+                    <td><strong><%= u.name %></strong><br><small><%= u.phoneNumber %> · <%= u.email %></small></td>
+                    <td><%= rupees(u.amount) %></td>
+                    <td class="mono"><%= u.txnid %></td>
                   </tr>
                 <% }) %>
               </tbody>

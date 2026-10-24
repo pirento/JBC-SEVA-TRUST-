@@ -34,6 +34,18 @@ async function getPending(id) {
   return null;
 }
 
+// Payments started but never confirmed by PayU (failed, cancelled, or the
+// success callback never arrived), oldest first
+async function listPending() {
+  const last = new Map();
+  for (const record of await readRecords(PENDING_FILE)) {
+    last.set(String(record.transactionId || ""), record);
+  }
+  return [...last.values()]
+    .filter((record) => record.state === "PENDING" && record.data)
+    .map((record) => ({ ...record.data, createdAt: record.createdAt }));
+}
+
 async function deletePending(id) {
   const transactionId = String(id || "").trim();
   if (!transactionId) return;
@@ -82,6 +94,7 @@ module.exports = {
   MAX_AGE,
   setPending,
   getPending,
+  listPending,
   deletePending,
   setReceipt,
   getReceipt,
