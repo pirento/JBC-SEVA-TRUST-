@@ -126,7 +126,7 @@
             <label for="dAddress">Address <span class="muted">(optional)</span></label>
             <input id="dAddress" name="address" type="text" maxlength="300" autocomplete="street-address"
               value="<%= v.address || '' %>" />
-            <small><%= opt.religious ? 'Optional, for our records.' : 'Needed with PAN for 80G reporting.' %> Stored encrypted.</small>
+            <small><%= opt.religious ? 'Optional, for our records.' : trust.eightyGCovers() ? 'Needed with PAN for 80G reporting.' : 'Needed with PAN for 80G reporting once the trust is approved.' %> Stored encrypted.</small>
           </div>
 
           <%- include('../partials/payment-mode') %>

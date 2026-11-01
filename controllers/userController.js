@@ -325,6 +325,17 @@ async function verifyEmail(req, res, next) {
   try {
     const user = await userAuthService.verifyEmail(req.params.token, req.session.user);
 
+    // Logged in as someone else: sending them to /login would bounce
+    // straight back here, forever
+    if (user === "login" && req.session.user) {
+      return res.status(400).render("pages/form-error", {
+        title: "Log out first",
+        message:
+          "This confirmation link is for a different account. Log out, then open the link again.",
+        backUrl: "/account",
+      });
+    }
+
     if (user === "login") {
       // Back here after logging in to the account the link belongs to
       const next = `/verify-email/${encodeURIComponent(req.params.token)}`;

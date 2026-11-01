@@ -173,6 +173,9 @@ module.exports = {
   "Give online by UPI, card or net banking and choose the cause your money goes to.":
     "UPI, कार्ड या नेट बैंकिंग से ऑनलाइन दान दें और चुनें कि आपका पैसा किस काम में लगे।",
   "Become a member": "सदस्य बनें",
+  "Log out first": "पहले लॉग आउट करें",
+  "This confirmation link is for a different account. Log out, then open the link again.":
+    "यह पुष्टि लिंक किसी दूसरे खाते का है। लॉग आउट करें, फिर लिंक दोबारा खोलें।",
   Membership: "सदस्यता",
   "No login needed. After payment, login details for your account are emailed to you.":
     "लॉगिन की ज़रूरत नहीं। भुगतान के बाद आपके खाते की लॉगिन जानकारी ईमेल पर भेज दी जाती है।",
@@ -261,6 +264,8 @@ module.exports = {
   Address: "पता",
   "Needed with PAN for 80G reporting. Stored encrypted.":
     "80G रिपोर्टिंग के लिए पैन के साथ ज़रूरी। सुरक्षित (एन्क्रिप्टेड) रखा जाता है।",
+  "Needed with PAN for 80G reporting once the trust is approved. Stored encrypted.":
+    "ट्रस्ट को मंज़ूरी मिलने के बाद 80G रिपोर्टिंग के लिए पैन के साथ ज़रूरी। सुरक्षित (एन्क्रिप्टेड) रखा जाता है।",
   "Payment Mode *": "भुगतान का तरीका *",
   Card: "कार्ड",
   "Net Banking": "नेट बैंकिंग",

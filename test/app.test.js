@@ -1752,6 +1752,30 @@ test("guest donor gets an account with a temporary password to replace", async (
   assert.match(res.text, /temporary password has expired/);
 });
 
+test("payer gets login details even if someone else registered the email unconfirmed", async () => {
+  const userAuthService = require("../services/userAuthService");
+  const userModel = require("../models/userModel");
+  await userModel.createUser({
+    name: "Squatter",
+    email: "real.owner@example.com",
+    phone: "9876500000",
+    passwordHash: "x",
+  });
+  await userAuthService.ensureAccountForPayment({ email: "real.owner@example.com" });
+  const user = await userModel.findByEmail("real.owner@example.com");
+  assert.equal(user.mustChangePassword, true, "temporary password sent to the payer");
+});
+
+test("odd admin record kinds 404; a form posted after logout returns to the account", async () => {
+  const admin = client();
+  await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+  for (const kind of ["constructor", "toString"]) {
+    assert.equal((await admin(`/admin/records/${kind}/x/edit`)).status, 404, kind);
+  }
+  const res = await client()("/account/password", { method: "POST", form: {} });
+  assert.equal(res.location, "/login?next=%2Faccount");
+});
+
 test("admin users page: search, reset link, new login details", async () => {
   const admin = client();
   await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });

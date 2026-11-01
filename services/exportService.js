@@ -14,7 +14,14 @@ const {
   normalizeMembership,
   normalizeDonation,
   normalizeMedical,
+  indiaDate,
 } = require("./adminReportService");
+
+// Stored times are UTC; a sign-up at 1:30 AM in India belongs to that day
+const day = (value) => {
+  const date = new Date(value);
+  return value && !Number.isNaN(date.getTime()) ? indiaDate(date) : "";
+};
 
 const isSuccess = (r) => String(r.paymentStatus || "SUCCESS").toUpperCase() === "SUCCESS";
 
@@ -92,7 +99,7 @@ const exports_ = {
 
   volunteers: async () =>
     toCsv(await enquiryModel.listVolunteers(), [
-      ["Date", (r) => r.createdAt],
+      ["Date", (r) => day(r.createdAt)],
       ["Name", (r) => r.name],
       ["Phone", (r) => r.phone],
       ["Email", (r) => r.email],
@@ -104,7 +111,7 @@ const exports_ = {
 
   messages: async () =>
     toCsv(await enquiryModel.listMessages(), [
-      ["Date", (r) => r.createdAt],
+      ["Date", (r) => day(r.createdAt)],
       ["Type", (r) => r.enquiryType],
       ["Name", (r) => r.name],
       ["Organisation", (r) => r.organisation],
@@ -115,7 +122,7 @@ const exports_ = {
 
   "event-registrations": async () =>
     toCsv(await contentModel.listRegistrations(), [
-      ["Date", (r) => r.createdAt],
+      ["Date", (r) => day(r.createdAt)],
       ["Event", (r) => r.eventTitle],
       ["Name", (r) => r.name],
       ["Phone", (r) => r.phone],
@@ -189,8 +196,8 @@ const exports_ = {
       ["Fund", (r) => r.cause],
       ["Purpose", (r) => r.purpose],
       ["Amount", (r) => r.amount],
-      ["Last Paid", (r) => r.lastPaid],
-      ["Next Due", (r) => r.nextDue],
+      ["Last Paid", (r) => day(r.lastPaid)],
+      ["Next Due", (r) => day(r.nextDue)],
       ["Status", (r) => (r.active ? "Active" : "Stopped")],
     ]),
 

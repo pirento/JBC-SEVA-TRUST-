@@ -147,7 +147,16 @@ async function ensureAccountForPayment({ name, email: rawEmail, phone: rawPhone,
   if (creating.has(cleanEmail)) return creating.get(cleanEmail);
 
   const work = (async () => {
-    if (await userModel.findByEmail(cleanEmail)) return null;
+    const existing = await userModel.findByEmail(cleanEmail);
+    // Someone registered this email but never confirmed it: the payer
+    // owns the inbox, so send the login details there (resets the password).
+    // Not while a temporary password already sent is still valid.
+    const pendingTemp =
+      existing?.mustChangePassword && Number(existing.tempPasswordExpires) > Date.now();
+    if (existing && !existing.emailVerified && !pendingTemp) {
+      return sendLoginDetails(existing);
+    }
+    if (existing) return null;
     return sendLoginDetails(
       await userModel.createUser({
         name: String(name || "").trim() || cleanEmail,

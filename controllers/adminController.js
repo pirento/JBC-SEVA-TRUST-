@@ -1,6 +1,6 @@
 const { authenticateAdmin } = require("../services/adminAuthService");
 const { realDate } = require("../utils/validation");
-const { getDailyReport } = require("../services/adminReportService");
+const { getDailyReport, indiaDate } = require("../services/adminReportService");
 const { generateDailyReportPdf } = require("../services/adminReportPdfService");
 const { getDashboard } = require("../services/adminDashboardService");
 const { buildExport, exportTypes } = require("../services/exportService");
@@ -124,7 +124,7 @@ exports.exportCsv = async (req, res, next) => {
       return next();
     }
 
-    const date = new Date().toISOString().slice(0, 10);
+    const date = indiaDate(new Date());
 
     res.set("Content-Type", "text/csv; charset=utf-8");
     res.attachment(`jbc-${req.params.type}-${date}.csv`);
