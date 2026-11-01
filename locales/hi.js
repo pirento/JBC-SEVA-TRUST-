@@ -167,6 +167,8 @@ module.exports = {
   "First year": "पहला साल",
   "Years 2–3": "साल 2–3",
   "How we will measure it": "हम कैसे मापेंगे",
+  "JBC Seva Trust, Basti, Uttar Pradesh, India: elder care (Anand Dham), marriage support (Kanyadaan), child education and nutrition, tree plantation and a community temple.":
+    "JBC Seva Trust, बस्ती, उत्तर प्रदेश, भारत: बुज़ुर्गों की देखभाल (आनंद धाम), विवाह सहायता (कन्यादान), बच्चों की शिक्षा और पोषण, वृक्षारोपण और सामुदायिक मंदिर।",
   "How you can help": "आप कैसे मदद कर सकते हैं",
   "Give online by UPI, card or net banking and choose the cause your money goes to.":
     "UPI, कार्ड या नेट बैंकिंग से ऑनलाइन दान दें और चुनें कि आपका पैसा किस काम में लगे।",

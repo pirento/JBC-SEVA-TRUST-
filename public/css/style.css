@@ -740,6 +740,10 @@ a:hover {
   font-size: 15px;
 }
 
+.plan-table .cell-label {
+  display: none;
+}
+
 .plan-table th[scope="row"] a {
   font-weight: 700;
   text-decoration: none;
@@ -1865,19 +1869,14 @@ fieldset.field {
     padding: 2px 0;
   }
 
-  .plan-table td::before {
+  .plan-table .cell-label {
+    display: inline;
     font-weight: 600;
     color: var(--navy);
   }
 
-  .plan-table td:nth-of-type(1)::before {
-    content: "First year: ";
-  }
-  .plan-table td:nth-of-type(2)::before {
-    content: "Years 2–3: ";
-  }
-  .plan-table td:nth-of-type(3)::before {
-    content: "Measured by: ";
+  .plan-table .cell-label::after {
+    content: ": ";
   }
 
   .plan-list div {

@@ -5,7 +5,8 @@
 <meta name="theme-color" content="#15375c" />
 <meta property="og:title" content="<%= trust.name %>" />
 <meta property="og:description" content="<%= trust.tagline %>" />
-<meta property="og:image" content="/images/logo-full.png" />
+<%# Link previews (WhatsApp, Facebook) need a full address %>
+<meta property="og:image" content="<%= appUrl %>/images/logo-full.png" />
 <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png" />
 <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />

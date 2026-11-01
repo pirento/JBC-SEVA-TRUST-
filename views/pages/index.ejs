@@ -152,9 +152,10 @@
                 <% trust.programmes.forEach((p) => { %>
                   <tr>
                     <th scope="row"><a href="/work/<%= p.slug %>"><%= p.title %></a></th>
-                    <td><%= p.year1 %></td>
-                    <td><%= p.later %></td>
-                    <td><%= p.measure %></td>
+                    <%# The labels show only on phones, where the table becomes a list %>
+                    <td><span class="cell-label">First year</span><%= p.year1 %></td>
+                    <td><span class="cell-label">Years 2–3</span><%= p.later %></td>
+                    <td><span class="cell-label">How we will measure it</span><%= p.measure %></td>
                   </tr>
                 <% }) %>
               </tbody>
