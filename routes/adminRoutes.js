@@ -21,6 +21,10 @@ router.get("/report/download", adminAuth, adminController.downloadDailyReport);
 
 router.get("/export/:type", adminAuth, adminController.exportCsv);
 
+// Payments PayU never confirmed: ask PayU, or mark as checked
+router.post("/unfinished/:txnid/verify", adminAuth, adminController.verifyUnfinished);
+router.post("/unfinished/:txnid/close", adminAuth, adminController.closeUnfinished);
+
 // Updates (with photo) and events
 const content = require("../controllers/contentController");
 const { handlePhoto } = require("../middleware/upload");

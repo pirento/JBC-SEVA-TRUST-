@@ -740,6 +740,10 @@ a:hover {
   font-size: 15px;
 }
 
+.plan-table .cell-label {
+  display: none;
+}
+
 .plan-table th[scope="row"] a {
   font-weight: 700;
   text-decoration: none;
@@ -1865,19 +1869,14 @@ fieldset.field {
     padding: 2px 0;
   }
 
-  .plan-table td::before {
+  .plan-table .cell-label {
+    display: inline;
     font-weight: 600;
     color: var(--navy);
   }
 
-  .plan-table td:nth-of-type(1)::before {
-    content: "First year: ";
-  }
-  .plan-table td:nth-of-type(2)::before {
-    content: "Years 2–3: ";
-  }
-  .plan-table td:nth-of-type(3)::before {
-    content: "Measured by: ";
+  .plan-table .cell-label::after {
+    content: ": ";
   }
 
   .plan-list div {
@@ -2771,4 +2770,48 @@ html[lang="hi"] body {
 .google-consent {
   margin: 8px 0 0;
   text-align: center;
+}
+
+/* Several small buttons in one table cell */
+.row-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.share-link {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+/* Questions and answers */
+.faq-page details {
+  border-bottom: 1px solid var(--line, #e6dcc8);
+  padding: 14px 0;
+}
+
+.faq-page summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.faq-page details p {
+  margin: 10px 0 0;
+}
+
+.faq-contact {
+  margin-top: 24px;
+}
+
+/* Home page: check before you pay */
+.check-box {
+  margin-top: 32px;
+  padding: 20px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius);
+}
+
+.check-box h3 {
+  margin-top: 0;
 }

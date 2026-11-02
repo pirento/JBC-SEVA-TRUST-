@@ -49,6 +49,7 @@ router.get("/reset-password/:token", controller.showReset);
 router.post("/reset-password/:token", passwordLimiter, controller.reset);
 
 router.get("/account", userAuth, controller.account);
+router.get("/account/statement", userAuth, controller.statement);
 router.post("/account/pledges/stop", userAuth, controller.stopPledge);
 router.get("/monthly/stop", controller.monthlyStop);
 router.post("/monthly/stop", controller.monthlyStop);

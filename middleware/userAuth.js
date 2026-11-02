@@ -9,7 +9,9 @@ function userAuth(req, res, next) {
     return next();
   }
 
-  return res.redirect(`/login?next=${encodeURIComponent(req.originalUrl)}`);
+  // A form posted after the session ended has no page to come back to
+  const back = req.method === "GET" ? req.originalUrl : "/account";
+  return res.redirect(`/login?next=${encodeURIComponent(back)}`);
 }
 
 module.exports = userAuth;

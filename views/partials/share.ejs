@@ -1,0 +1,2 @@
+<%# WhatsApp share link; pass `text` (the page title) and `path` (from the site root) %>
+<a href="https://wa.me/?text=<%= encodeURIComponent(`${text} - ${trust.name}: ${appUrl}${path}`) %>" target="_blank" rel="noopener" class="side-link share-link">Share on WhatsApp</a>

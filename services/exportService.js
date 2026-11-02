@@ -2,6 +2,7 @@ const { readCorrected } = require("../models/records");
 const enquiryModel = require("../models/enquiryModel");
 const contentModel = require("../models/contentModel");
 const { toCsv } = require("../utils/csv");
+const { realDate } = require("../utils/validation");
 const {
   donationPages,
   GENERAL_CAUSE,
@@ -14,18 +15,35 @@ const {
   normalizeMembership,
   normalizeDonation,
   normalizeMedical,
+  indiaDate,
 } = require("./adminReportService");
+
+// Stored times are UTC; a sign-up at 1:30 AM in India belongs to that day
+const day = (value) => {
+  const date = new Date(value);
+  return value && !Number.isNaN(date.getTime()) ? indiaDate(date) : "";
+};
 
 const isSuccess = (r) => String(r.paymentStatus || "SUCCESS").toUpperCase() === "SUCCESS";
 
-async function successfulDonations() {
-  return (await readCorrected("donations.txt")).filter(isSuccess);
+// ?from=YYYY-MM-DD&to=YYYY-MM-DD (India dates, both optional and inclusive)
+function inRange(query = {}) {
+  const from = realDate(query.from) ? query.from : "";
+  const to = realDate(query.to) ? query.to : "";
+  return (record) => {
+    const d = day(record.paymentDate || record.createdAt);
+    return (!from || d >= from) && (!to || d <= to);
+  };
+}
+
+async function successfulDonations(query) {
+  return (await readCorrected("donations.txt")).filter(isSuccess).filter(inRange(query));
 }
 
 // Each export: file name and a function returning CSV text
 const exports_ = {
-  donations: async () => {
-    const rows = (await successfulDonations()).map((r) => ({
+  donations: async (query) => {
+    const rows = (await successfulDonations(query)).map((r) => ({
       ...normalizeDonation(r),
       raw: r,
     }));
@@ -51,9 +69,10 @@ const exports_ = {
     ]);
   },
 
-  memberships: async () => {
+  memberships: async (query) => {
     const rows = (await readCorrected("payment.txt"))
       .filter(isSuccess)
+      .filter(inRange(query))
       .map(normalizeMembership);
     return toCsv(rows, [
       ["Date", (r) => r.date],
@@ -61,6 +80,7 @@ const exports_ = {
       ["Phone", (r) => r.phoneNumber],
       ["Email", (r) => r.email],
       ["Membership", (r) => r.membershipType],
+      ["Valid Till", (r) => r.validTill],
       ["Amount", (r) => r.amount],
       ["Payment Mode", (r) => r.paymentMode],
       ["Transaction ID", (r) => r.transactionId],
@@ -92,7 +112,7 @@ const exports_ = {
 
   volunteers: async () =>
     toCsv(await enquiryModel.listVolunteers(), [
-      ["Date", (r) => r.createdAt],
+      ["Date", (r) => day(r.createdAt)],
       ["Name", (r) => r.name],
       ["Phone", (r) => r.phone],
       ["Email", (r) => r.email],
@@ -104,7 +124,7 @@ const exports_ = {
 
   messages: async () =>
     toCsv(await enquiryModel.listMessages(), [
-      ["Date", (r) => r.createdAt],
+      ["Date", (r) => day(r.createdAt)],
       ["Type", (r) => r.enquiryType],
       ["Name", (r) => r.name],
       ["Organisation", (r) => r.organisation],
@@ -115,7 +135,7 @@ const exports_ = {
 
   "event-registrations": async () =>
     toCsv(await contentModel.listRegistrations(), [
-      ["Date", (r) => r.createdAt],
+      ["Date", (r) => day(r.createdAt)],
       ["Event", (r) => r.eventTitle],
       ["Name", (r) => r.name],
       ["Phone", (r) => r.phone],
@@ -189,13 +209,13 @@ const exports_ = {
       ["Fund", (r) => r.cause],
       ["Purpose", (r) => r.purpose],
       ["Amount", (r) => r.amount],
-      ["Last Paid", (r) => r.lastPaid],
-      ["Next Due", (r) => r.nextDue],
+      ["Last Paid", (r) => day(r.lastPaid)],
+      ["Next Due", (r) => day(r.nextDue)],
       ["Status", (r) => (r.active ? "Active" : "Stopped")],
     ]),
 
-  funds: async () => {
-    const donations = await successfulDonations();
+  funds: async (query) => {
+    const donations = await successfulDonations(query);
     const rows = donationPages.map((page) => {
       const items = donations.filter((d) => (d.cause || GENERAL_CAUSE) === page.title);
       return {

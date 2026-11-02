@@ -4,7 +4,17 @@ const {
   normalizeMembership,
   normalizeDonation,
   normalizeMedical,
+  getRecordDate,
 } = require("./adminReportService");
+const { financialYear } = require("../config/trustConfig");
+
+// Financial year and sort time, for the yearly statement
+function yearOf(record) {
+  const date = getRecordDate(record);
+  return date
+    ? { time: date.getTime(), financialYear: financialYear(date) }
+    : { time: 0, financialYear: "" };
+}
 
 function sameEmail(a, b) {
   return (
@@ -37,11 +47,11 @@ async function getActivity(email) {
 
   const memberships = newestFirst(
     payments.filter((r) => isSuccess(r) && sameEmail(r.email, email)),
-  ).map(normalizeMembership);
+  ).map((r) => ({ ...normalizeMembership(r), ...yearOf(r) }));
 
   const userDonations = newestFirst(
     donations.filter((r) => isSuccess(r) && sameEmail(r.email, email)),
-  ).map(normalizeDonation);
+  ).map((r) => ({ ...normalizeDonation(r), ...yearOf(r) }));
 
   const medicalRequests = newestFirst(
     medical.filter(

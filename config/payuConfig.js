@@ -15,6 +15,16 @@ const PAYU_PAYMENT_URL =
     ? "https://secure.payu.in/_payment"
     : "https://test.payu.in/_payment";
 
+// Live payments with no public address would send every donor back to
+// localhost after paying; refuse to start instead of failing quietly
+if (
+  PAYU_ENV === "production" &&
+  !/^https:\/\//.test(appUrl) &&
+  !process.env.PAYU_DONATION_SUCCESS_URL
+) {
+  throw new Error("Set APP_URL to the site's https address before using live PayU.");
+}
+
 // ============================================================
 // MEMBERSHIP CALLBACK URLS
 // ============================================================

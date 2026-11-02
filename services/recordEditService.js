@@ -178,7 +178,8 @@ function invalid(message) {
 }
 
 async function load(kind, id) {
-  const spec = KINDS[kind];
+  // Not KINDS[kind]: "constructor" or "__proto__" would find a built-in
+  const spec = Object.hasOwn(KINDS, kind) ? KINDS[kind] : null;
   if (!spec) return null;
   const record = await spec.find(String(id || ""));
   return record ? { spec, record } : null;

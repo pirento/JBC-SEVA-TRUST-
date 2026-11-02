@@ -30,31 +30,6 @@
     </div>
   </main>
 
-  <script>
-    // PayU rejects a reused transaction id, so never post this form again
-    // when the donor comes back with the Back button or from a UPI app.
-    window.addEventListener("load", function () {
-      var key = "payu_submitted_" + <%- JSON.stringify(String(paymentData.txnid)) %>;
-      var form = document.getElementById("payuForm");
-
-      try {
-        if (sessionStorage.getItem(key)) {
-          form.hidden = true;
-          document.getElementById("payLoader").hidden = true;
-          document.getElementById("payAgainNote").hidden = false;
-          return;
-        }
-      } catch (e) {}
-
-      form.addEventListener("submit", function () {
-        try { sessionStorage.setItem(key, "1"); } catch (e) {}
-      });
-
-      setTimeout(function () {
-        try { sessionStorage.setItem(key, "1"); } catch (e) {}
-        form.submit();
-      }, 800);
-    });
-  </script>
+  <script src="/js/payu-redirect.js" defer></script>
 </body>
 </html>

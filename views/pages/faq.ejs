@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="<%= locals.lang || 'en' %>">
+<head>
+  <%- include('../partials/head', { title: 'Questions and answers', description: 'Answers about donations, receipts, 80G, monthly giving, membership, refunds and the temple fund at JBC Seva Trust.' }) %>
+</head>
+<body class="page-bg">
+  <%- include('../partials/header') %>
+
+  <main id="main" class="legal-page faq-page">
+    <article class="legal-content">
+      <h1>Questions and answers</h1>
+      <p class="lead">Short answers to what donors and members ask most.</p>
+      <p class="muted"><span>Full rules:</span> <a href="/terms">Terms &amp; Conditions</a> · <a href="/refund-policy">Refund Policy</a></p>
+
+      <details>
+        <summary>Do I need an account to donate or become a member?</summary>
+        <p>No. Fill in the form and pay on PayU. After the payment is confirmed, an account is made for your email and its login details are emailed to you.</p>
+      </details>
+
+      <details>
+        <summary>Will I get a receipt?</summary>
+        <p>Yes. A receipt or certificate is emailed as soon as PayU confirms the payment, and you can download it again from My Account. My Account also has a yearly statement of all your payments.</p>
+      </details>
+
+      <details>
+        <summary>Can I claim 80G tax deduction?</summary>
+        <% if (trust.eightyGCovers()) { %>
+          <p>Gifts to the charitable programmes are eligible under Section 80G; the receipt shows the registration details. Temple Fund donations are generally not eligible.</p>
+        <% } else { %>
+          <p>Not yet. 80G tax-exemption receipts will be issued only after the Trust receives 80G approval. Temple Fund donations are generally not eligible for 80G deduction.</p>
+        <% } %>
+      </details>
+
+      <details>
+        <summary>Where does my money go?</summary>
+        <p>Into the fund of the cause you choose, and only that cause. If you choose "Where most needed", the trustees use it where the need is most urgent. The Temple Fund is kept apart from the charitable programmes.</p>
+      </details>
+
+      <details>
+        <summary>How does monthly giving work?</summary>
+        <p>Nothing is debited automatically. Each month you get an email reminder with a link to give again. You can stop the reminders from the email or from My Account.</p>
+      </details>
+
+      <details>
+        <summary>What does membership give me?</summary>
+        <p>A membership certificate and a part in the Trust's work. ₹100 to ₹10,999 is a one-year membership and ₹11,000 or more is a lifetime membership. Membership does not give ownership, voting or management rights in the Trust.</p>
+      </details>
+
+      <details>
+        <summary>Can I get a refund?</summary>
+        <p>Donations are generally not refundable, but we refund in full a double charge, a wrong amount, a failed payment where money was deducted, or a payment made without your permission. Write to us within 15 days with your transaction ID.</p>
+      </details>
+
+      <details>
+        <summary>How do I know someone asking for money is from the Trust?</summary>
+        <p>The Trust takes online donations only through this website. For cash or other payments, ask for a receipt signed by a trustee. If you are unsure, call or WhatsApp us before paying.</p>
+      </details>
+
+      <details>
+        <summary>Does the Trust always give medical help when asked?</summary>
+        <p>No. The trustees decide on each request based on need and the funds available. Our team may call you or ask for hospital papers first.</p>
+      </details>
+
+      <p class="faq-contact"><strong>Still have a question?</strong><br>
+        <a href="https://wa.me/91<%= trust.phone %>" target="_blank" rel="noopener">WhatsApp: <%= trust.phoneDisplay %></a> · <a href="mailto:<%= trust.email %>"><%= trust.email %></a></p>
+    </article>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>
