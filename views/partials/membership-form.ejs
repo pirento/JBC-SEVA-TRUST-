@@ -47,6 +47,11 @@
   <%- include('honeypot', { hpId: 'member' }) %>
   <%- include('consent', { withRefund: true }) %>
 
+  <%# Filled in by main.js as the amount is chosen %>
+  <p class="donate-summary" id="donateSummary" aria-live="polite" hidden>
+    <span>Your membership</span>: <strong data-sum="amount"></strong> · <span data-sum="year">1 Year Member</span><span data-sum="life" hidden>Lifetime Member</span>
+  </p>
+
   <div class="actions">
     <button type="submit" class="btn orange">Pay &amp; Become a Member</button>
   </div>
