@@ -153,8 +153,13 @@ async function ensureAccountForPayment({ name, email: rawEmail, phone: rawPhone,
     // Not while a temporary password already sent is still valid.
     const pendingTemp =
       existing?.mustChangePassword && Number(existing.tempPasswordExpires) > Date.now();
+    // Registered in the last day: most likely the payer themself, who has
+    // not clicked the link yet; send that again instead of a new password
+    const justRegistered = Date.now() - new Date(existing?.createdAt).getTime() < DAY_MS;
     if (existing && !existing.emailVerified && !pendingTemp) {
-      return sendLoginDetails(existing);
+      return justRegistered
+        ? requestEmailVerification(cleanEmail)
+        : sendLoginDetails(existing);
     }
     if (existing) return null;
     return sendLoginDetails(
@@ -408,6 +413,7 @@ async function isEmailVerified(email) {
 // ============================================================
 
 const RESET_TTL_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 function hashToken(token) {
   return crypto.createHash("sha256").update(token).digest("hex");

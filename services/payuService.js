@@ -229,7 +229,12 @@ async function fetchPayUStatus(txnid) {
   });
   if (!response.ok) throw new Error(`PayU answered ${response.status}`);
 
-  const details = (await response.json())?.transaction_details?.[txnid];
+  const answer = await response.json();
+  // status 0 means PayU refused the request itself (e.g. wrong key or salt)
+  if (Number(answer?.status) !== 1 && !answer?.transaction_details) {
+    throw new Error(`PayU: ${String(answer?.msg || "request refused").slice(0, 100)}`);
+  }
+  const details = answer.transaction_details?.[txnid];
   if (!details || typeof details !== "object") return { status: "not found" };
 
   return {
