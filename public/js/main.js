@@ -123,3 +123,14 @@ window.addEventListener("pageshow", (e) => {
     button.textContent = button.dataset.label || button.textContent;
   });
 });
+
+// ========================================
+// CONFIRM BEFORE SUBMIT
+// ========================================
+// data-confirm instead of inline onsubmit, which the CSP blocks
+
+document.querySelectorAll("form[data-confirm]").forEach((form) => {
+  form.addEventListener("submit", (e) => {
+    if (!window.confirm(form.dataset.confirm)) e.preventDefault();
+  });
+});

@@ -2,6 +2,7 @@ const userAuthService = require("../services/userAuthService");
 const accountService = require("../services/accountService");
 const pledgeService = require("../services/pledgeService");
 const googleAuthService = require("../services/googleAuthService");
+const statementService = require("../services/statementService");
 
 // Only same-site paths, so ?next= cannot send users to another site
 function safeNext(value) {
@@ -14,18 +15,15 @@ function safeNext(value) {
 // New session id on login stops session fixation
 function startSession(req, user) {
   return new Promise((resolve, reject) => {
-    const isAdmin = req.session.isAdmin;
-    const adminLoginTime = req.session.adminLoginTime;
+    // An admin login in the same browser survives, with its own limits
+    const { isAdmin, adminLoginAt, adminKey } = req.session;
 
     req.session.regenerate((error) => {
       if (error) return reject(error);
 
       req.session.user = user;
 
-      if (isAdmin) {
-        req.session.isAdmin = isAdmin;
-        req.session.adminLoginTime = adminLoginTime;
-      }
+      if (isAdmin) Object.assign(req.session, { isAdmin, adminLoginAt, adminKey });
 
       return resolve();
     });
@@ -173,6 +171,7 @@ async function account(req, res, next) {
 
     return res.render("user/account", {
       activity,
+      statementYears: statementService.yearsWithPayments(activity),
       verifyNotice: req.query.verify || "",
       pledgeStopped: req.query.pledge === "stopped",
       welcome: req.query.welcome === "1",
@@ -367,7 +366,34 @@ async function resendVerification(req, res, next) {
   }
 }
 
+// Yearly statement PDF of the logged-in donor's payments
+async function statement(req, res, next) {
+  if (req.session.user.mustChangePassword) return res.redirect("/account/set-password");
+
+  try {
+    const activity = await loadActivity(req.session.user.email);
+    const fy = String(req.query.fy || "");
+    if (!statementService.yearsWithPayments(activity).includes(fy)) {
+      return res.redirect("/account");
+    }
+
+    const pdf = await statementService.generateStatement({
+      name: req.session.user.name,
+      email: req.session.user.email,
+      fy,
+      rows: statementService.rowsFor(activity, fy),
+    });
+    res.set("Cache-Control", "no-store");
+    res.set("Content-Type", "application/pdf");
+    res.attachment(`jbc-seva-statement-${fy}.pdf`);
+    return res.send(pdf);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
+  statement,
   verifyEmail,
   resendVerification,
   stopPledge,

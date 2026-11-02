@@ -173,10 +173,60 @@ module.exports = {
   "Give online by UPI, card or net banking and choose the cause your money goes to.":
     "UPI, कार्ड या नेट बैंकिंग से ऑनलाइन दान दें और चुनें कि आपका पैसा किस काम में लगे।",
   "Become a member": "सदस्य बनें",
+  "Valid till": "मान्य तक",
+  "Yearly statement (PDF)": "सालाना विवरण (PDF)",
+  "Share on WhatsApp": "WhatsApp पर शेयर करें",
+  // FAQ page and home "check before you pay" box
+  "Questions and answers": "सवाल और जवाब",
+  FAQ: "सवाल-जवाब",
+  "Answers about donations, receipts, 80G, monthly giving, membership, refunds and the temple fund at JBC Seva Trust.":
+    "JBC Seva Trust में दान, रसीद, 80G, मासिक दान, सदस्यता, धन वापसी और मंदिर कोष के बारे में जवाब।",
+  "Short answers to what donors and members ask most.":
+    "दानदाता और सदस्य जो सबसे ज़्यादा पूछते हैं, उनके छोटे जवाब।",
+  "Full rules:": "पूरे नियम:",
+  "Do I need an account to donate or become a member?":
+    "क्या दान करने या सदस्य बनने के लिए खाता ज़रूरी है?",
+  "No. Fill in the form and pay on PayU. After the payment is confirmed, an account is made for your email and its login details are emailed to you.":
+    "नहीं। फ़ॉर्म भरें और PayU पर भुगतान करें। भुगतान की पुष्टि के बाद आपके ईमेल के लिए खाता बन जाता है और उसकी लॉगिन जानकारी ईमेल पर भेज दी जाती है।",
+  "Will I get a receipt?": "क्या मुझे रसीद मिलेगी?",
+  "Yes. A receipt or certificate is emailed as soon as PayU confirms the payment, and you can download it again from My Account. My Account also has a yearly statement of all your payments.":
+    "हाँ। PayU से भुगतान की पुष्टि होते ही रसीद या प्रमाणपत्र ईमेल पर आ जाता है, और आप इसे मेरा खाता से दोबारा डाउनलोड कर सकते हैं। मेरा खाता में आपके सभी भुगतानों का सालाना विवरण भी है।",
+  "Can I claim 80G tax deduction?": "क्या मुझे 80G कर छूट मिल सकती है?",
+  "Gifts to the charitable programmes are eligible under Section 80G; the receipt shows the registration details. Temple Fund donations are generally not eligible.":
+    "धर्मार्थ कार्यक्रमों के लिए दिया गया दान धारा 80G के तहत योग्य है; रसीद पर पंजीकरण का विवरण होता है। मंदिर कोष का दान आम तौर पर योग्य नहीं है।",
+  "Not yet. 80G tax-exemption receipts will be issued only after the Trust receives 80G approval. Temple Fund donations are generally not eligible for 80G deduction.":
+    "अभी नहीं। 80G कर-छूट रसीदें ट्रस्ट को 80G मंज़ूरी मिलने के बाद ही दी जाएँगी। मंदिर कोष का दान आम तौर पर 80G छूट के योग्य नहीं है।",
+  "Where does my money go?": "मेरा पैसा कहाँ जाता है?",
+  'Into the fund of the cause you choose, and only that cause. If you choose "Where most needed", the trustees use it where the need is most urgent. The Temple Fund is kept apart from the charitable programmes.':
+    'आपके चुने हुए काम के कोष में, और केवल उसी काम पर। "जहाँ सबसे ज़्यादा ज़रूरत हो" चुनने पर ट्रस्टी इसे वहाँ लगाते हैं जहाँ ज़रूरत सबसे ज़्यादा है। मंदिर कोष धर्मार्थ कार्यक्रमों से अलग रखा जाता है।',
+  "How does monthly giving work?": "मासिक दान कैसे काम करता है?",
+  "Nothing is debited automatically. Each month you get an email reminder with a link to give again. You can stop the reminders from the email or from My Account.":
+    "कुछ भी अपने आप नहीं कटता। हर महीने आपको दोबारा दान करने के लिंक के साथ एक ईमेल रिमाइंडर मिलता है। आप ईमेल से या मेरा खाता से रिमाइंडर बंद कर सकते हैं।",
+  "What does membership give me?": "सदस्यता से मुझे क्या मिलता है?",
+  "A membership certificate and a part in the Trust's work. ₹100 to ₹10,999 is a one-year membership and ₹11,000 or more is a lifetime membership. Membership does not give ownership, voting or management rights in the Trust.":
+    "सदस्यता प्रमाणपत्र और ट्रस्ट के काम में भागीदारी। ₹100 से ₹10,999 एक साल की सदस्यता है और ₹11,000 या उससे ज़्यादा आजीवन सदस्यता। सदस्यता से ट्रस्ट में स्वामित्व, मतदान या प्रबंधन का अधिकार नहीं मिलता।",
+  "Can I get a refund?": "क्या मुझे पैसा वापस मिल सकता है?",
+  "Donations are generally not refundable, but we refund in full a double charge, a wrong amount, a failed payment where money was deducted, or a payment made without your permission. Write to us within 15 days with your transaction ID.":
+    "दान आम तौर पर वापस नहीं होता, लेकिन दो बार कटा पैसा, गलत राशि, पैसा कटने के बाद असफल भुगतान, या आपकी अनुमति के बिना किया गया भुगतान हम पूरा लौटाते हैं। 15 दिनों के भीतर अपनी ट्रांज़ैक्शन ID के साथ हमें लिखें।",
+  "How do I know someone asking for money is from the Trust?":
+    "पैसे माँगने वाला व्यक्ति ट्रस्ट का है, यह कैसे जानें?",
+  "The Trust takes online donations only through this website. For cash or other payments, ask for a receipt signed by a trustee. If you are unsure, call or WhatsApp us before paying.":
+    "ट्रस्ट ऑनलाइन दान केवल इसी वेबसाइट से लेता है। नकद या किसी और तरीके से देने पर किसी ट्रस्टी के हस्ताक्षर वाली रसीद माँगें। शक हो तो देने से पहले हमें फ़ोन या WhatsApp करें।",
+  "Does the Trust always give medical help when asked?":
+    "क्या ट्रस्ट माँगने पर हमेशा चिकित्सा सहायता देता है?",
+  "No. The trustees decide on each request based on need and the funds available. Our team may call you or ask for hospital papers first.":
+    "नहीं। ट्रस्टी हर अनुरोध पर ज़रूरत और उपलब्ध धन के आधार पर फ़ैसला करते हैं। हमारी टीम पहले आपको फ़ोन कर सकती है या अस्पताल के कागज़ माँग सकती है।",
+  "Still have a question?": "अब भी कोई सवाल है?",
+  "Check before you pay": "देने से पहले जाँच लें",
+  Lifetime: "आजीवन",
+  "Your membership is ending soon": "आपकी सदस्यता जल्द समाप्त हो रही है",
+  "Thank you for being a member of JBC Seva Trust. Your one-year membership ends soon; you can renew it with the button below.":
+    "JBC Seva Trust का सदस्य होने के लिए धन्यवाद। आपकी एक साल की सदस्यता जल्द समाप्त हो रही है; नीचे दिए बटन से आप इसे नवीनीकृत कर सकते हैं।",
+  "Renew membership": "सदस्यता नवीनीकृत करें",
+  "Stop these monthly reminders?": "ये मासिक रिमाइंडर बंद करें?",
   "Log out first": "पहले लॉग आउट करें",
   "This confirmation link is for a different account. Log out, then open the link again.":
     "यह पुष्टि लिंक किसी दूसरे खाते का है। लॉग आउट करें, फिर लिंक दोबारा खोलें।",
-  Membership: "सदस्यता",
   "No login needed. After payment, login details for your account are emailed to you.":
     "लॉगिन की ज़रूरत नहीं। भुगतान के बाद आपके खाते की लॉगिन जानकारी ईमेल पर भेज दी जाती है।",
   "Plant trees, spend time with elders, help at weddings or teach children. Volunteers get a certificate.":

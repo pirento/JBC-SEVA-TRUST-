@@ -20,6 +20,7 @@
   %>
 
   <main id="main" class="account-page">
+    <% if (locals.notice) { %><div class="alert success" role="status"><%= notice %></div><% } %>
 
     <div class="account-head">
       <div>
@@ -53,6 +54,16 @@
     <div class="admin-two">
       <section class="panel">
         <h2>Fund-wise collection</h2>
+        <form method="GET" action="/admin/dashboard" class="date-form fund-range">
+          <label>From <input type="date" name="from" value="<%= range.from %>" /></label>
+          <label>To <input type="date" name="to" value="<%= range.to %>" /></label>
+          <button type="submit" class="btn navy small-btn">Show</button>
+        </form>
+        <% const rangeQuery = new URLSearchParams(Object.entries(range).filter(([, v]) => v)).toString(); %>
+        <p class="muted small">
+          <%= range.from || range.to ? `From ${range.from || 'the start'} to ${range.to || 'today'}` : (date ? 'For the day shown above' : 'All time') %>
+          · CSV: <a href="/admin/export/funds?<%= rangeQuery %>">fund totals</a>, <a href="/admin/export/donations?<%= rangeQuery %>">donations</a>, <a href="/admin/export/memberships?<%= rangeQuery %>">memberships</a>
+        </p>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Fund</th><th>Donations</th><th>Amount</th></tr></thead>
@@ -125,13 +136,14 @@
                 <% }) %>
               </tbody>
             <% } else if (view === 'memberships') { %>
-              <thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Amount</th><th>Payment</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Valid till</th><th>Amount</th><th>Payment</th><th>Actions</th></tr></thead>
               <tbody>
                 <% list.rows.forEach((m) => { %>
                   <tr>
                     <td><%= m.date %><br><small class="muted"><%= m.time %></small></td>
                     <td><strong><%= m.memberName %></strong><br><small><%= m.phoneNumber %> · <%= m.email %></small></td>
                     <td><%= m.membershipType %></td>
+                    <td><%= m.validTill %></td>
                     <td><strong><%= rupees(m.amount) %></strong></td>
                     <td><%= m.paymentMode %><br><small class="mono"><%= m.transactionId %></small></td>
                     <td><a href="/donation/receipt/<%= encodeURIComponent(m.transactionId) %>">PDF</a> · <a href="/admin/records/membership/<%= encodeURIComponent(m.transactionId) %>/edit">Edit</a></td>
@@ -140,7 +152,7 @@
               </tbody>
             <% } else if (view === 'unfinished') { %>
               <caption class="muted small">Started on the website but not confirmed by PayU: failed, cancelled, or the confirmation never arrived. Check the transaction in the PayU dashboard; nothing here has been counted as received.</caption>
-              <thead><tr><th>Started</th><th>Type</th><th>Name</th><th>Amount</th><th>Transaction</th></tr></thead>
+              <thead><tr><th>Started</th><th>Type</th><th>Name</th><th>Amount</th><th>Transaction</th><th>Actions</th></tr></thead>
               <tbody>
                 <% list.rows.forEach((u) => { %>
                   <tr>
@@ -149,6 +161,14 @@
                     <td><strong><%= u.name %></strong><br><small><%= u.phoneNumber %> · <%= u.email %></small></td>
                     <td><%= rupees(u.amount) %></td>
                     <td class="mono"><%= u.txnid %></td>
+                    <td class="row-actions">
+                      <form method="POST" action="/admin/unfinished/<%= encodeURIComponent(u.txnid) %>/verify" class="inline-form">
+                        <button type="submit" class="btn navy small-btn">Verify with PayU</button>
+                      </form>
+                      <form method="POST" action="/admin/unfinished/<%= encodeURIComponent(u.txnid) %>/close" class="inline-form" data-confirm="Only do this after checking the PayU dashboard. Mark this payment as checked?">
+                        <button type="submit" class="btn secondary small-btn">Mark checked</button>
+                      </form>
+                    </td>
                   </tr>
                 <% }) %>
               </tbody>
@@ -209,5 +229,6 @@
     </section>
 
   </main>
+  <script src="/js/main.js" defer></script>
 </body>
 </html>

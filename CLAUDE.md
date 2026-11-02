@@ -29,7 +29,9 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 - Account records need a confirmed email (`emailVerified`).
 - No account is needed to pay. After a verified donation or membership, `userAuthService.ensureAccountForPayment` makes an account for that email (if none) and emails a temporary password (7 days, `mustChangePassword` forces `/account/set-password`; logging in with it confirms the email).
 - Google login: admin `/admin/settings` (client ID/secret in encrypted `settings.txt`); `services/googleAuthService.js` does the OAuth code flow with fetch, no package.
-- PayU callback URLs default to `APP_URL` + `/donate/success|failure` (donations) and `/donation/success|failure` (membership); `PAYU_*_URL` only override. Admin "Unfinished payments" tab lists pending records PayU never confirmed.
+- PayU callback URLs default to `APP_URL` + `/donate/success|failure` (donations) and `/donation/success|failure` (membership); `PAYU_*_URL` only override. Live PayU refuses to start without an https `APP_URL`. Admin "Unfinished payments" tab lists pending records PayU never confirmed, with "Verify with PayU" (`payuService.fetchPayUStatus`, verify_payment API; saves via `processPaymentSuccess(data, { checkedWithPayU: true })`) and "Mark checked" (CLOSED pending record).
+- Receipts use PayU's own `mode` (`payuModeLabel`, known codes only) over the form's payment choice.
+- CSP allows no inline scripts or `on*=` handlers: put JS in `public/js` (confirm dialogs use `data-confirm`). Admin sessions last 8 hours and end when `ADMIN_PASSWORD_HASH` changes (`middleware/adminAuth.js`).
 - Admin: `/admin/users` (reset link, new login details), `/admin/records/:kind/:id/edit` (correct typed details). Corrections are EDIT records applied on read by `models/records.js` `readCorrected()`; always read donations/payment/user files through it, never `readRecords` directly.
 - Password change/reset bumps `passwordChangedAt`; `middleware/userAuth.js` logs out older sessions.
 - App runs in Indian time (`process.env.TZ` set in app.js). Production: `TRUST_PROXY` = proxy hops (default 1), `SESSION_SECRET` >= 32 chars, `PAYU_ENV` test|production.
@@ -48,6 +50,10 @@ Node/Express + EJS MVC app, rebranded from the Manorama Charitable Trust project
 - Admin CSV exports `/admin/export/:type` incl. Form 10BD; 80G switch `eightyG` in trustConfig (keep `approved: false` until granted); terms, disclaimer, donate form, certificates and Form 10BD (hidden until approved, only gifts inside validFrom..validTo) follow it.
 - Updates with photos and events: `/admin/content`, `/updates`, `/events`; photos in `DATA_DIR/uploads` (byte-checked).
 - Monthly giving = email reminders (`services/pledgeService.js`), not auto-debit.
+- Membership "Valid till" (`membershipEnd` in adminReportService) on admin, account and CSV; one renewal email in the last 30 days (`services/renewalService.js`, log `renewals.txt`).
+- Fund-wise table and CSV exports (donations, memberships, funds) take `from`/`to` India dates.
+- Donor yearly statement PDF `/account/statement?fy=2026-27` (`services/statementService.js`; a summary, not a receipt). WhatsApp share on cause and programme pages (`partials/share`).
+- `/faq` (Hindi in locales) and a "Check before you pay" box on the home page; FAQ 80G answer follows `eightyGCovers()`.
 - Nightly backups (`services/backupService.js`, `BACKUP_DIR`): records, photos and medical receipts; unchanged photos/receipts hard-linked to the previous backup; missing go-live settings are printed at server start (`services/configCheck.js`), not shown in admin.
 
 ## Pending

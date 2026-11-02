@@ -152,6 +152,7 @@
           <% if (page.slug !== 'general') { %>
             <a href="/work/<%= page.slug %>" class="side-link">About this programme →</a>
           <% } %>
+          <%- include('../partials/share', { text: page.title, path: `/donate/${page.slug}` }) %>
         </div>
         <div class="side-card plain">
           <h3>What happens next</h3>

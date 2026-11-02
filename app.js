@@ -35,11 +35,15 @@ const { startBackupScheduler } = require("./services/backupService");
 
 const { startPledgeScheduler } = require("./services/pledgeService");
 
+const { startRenewalScheduler } = require("./services/renewalService");
+
 const { logGoLiveChecks } = require("./services/configCheck");
 
 const notFound = require("./middleware/notFound");
 
 const errorHandler = require("./middleware/errorHandler");
+
+const { isAdminSession } = require("./middleware/adminAuth");
 
 // ========================================
 // APP
@@ -65,7 +69,24 @@ app.use((req, res, next) => {
     "X-Frame-Options": "SAMEORIGIN",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+    // Scripts only from our own files (no inline code); forms may post
+    // only here and to PayU; fonts from Google
+    "Content-Security-Policy": [
+      "default-src 'self'",
+      "script-src 'self'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data:",
+      "form-action 'self' https://test.payu.in https://secure.payu.in",
+      "frame-ancestors 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+    ].join("; "),
   });
+
+  if (nodeEnv === "production") {
+    res.set("Strict-Transport-Security", "max-age=31536000");
+  }
 
   next();
 });
@@ -213,7 +234,7 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   res.locals.trust = trust;
   res.locals.currentUser = req.session.user || null;
-  res.locals.isAdmin = req.session.isAdmin === true;
+  res.locals.isAdmin = isAdminSession(req);
   res.locals.currentPath = req.path;
   res.locals.trustEmail = trustEmail || "";
   res.locals.appUrl = appUrl;
@@ -354,6 +375,8 @@ if (require.main === module) {
     startBackupScheduler();
 
     startPledgeScheduler();
+
+    startRenewalScheduler();
 
     logGoLiveChecks();
 

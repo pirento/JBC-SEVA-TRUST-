@@ -151,6 +151,18 @@ test("homepage lists all five programmes and no Manorama branding", async () => 
   assert.doesNotMatch(res.text, /manorama/i);
 });
 
+test("FAQ page answers without claiming 80G, in English and Hindi", async () => {
+  const get = client();
+  let res = await get("/faq");
+  assert.equal(res.status, 200);
+  assert.match(res.text, /Not yet\. 80G tax-exemption receipts/);
+  res = await get("/faq?lang=hi");
+  assert.match(res.text, /सवाल और जवाब/);
+  assert.match(res.text, /अभी नहीं।/);
+  res = await client()("/");
+  assert.match(res.text, /Check before you pay/);
+});
+
 test("unknown page returns styled 404", async () => {
   const res = await client()("/does-not-exist");
   assert.equal(res.status, 404);
@@ -162,6 +174,21 @@ test("security headers are set and x-powered-by is hidden", async () => {
   assert.equal(res.headers.get("x-content-type-options"), "nosniff");
   assert.equal(res.headers.get("x-frame-options"), "SAMEORIGIN");
   assert.equal(res.headers.get("x-powered-by"), null);
+  assert.match(res.headers.get("content-security-policy"), /script-src 'self'(;|$)/);
+});
+
+test("a new admin password logs out older admin sessions", async () => {
+  const admin = client();
+  await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+  assert.equal((await admin("/admin/dashboard")).status, 200);
+
+  const saved = process.env.ADMIN_PASSWORD_HASH;
+  process.env.ADMIN_PASSWORD_HASH = bcrypt.hashSync("another-password", 4);
+  try {
+    assert.equal((await admin("/admin/dashboard")).location, "/admin/login");
+  } finally {
+    process.env.ADMIN_PASSWORD_HASH = saved;
+  }
 });
 
 test("donate page lists every cause and old ?cause= links redirect", async () => {
@@ -848,6 +875,16 @@ test("verified PayU donation is saved with its cause and listed in the account",
   assert.match(res.text, /Green Earth/);
   assert.match(res.text, /₹1,100/);
 
+  // Yearly statement of this financial year
+  const { financialYear } = require("../config/trustConfig");
+  const fy = financialYear(new Date());
+  assert.match(res.text, new RegExp(`FY ${fy}`));
+  res = await req(`/account/statement?fy=${fy}`);
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get("content-type"), /pdf/);
+  res = await req("/account/statement?fy=1999-00");
+  assert.equal(res.location, "/account", "a year without payments");
+
   // The admin dashboard lists it too (donations tab is the default)
   const admin = client();
   await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
@@ -893,10 +930,54 @@ test("admin sees payments PayU never confirmed until they are confirmed", async 
   assert.match(res.text, new RegExp(callback.txnid), "listed as unfinished");
   assert.match(res.text, /Meera Unpaid/);
 
-  res = await req("/donate/success", { method: "POST", form: callback });
+  // Chose UPI on our form, then paid by credit card on PayU's page
+  res = await req("/donate/success", {
+    method: "POST",
+    form: { ...callback, mode: "CC" },
+  });
   assert.equal(res.status, 303);
   res = await admin("/admin/dashboard?view=unfinished");
   assert.doesNotMatch(res.text, new RegExp(callback.txnid), "gone once paid");
+  res = await admin("/admin/dashboard?q=Meera+Unpaid");
+  assert.match(res.text, /Credit Card/, "PayU's own payment mode is saved");
+});
+
+test("admin asks PayU about an unfinished payment and saves it, or marks it checked", async () => {
+  const req = client();
+  const admin = client();
+  await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+  const paid = await startDonation(req, { ...donation, donorName: "Gopal Verify" });
+  const failed = await startDonation(req, { ...donation, donorName: "Hari Failed" });
+
+  // PayU's verify API, stubbed: the first payment succeeded, the second failed
+  const realFetch = global.fetch;
+  global.fetch = async (url, options) => {
+    if (!String(url).includes("payu.in")) return realFetch(url, options);
+    const txnid = options.body.get("var1");
+    const details =
+      txnid === paid.txnid
+        ? { ...paid, status: "success", amt: paid.amount, mode: "UPI" }
+        : { status: "failure" };
+    return new Response(
+      JSON.stringify({ status: 1, transaction_details: { [txnid]: details } }),
+    );
+  };
+  try {
+    let res = await admin(`/admin/unfinished/${paid.txnid}/verify`, { method: "POST" });
+    assert.match(res.location, /done=saved/);
+    res = await admin(`/admin/unfinished/${failed.txnid}/verify`, { method: "POST" });
+    assert.match(res.location, /done=payu-failure/);
+  } finally {
+    global.fetch = realFetch;
+  }
+
+  let res = await admin("/admin/dashboard");
+  assert.match(res.text, new RegExp(paid.txnid), "verified payment is a donation now");
+
+  res = await admin(`/admin/unfinished/${failed.txnid}/close`, { method: "POST" });
+  res = await admin("/admin/dashboard?view=unfinished");
+  assert.doesNotMatch(res.text, new RegExp(failed.txnid), "checked one is hidden");
+  assert.doesNotMatch(res.text, new RegExp(paid.txnid));
 });
 
 test("temple donation keeps purpose, dedication, seva date and gotra end to end", async () => {
@@ -999,6 +1080,25 @@ test("Form 10BD export lists charitable donors by PAN, never temple gifts", asyn
   assert.match(res.text, /Village Mudila, Basti/);
   assert.match(res.text, /,1500\r\n/, "two gifts from one PAN are added up");
   assert.doesNotMatch(res.text, /ABCDE1234F/, "temple donor excluded");
+});
+
+test("fund report and CSV follow the chosen date range", async () => {
+  const admin = client();
+  await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+  const today = new Date().toLocaleDateString("en-CA");
+
+  let res = await admin(`/admin/export/funds?from=${today}&to=${today}`);
+  const greenToday = res.text.split("\n").find((line) => line.startsWith("Green Earth"));
+  assert.notEqual(greenToday, "Green Earth,0,0", "today's gifts counted");
+
+  res = await admin("/admin/export/funds?from=2000-01-01&to=2000-12-31");
+  assert.match(res.text, /Green Earth,0,0/, "nothing in another year");
+
+  res = await admin("/admin/export/donations?from=2000-01-01&to=2000-12-31");
+  assert.equal(res.text.trim().split("\n").length, 1, "header only");
+
+  res = await admin("/admin/dashboard?from=2000-01-01&to=2000-12-31");
+  assert.match(res.text, /From 2000-01-01 to 2000-12-31/);
 });
 
 test("tax note claims 80G only after approval, never for the temple", () => {
@@ -1488,6 +1588,31 @@ test("a verified membership payment whose pending details were lost is still sav
     form: { ...cb, txnid: "TXN_LOST_2" },
   });
   assert.notEqual(forged.status, 303);
+});
+
+test("1-year members get one renewal reminder in their last month", async () => {
+  const { sendRenewalReminders } = require("../services/renewalService");
+  const { appendRecord } = require("../models/fileStore");
+  const day = 24 * 60 * 60 * 1000;
+  await appendRecord("payment.txt", {
+    type: "MEMBERSHIP",
+    memberName: "Renu Devi",
+    email: "renu@example.com",
+    phoneNumber: "9876501111",
+    amount: 500,
+    membershipType: "1 Year Member",
+    paymentStatus: "SUCCESS",
+    transactionId: "TXN_RENEW_1",
+    paymentDate: new Date(Date.now() - 350 * day).toISOString(),
+  });
+
+  assert.equal(await sendRenewalReminders(), 1, "due: ends in about two weeks");
+  assert.equal(await sendRenewalReminders(), 0, "only once");
+
+  const admin = client();
+  await admin("/admin/login", { method: "POST", form: { password: ADMIN_PASSWORD } });
+  const res = await admin("/admin/dashboard?view=memberships&q=Renu");
+  assert.match(res.text, /Valid till/);
 });
 
 test("only genuine data is saved: bot trap, spam names, duplicates", async () => {

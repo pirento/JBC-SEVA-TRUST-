@@ -6,6 +6,7 @@ const {
   createPaymentData,
   verifyResponseHash,
   verifyPaymentAmount,
+  payuModeLabel,
   PAYU_PAYMENT_URL,
 } = require("./payuService");
 
@@ -273,11 +274,12 @@ async function initiateMembership(input) {
 // ============================================================
 
 // Browser callback and PayU webhook can arrive together; run them one at a time per txnid.
-function processPaymentSuccess(data) {
-  return store.withTxnLock(data && data.txnid, () => handlePaymentSuccess(data));
+// checkedWithPayU: the details came from PayU's verify API, not a callback
+function processPaymentSuccess(data, options = {}) {
+  return store.withTxnLock(data && data.txnid, () => handlePaymentSuccess(data, options));
 }
 
-async function handlePaymentSuccess(data) {
+async function handlePaymentSuccess(data, { checkedWithPayU = false } = {}) {
   if (!data || !data.txnid) {
     throw new Error("Transaction ID missing from PayU response.");
   }
@@ -286,7 +288,7 @@ async function handlePaymentSuccess(data) {
   // Verify PayU response hash
   // ----------------------------------------------------------
 
-  if (!verifyResponseHash(data)) {
+  if (!checkedWithPayU && !verifyResponseHash(data)) {
     return {
       error: "Payment verification failed. Please contact the Trust.",
       status: 400,
@@ -337,6 +339,9 @@ async function handlePaymentSuccess(data) {
       pending.txnid,
     );
   }
+
+  // Receipts show how the donor really paid on PayU's page
+  pending.paymentMode = payuModeLabel(data.mode) || pending.paymentMode;
 
   // ----------------------------------------------------------
   // Verify amount

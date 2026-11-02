@@ -2,6 +2,7 @@ const { readCorrected } = require("../models/records");
 const enquiryModel = require("../models/enquiryModel");
 const contentModel = require("../models/contentModel");
 const { toCsv } = require("../utils/csv");
+const { realDate } = require("../utils/validation");
 const {
   donationPages,
   GENERAL_CAUSE,
@@ -25,14 +26,24 @@ const day = (value) => {
 
 const isSuccess = (r) => String(r.paymentStatus || "SUCCESS").toUpperCase() === "SUCCESS";
 
-async function successfulDonations() {
-  return (await readCorrected("donations.txt")).filter(isSuccess);
+// ?from=YYYY-MM-DD&to=YYYY-MM-DD (India dates, both optional and inclusive)
+function inRange(query = {}) {
+  const from = realDate(query.from) ? query.from : "";
+  const to = realDate(query.to) ? query.to : "";
+  return (record) => {
+    const d = day(record.paymentDate || record.createdAt);
+    return (!from || d >= from) && (!to || d <= to);
+  };
+}
+
+async function successfulDonations(query) {
+  return (await readCorrected("donations.txt")).filter(isSuccess).filter(inRange(query));
 }
 
 // Each export: file name and a function returning CSV text
 const exports_ = {
-  donations: async () => {
-    const rows = (await successfulDonations()).map((r) => ({
+  donations: async (query) => {
+    const rows = (await successfulDonations(query)).map((r) => ({
       ...normalizeDonation(r),
       raw: r,
     }));
@@ -58,9 +69,10 @@ const exports_ = {
     ]);
   },
 
-  memberships: async () => {
+  memberships: async (query) => {
     const rows = (await readCorrected("payment.txt"))
       .filter(isSuccess)
+      .filter(inRange(query))
       .map(normalizeMembership);
     return toCsv(rows, [
       ["Date", (r) => r.date],
@@ -68,6 +80,7 @@ const exports_ = {
       ["Phone", (r) => r.phoneNumber],
       ["Email", (r) => r.email],
       ["Membership", (r) => r.membershipType],
+      ["Valid Till", (r) => r.validTill],
       ["Amount", (r) => r.amount],
       ["Payment Mode", (r) => r.paymentMode],
       ["Transaction ID", (r) => r.transactionId],
@@ -201,8 +214,8 @@ const exports_ = {
       ["Status", (r) => (r.active ? "Active" : "Stopped")],
     ]),
 
-  funds: async () => {
-    const donations = await successfulDonations();
+  funds: async (query) => {
+    const donations = await successfulDonations(query);
     const rows = donationPages.map((page) => {
       const items = donations.filter((d) => (d.cause || GENERAL_CAUSE) === page.title);
       return {

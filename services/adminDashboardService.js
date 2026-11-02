@@ -11,6 +11,7 @@ const {
   normalizeMedical,
   getRecordDate,
   isSameDate,
+  indiaDate,
 } = require("./adminReportService");
 
 // ============================================================
@@ -83,8 +84,17 @@ function paginate(rows, page) {
   };
 }
 
-async function getDashboard({ date = "", view = "donations", q = "", page = 1 } = {}) {
+async function getDashboard({
+  date = "",
+  view = "donations",
+  q = "",
+  page = 1,
+  from = "",
+  to = "",
+} = {}) {
   const day = realDate(date) ? date : "";
+  // Date range for the fund-wise table (India dates, inclusive)
+  const range = { from: realDate(from) ? from : "", to: realDate(to) ? to : "" };
   const tab = VIEWS.includes(view) ? view : "donations";
 
   const [
@@ -147,8 +157,16 @@ async function getDashboard({ date = "", view = "donations", q = "", page = 1 } 
     unfinishedCount: unfinished.length,
   };
 
+  const fundDonations =
+    range.from || range.to
+      ? donationRecords.filter(isSuccess).filter((d) => {
+          const when = getRecordDate(d);
+          const d8 = when ? indiaDate(when) : "";
+          return (!range.from || d8 >= range.from) && (!range.to || d8 <= range.to);
+        })
+      : donations;
   const funds = donationPages.map((p) => {
-    const items = donations.filter((d) => (d.cause || GENERAL_CAUSE) === p.title);
+    const items = fundDonations.filter((d) => (d.cause || GENERAL_CAUSE) === p.title);
     return { cause: p.title, count: items.length, amount: sum(items) };
   });
 
@@ -188,6 +206,7 @@ async function getDashboard({ date = "", view = "donations", q = "", page = 1 } 
     views: VIEWS,
     stats,
     funds,
+    range,
     list,
   };
 }

@@ -2771,3 +2771,47 @@ html[lang="hi"] body {
   margin: 8px 0 0;
   text-align: center;
 }
+
+/* Several small buttons in one table cell */
+.row-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.share-link {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+/* Questions and answers */
+.faq-page details {
+  border-bottom: 1px solid var(--line, #e6dcc8);
+  padding: 14px 0;
+}
+
+.faq-page summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.faq-page details p {
+  margin: 10px 0 0;
+}
+
+.faq-contact {
+  margin-top: 24px;
+}
+
+/* Home page: check before you pay */
+.check-box {
+  margin-top: 32px;
+  padding: 20px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius);
+}
+
+.check-box h3 {
+  margin-top: 0;
+}

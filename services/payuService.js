@@ -1,6 +1,16 @@
 const crypto = require("crypto");
 
-const { PAYU_KEY, PAYU_SALT, PAYU_PAYMENT_URL } = require("../config/payuConfig");
+const {
+  PAYU_KEY,
+  PAYU_SALT,
+  PAYU_PAYMENT_URL,
+  PAYU_ENV,
+} = require("../config/payuConfig");
+
+const PAYU_VERIFY_URL =
+  PAYU_ENV === "production"
+    ? "https://info.payu.in/merchant/postservice.php?form=2"
+    : "https://test.payu.in/merchant/postservice.php?form=2";
 
 // ============================================================
 // SHA512
@@ -199,7 +209,61 @@ function verifyPaymentAmount(receivedAmount, expectedAmount) {
 // EXPORTS
 // ============================================================
 
+// ============================================================
+// ASK PAYU ABOUT A TRANSACTION (verify_payment API)
+// ============================================================
+// For payments whose callback never reached the site. The answer comes
+// straight from PayU over HTTPS, so it needs no response hash.
+
+async function fetchPayUStatus(txnid) {
+  const command = "verify_payment";
+  const response = await fetch(PAYU_VERIFY_URL, {
+    method: "POST",
+    body: new URLSearchParams({
+      key: PAYU_KEY,
+      command,
+      var1: txnid,
+      hash: sha512(`${PAYU_KEY}|${command}|${txnid}|${PAYU_SALT}`),
+    }),
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!response.ok) throw new Error(`PayU answered ${response.status}`);
+
+  const details = (await response.json())?.transaction_details?.[txnid];
+  if (!details || typeof details !== "object") return { status: "not found" };
+
+  return {
+    ...details,
+    status: String(details.status || "").toLowerCase(),
+    amount: details.amt ?? details.transaction_amount ?? details.amount,
+  };
+}
+
+// ============================================================
+// PAYMENT MODE PAYU REPORTS
+// ============================================================
+// What the donor actually paid with on PayU's page, which can differ
+// from the choice on our form. Unknown codes are ignored (the field is
+// not covered by the response hash, so only known labels are used).
+
+const PAYU_MODES = {
+  CC: "Credit Card",
+  DC: "Debit Card",
+  NB: "Net Banking",
+  UPI: "UPI",
+  EMI: "EMI",
+  CASH: "Wallet",
+  WALLET: "Wallet",
+  BNPL: "Pay Later",
+};
+
+function payuModeLabel(mode) {
+  return PAYU_MODES[String(mode || "").toUpperCase()] || "";
+}
+
 module.exports = {
+  fetchPayUStatus,
+  payuModeLabel,
   generateTxnId,
   generateHash,
   createPaymentData,

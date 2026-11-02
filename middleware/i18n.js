@@ -115,7 +115,7 @@ function translateHtml(html) {
           return `>${lead}${t}${trail}<`;
         })
         .replace(
-          /\b(placeholder|title|aria-label|alt|content)="([^"]*)"/g,
+          /\b(placeholder|title|aria-label|alt|content|data-confirm)="([^"]*)"/g,
           (whole, attr, text) => {
             const t = translateText(squash(text));
             // squash() turned &#34; back into "; re-escape so it stays inside the attribute

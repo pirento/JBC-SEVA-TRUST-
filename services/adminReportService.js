@@ -78,6 +78,17 @@ function indiaDate(date) {
   return DAY_FORMAT.format(date);
 }
 
+// Last day of a 1-year membership (as on the certificate); null for
+// lifetime members or a record without a date
+function membershipEnd(record, membershipType) {
+  const date = getRecordDate(record);
+  if (!date || String(membershipType).toLowerCase() === "lifetime member") return null;
+  const end = new Date(date);
+  end.setFullYear(end.getFullYear() + 1);
+  end.setDate(end.getDate() - 1);
+  return end;
+}
+
 // ========================================
 // NORMALIZE MEMBERSHIP
 // ========================================
@@ -105,6 +116,12 @@ function normalizeMembership(record) {
     email: String(record.email || "").trim(),
     date: date ? formatDate(date) : "-",
     time: date ? formatTime(date) : "-",
+    validTill:
+      membershipType === "Lifetime Member"
+        ? "Lifetime"
+        : date
+          ? formatDate(membershipEnd(record, membershipType))
+          : "-",
   };
 }
 
@@ -302,4 +319,5 @@ module.exports = {
   normalizeMembership,
   normalizeDonation,
   normalizeMedical,
+  membershipEnd,
 };

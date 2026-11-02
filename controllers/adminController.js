@@ -1,16 +1,19 @@
 const { authenticateAdmin } = require("../services/adminAuthService");
+const { isAdminSession, passwordKey } = require("../middleware/adminAuth");
 const { realDate } = require("../utils/validation");
 const { getDailyReport, indiaDate } = require("../services/adminReportService");
 const { generateDailyReportPdf } = require("../services/adminReportPdfService");
 const { getDashboard } = require("../services/adminDashboardService");
 const { buildExport, exportTypes } = require("../services/exportService");
+const store = require("../models/pendingPaymentStore");
+const { fetchPayUStatus } = require("../services/payuService");
 
 // ========================================
 // SHOW ADMIN LOGIN
 // ========================================
 
 exports.showLogin = (req, res) => {
-  if (req.session && req.session.isAdmin === true) {
+  if (isAdminSession(req)) {
     return res.redirect("/admin/dashboard");
   }
 
@@ -54,7 +57,8 @@ exports.login = async (req, res) => {
     }
 
     req.session.isAdmin = true;
-    req.session.adminLoginTime = new Date().toISOString();
+    req.session.adminLoginAt = Date.now();
+    req.session.adminKey = passwordKey();
 
     return res.redirect("/admin/dashboard");
   } catch (error) {
@@ -77,9 +81,20 @@ exports.dashboard = async (req, res, next) => {
       view: String(req.query.view || ""),
       q: String(req.query.q || ""),
       page: req.query.page,
+      from: String(req.query.from || ""),
+      to: String(req.query.to || ""),
     });
 
-    return res.render("admin/dashboard", { ...data, exportTypes: exportTypes() });
+    const done = String(req.query.done || "");
+    return res.render("admin/dashboard", {
+      ...data,
+      exportTypes: exportTypes(),
+      notice:
+        UNFINISHED_NOTICES[done] ||
+        (done.startsWith("payu-")
+          ? `PayU says this payment is "${done.slice(5)}", so nothing was saved.`
+          : ""),
+    });
   } catch (error) {
     return next(error);
   }
@@ -148,4 +163,63 @@ exports.logout = (req, res) => {
     res.clearCookie("connect.sid");
     return res.redirect("/admin/login");
   });
+};
+
+// ========================================
+// UNFINISHED PAYMENTS
+// ========================================
+
+const UNFINISHED_NOTICES = {
+  saved: "PayU confirmed the payment. It is saved and the receipt has been emailed.",
+  "save-failed":
+    "PayU confirmed the payment, but it could not be saved. Check the server log.",
+  closed: "Marked as checked. It no longer shows here.",
+  gone: "This payment is no longer unfinished.",
+  error: "Could not reach PayU. Try again later.",
+};
+
+const backToUnfinished = (res, done) =>
+  res.redirect(`/admin/dashboard?view=unfinished&done=${encodeURIComponent(done)}`);
+
+// Asks PayU about a payment whose callback never arrived and saves it
+// if PayU says it succeeded
+exports.verifyUnfinished = async (req, res) => {
+  const txnid = String(req.params.txnid || "");
+  try {
+    const pending = await store.getPending(txnid);
+    if (!pending) return backToUnfinished(res, "gone");
+
+    const payu = await fetchPayUStatus(txnid);
+    if (payu.status !== "success") {
+      return backToUnfinished(res, `payu-${payu.status.slice(0, 30) || "unknown"}`);
+    }
+
+    const isDonation = pending.type === "DONATION";
+    const service = require(
+      isDonation ? "../services/donationService" : "../services/membershipService",
+    );
+    const result = await service.processPaymentSuccess(
+      {
+        ...payu,
+        txnid,
+        status: "success",
+        productinfo: isDonation ? "donation" : "membership",
+      },
+      { checkedWithPayU: true },
+    );
+    return backToUnfinished(res, result?.error ? "save-failed" : "saved");
+  } catch (error) {
+    console.error("❌ PayU verify failed:", error.message);
+    return backToUnfinished(res, "error");
+  }
+};
+
+// The admin checked it in the PayU dashboard (failed or abandoned)
+exports.closeUnfinished = async (req, res, next) => {
+  try {
+    await store.deletePending(String(req.params.txnid || ""));
+    return backToUnfinished(res, "closed");
+  } catch (error) {
+    return next(error);
+  }
 };
