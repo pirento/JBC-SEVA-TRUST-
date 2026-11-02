@@ -77,7 +77,9 @@ app.use((req, res, next) => {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data:",
-      "form-action 'self' https://test.payu.in https://secure.payu.in",
+      // PayU's payment page redirects on to other payu.in hosts (apitest,
+      // api), and browsers apply form-action to those redirects too
+      "form-action 'self' https://*.payu.in",
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "object-src 'none'",

@@ -174,7 +174,10 @@ test("security headers are set and x-powered-by is hidden", async () => {
   assert.equal(res.headers.get("x-content-type-options"), "nosniff");
   assert.equal(res.headers.get("x-frame-options"), "SAMEORIGIN");
   assert.equal(res.headers.get("x-powered-by"), null);
-  assert.match(res.headers.get("content-security-policy"), /script-src 'self'(;|$)/);
+  const csp = res.headers.get("content-security-policy");
+  assert.match(csp, /script-src 'self'(;|$)/);
+  // PayU's page redirects to apitest.payu.in / api.payu.in
+  assert.match(csp, /form-action 'self' https:\/\/\*\.payu\.in/);
 });
 
 test("a new admin password logs out older admin sessions", async () => {
@@ -1880,15 +1883,32 @@ test("guest donor gets an account with a temporary password to replace", async (
 test("payer gets login details even if someone else registered the email unconfirmed", async () => {
   const userAuthService = require("../services/userAuthService");
   const userModel = require("../models/userModel");
-  await userModel.createUser({
+  const squatter = await userModel.createUser({
     name: "Squatter",
     email: "real.owner@example.com",
     phone: "9876500000",
     passwordHash: "x",
   });
+  // Registered two days ago and never confirmed
+  await userModel.updateUser(squatter, {
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  });
   await userAuthService.ensureAccountForPayment({ email: "real.owner@example.com" });
-  const user = await userModel.findByEmail("real.owner@example.com");
+  let user = await userModel.findByEmail("real.owner@example.com");
   assert.equal(user.mustChangePassword, true, "temporary password sent to the payer");
+
+  // Registered just now and paid before clicking the link: password kept,
+  // the confirmation link is sent again
+  await userModel.createUser({
+    name: "Fresh Donor",
+    email: "fresh.donor@example.com",
+    phone: "9876500001",
+    passwordHash: "kept",
+  });
+  await userAuthService.ensureAccountForPayment({ email: "fresh.donor@example.com" });
+  user = await userModel.findByEmail("fresh.donor@example.com");
+  assert.equal(user.passwordHash, "kept");
+  assert.ok(user.verifyTokenHash, "confirmation link sent again");
 });
 
 test("odd admin record kinds 404; a form posted after logout returns to the account", async () => {

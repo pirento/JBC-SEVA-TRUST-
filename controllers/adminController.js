@@ -91,7 +91,7 @@ exports.dashboard = async (req, res, next) => {
       exportTypes: exportTypes(),
       notice:
         UNFINISHED_NOTICES[done] ||
-        (done.startsWith("payu-")
+        (PAYU_STATUSES.has(done.slice(5)) && done.startsWith("payu-")
           ? `PayU says this payment is "${done.slice(5)}", so nothing was saved.`
           : ""),
     });
@@ -169,13 +169,28 @@ exports.logout = (req, res) => {
 // UNFINISHED PAYMENTS
 // ========================================
 
+// Only statuses PayU really reports are shown (the notice comes from the URL)
+const PAYU_STATUSES = new Set([
+  "failure",
+  "failed",
+  "pending",
+  "in progress",
+  "bounced",
+  "dropped",
+  "cancelled",
+  "usercancelled",
+  "not found",
+  "unknown",
+]);
+
 const UNFINISHED_NOTICES = {
   saved: "PayU confirmed the payment. It is saved and the receipt has been emailed.",
   "save-failed":
     "PayU confirmed the payment, but it could not be saved. Check the server log.",
   closed: "Marked as checked. It no longer shows here.",
   gone: "This payment is no longer unfinished.",
-  error: "Could not reach PayU. Try again later.",
+  error:
+    "Could not reach PayU, or PayU refused the request (check PAYU_KEY / PAYU_SALT). See the server log.",
 };
 
 const backToUnfinished = (res, done) =>
@@ -191,7 +206,8 @@ exports.verifyUnfinished = async (req, res) => {
 
     const payu = await fetchPayUStatus(txnid);
     if (payu.status !== "success") {
-      return backToUnfinished(res, `payu-${payu.status.slice(0, 30) || "unknown"}`);
+      const status = PAYU_STATUSES.has(payu.status) ? payu.status : "unknown";
+      return backToUnfinished(res, `payu-${status}`);
     }
 
     const isDonation = pending.type === "DONATION";

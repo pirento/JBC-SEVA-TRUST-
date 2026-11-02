@@ -176,6 +176,13 @@ module.exports = {
   "Valid till": "मान्य तक",
   "Yearly statement (PDF)": "सालाना विवरण (PDF)",
   "Share on WhatsApp": "WhatsApp पर शेयर करें",
+  "Add PAN, address or a message": "पैन, पता या संदेश जोड़ें",
+  "Your donation": "आपका दान",
+  "Your membership": "आपकी सदस्यता",
+  Payment: "भुगतान",
+  "Pay securely on PayU by UPI, card or net banking.":
+    "PayU पर UPI, कार्ड या नेट बैंकिंग से सुरक्षित भुगतान करें।",
+  "every month": "हर महीने",
   // FAQ page and home "check before you pay" box
   "Questions and answers": "सवाल और जवाब",
   FAQ: "सवाल-जवाब",

@@ -134,3 +134,49 @@ document.querySelectorAll("form[data-confirm]").forEach((form) => {
     if (!window.confirm(form.dataset.confirm)) e.preventDefault();
   });
 });
+
+// ========================================
+// DONATION FORM: SUMMARY AND FOLDED PARTS
+// ========================================
+
+(() => {
+  const summary = document.getElementById("donateSummary");
+  if (!summary) return;
+  const form = summary.closest("form");
+  const amount = form.elements.amount;
+  const monthly = form.elements.monthly;
+  const part = (name) => summary.querySelector(`[data-sum="${name}"]`);
+
+  // "₹1,100 · Tree plantation · every month", shown once an amount is typed
+  const update = () => {
+    const value = Number(amount.value);
+    summary.hidden = !(value >= 100);
+    if (summary.hidden) return;
+    part("amount").textContent = "₹" + value.toLocaleString("en-IN");
+    // Donation: purpose and monthly; membership: the type the amount buys
+    if (part("purpose")) {
+      const chosen = form.querySelector('input[name="purpose"]:checked');
+      const label = chosen && chosen.closest("label")?.querySelector("span");
+      part("purpose").textContent = label ? " · " + label.textContent : "";
+      part("monthly").hidden = !(monthly && monthly.checked);
+    } else {
+      part("year").hidden = value >= 11000;
+      part("life").hidden = value < 11000;
+    }
+  };
+
+  form.addEventListener("input", update);
+  form.addEventListener("change", update);
+  // The chip handler (on an inner element) has already set the amount
+  form.addEventListener("click", (e) => {
+    if (e.target.closest(".chip")) update();
+  });
+  update();
+
+  // A field the browser rejects inside a folded part must be visible
+  form.addEventListener(
+    "invalid",
+    (e) => e.target.closest("details")?.setAttribute("open", ""),
+    true,
+  );
+})();

@@ -2815,3 +2815,42 @@ html[lang="hi"] body {
 .check-box h3 {
   margin-top: 0;
 }
+
+/* Donation form: folded optional parts and the summary line */
+.form-more {
+  margin: 8px 0 18px;
+  border: 1px solid var(--line, #e6dcc8);
+  border-radius: var(--radius);
+  padding: 0 16px;
+}
+
+.form-more > summary {
+  cursor: pointer;
+  padding: 14px 0;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.form-more[open] > summary {
+  border-bottom: 1px solid var(--line, #e6dcc8);
+  margin-bottom: 14px;
+}
+
+.donate-summary {
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  background: var(--cream, #faf3e3);
+  border-left: 4px solid var(--orange, #dd870d);
+  border-radius: 4px;
+}
+
+.payment-note .field-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.payment-note p {
+  margin: 0;
+  color: var(--muted, #5b6676);
+}
