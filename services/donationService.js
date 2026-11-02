@@ -55,7 +55,9 @@ function validateDonation(input) {
 
   const amount = Number(input.amount);
 
-  const paymentMode = String(input.paymentMode || "").trim();
+  // The donor picks UPI, card or net banking on PayU's own page; the
+  // receipt then shows what PayU reports (payuModeLabel)
+  const paymentMode = "Online";
 
   const message = String(input.message || "")
     .trim()
@@ -104,15 +106,6 @@ function validateDonation(input) {
   // Catches typing mistakes (an extra zero); large gifts go through the trust directly
   if (amount > 1000000) {
     throw new Error("For amounts above ₹10,00,000 please contact the Trust directly.");
-  }
-
-  if (!required(paymentMode)) {
-    throw new Error("Payment mode is required.");
-  }
-
-  // The choices on the form; the value goes to PayU and onto the receipt
-  if (!["UPI", "Card", "Net Banking"].includes(paymentMode)) {
-    throw new Error("Please choose UPI, Card or Net Banking.");
   }
 
   if (!accepted(input.consent)) {
