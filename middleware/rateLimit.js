@@ -31,6 +31,11 @@ function createRateLimiter({
       for (const [key, value] of attempts) {
         if (value.resetAt <= now) attempts.delete(key);
       }
+      // Still too many (a flood of new or forged IPs): drop the oldest
+      for (const key of attempts.keys()) {
+        if (attempts.size <= 10000) break;
+        attempts.delete(key);
+      }
     }
 
     const entry = attempts.get(ip);
@@ -60,9 +65,14 @@ function createRateLimiter({
 
     entry.count += 1;
 
+    // Several limiters on one route: a success resets all of them
     if (resettable) {
+      const resetEarlier = req.rateLimit?.reset;
       req.rateLimit = {
-        reset: () => attempts.delete(id),
+        reset: () => {
+          attempts.delete(id);
+          resetEarlier?.();
+        },
       };
     }
 

@@ -177,7 +177,7 @@ Restart par koi logout nahi hota (login MongoDB mein rehte hain). Data par koi a
 
 - Website ka **ek hi process** chalayein (`pm2 start app.js`, bina `-i`). Payment ka lock aur records ka kram ek process ke andar hi sahi rehta hai.
 - Server par `npm test` chalana surakshit hai: tests kabhi `.env` wala database nahi chhoote.
-- Cloudflare lagayenge to `.env` mein `TRUST_PROXY=2` karein.
+- Cloudflare lagayenge to `.env` mein `TRUST_PROXY=2` karein. Saath mein server ke firewall ya Nginx mein sirf Cloudflare ke IP se aane wali requests allow karein; warna koi seedha server par aakar apna IP badal-badal kar login ki seema se bach sakta hai.
 - `.env` aur `DATA_ENCRYPTION_KEY` kabhi GitHub par na daalein. `.env` pehle se gitignore mein hai.
 - Backup restore karna ho: us din ke folder ke `uploads` aur `receipts` ko `DATA_DIR` mein copy karein, aur records ke liye ek khaali database (naya `MONGODB_DB`) mein `npm run migrate:mongo -- <backup folder>` chalayein.
 - Atlas ka apna backup bhi hai (paid plan mein); free plan par roz ka `npm run backup` hi asli backup hai.

@@ -109,6 +109,11 @@ async function regenerateReceipt(record) {
 
 async function getMedicalReceipt(fileName) {
   const safeName = path.basename(fileName);
+  // Only names with the random part: an old "...-<reference>.pdf" name
+  // could be guessed from the reference number alone
+  if (!/^Medical-Help-Receipt-[A-Za-z0-9-]+-[0-9a-f]{32}\.pdf$/.test(safeName)) {
+    throw new Error("Receipt not found.");
+  }
   const filePath = path.join(receiptsDir, safeName);
   await fs.access(filePath);
   return { filePath, fileName: safeName };

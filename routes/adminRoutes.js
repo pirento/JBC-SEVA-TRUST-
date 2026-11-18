@@ -6,10 +6,13 @@ const adminAuth = require("../middleware/adminAuth");
 const createRateLimiter = require("../middleware/rateLimit");
 
 const loginLimiter = createRateLimiter();
+// All admin login attempts together, whatever IP they claim to come from
+// (a forged X-Forwarded-For gets a new IP each time); a success resets it
+const loginTotalLimiter = createRateLimiter({ key: () => "all", max: 30 });
 
 router.get("/login", adminController.showLogin);
 
-router.post("/login", loginLimiter, adminController.login);
+router.post("/login", loginTotalLimiter, loginLimiter, adminController.login);
 
 router.get("/dashboard", adminAuth, adminController.dashboard);
 

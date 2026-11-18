@@ -2227,3 +2227,17 @@ test("too many failed logins are blocked with 429", async () => {
   assert.equal(res.status, 429);
   assert.match(res.text, /Too many attempts/);
 });
+
+// Also last: it blocks admin login for 15 minutes
+test("admin login guesses from ever-changing IPs hit an overall limit", async () => {
+  const req = client();
+  let res;
+  for (let i = 0; i < 31; i += 1) {
+    res = await req("/admin/login", {
+      method: "POST",
+      form: { password: "wrong" },
+      headers: { "X-Forwarded-For": `10.0.${Math.floor(i / 250)}.${i % 250}` },
+    });
+  }
+  assert.equal(res.status, 429);
+});
