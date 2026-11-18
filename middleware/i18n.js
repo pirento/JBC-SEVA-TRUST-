@@ -37,6 +37,7 @@ const tr = (text) => dict.get(text);
 const known = (fn) => (m) => (tr(m[1]) ? fn(m, tr(m[1])) : null);
 
 const patterns = [
+  [/^Donate to Where Most Needed$/, () => "जहाँ सबसे ज़्यादा ज़रूरत हो, वहाँ दान करें"],
   [/^Donate to (.+)$/, known((m, t) => `${t} के लिए दान करें`)],
   [/^Support (.+)$/, known((m, t) => `${t} को सहयोग दें`)],
   [/^Wherever (.+) needs it$/, (m) => `जहाँ ${tr(m[1]) || m[1]} को ज़रूरत हो`],

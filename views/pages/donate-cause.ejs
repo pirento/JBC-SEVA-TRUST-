@@ -87,8 +87,8 @@
           <%- include('../partials/payment-mode') %>
 
           <%# Optional parts stay folded so the form is short; open when they hold a value %>
-          <details class="form-more" <%= opt.sevaDate || v.dedicationType || v.dedicatedTo || v.sevaDate || v.gotra ? 'open' : '' %>>
-            <summary>Dedicate this donation <span class="muted">(optional)</span></summary>
+          <details class="form-more" <%= v.dedicationType || v.dedicatedTo || v.sevaDate || v.gotra ? 'open' : '' %>>
+            <summary><%= opt.gotra ? 'Dedication, seva date and gotra' : opt.sevaDate ? 'Dedication and seva date' : 'Dedicate this donation' %> <span class="muted">(optional)</span></summary>
             <div class="form-grid">
               <div class="field">
                 <label for="dDedicationType">Dedication</label>

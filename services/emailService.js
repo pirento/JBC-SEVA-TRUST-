@@ -5,6 +5,10 @@ const { user, pass, trustEmail } = require("../config/emailConfig");
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: { user, pass },
+  // A slow mail server must not hold a request for minutes
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 30000,
 });
 
 async function verifyEmailConnection() {

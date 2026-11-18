@@ -46,7 +46,9 @@ document.querySelectorAll(".amount-chips").forEach((group) => {
 
   const mark = () => {
     group.querySelectorAll(".chip").forEach((chip) => {
-      chip.classList.toggle("selected", chip.dataset.amount === input.value);
+      const on = chip.dataset.amount === input.value;
+      chip.classList.toggle("selected", on);
+      chip.setAttribute("aria-pressed", String(on));
     });
   };
 

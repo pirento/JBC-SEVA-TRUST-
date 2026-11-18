@@ -115,7 +115,7 @@ Har line par ✔ aana chahiye. Dobara chalane par kuch bhi do baar copy nahi hot
 
 ```bash
 cd /var/www/jbc
-pm2 start app.js --name jbc   # ek hi process; cluster mode (-i) na lagayein
+pm2 start app.js --name jbc --kill-timeout 10000   # ek hi process; cluster mode (-i) na lagayein
 pm2 save
 pm2 startup        # ye ek command dikhayega, use copy karke chalayein
 pm2 logs jbc       # dekhein: "Go-live checklist" mein kuch bacha to wahi likha aayega
@@ -177,7 +177,7 @@ Restart par koi logout nahi hota (login MongoDB mein rehte hain). Data par koi a
 
 - Website ka **ek hi process** chalayein (`pm2 start app.js`, bina `-i`). Payment ka lock aur records ka kram ek process ke andar hi sahi rehta hai.
 - Server par `npm test` chalana surakshit hai: tests kabhi `.env` wala database nahi chhoote.
-- Cloudflare lagayenge to `.env` mein `TRUST_PROXY=2` karein.
+- Cloudflare lagayenge to `.env` mein `TRUST_PROXY=2` karein. Saath mein server ke firewall ya Nginx mein sirf Cloudflare ke IP se aane wali requests allow karein; warna koi seedha server par aakar apna IP badal-badal kar login ki seema se bach sakta hai.
 - `.env` aur `DATA_ENCRYPTION_KEY` kabhi GitHub par na daalein. `.env` pehle se gitignore mein hai.
 - Backup restore karna ho: us din ke folder ke `uploads` aur `receipts` ko `DATA_DIR` mein copy karein, aur records ke liye ek khaali database (naya `MONGODB_DB`) mein `npm run migrate:mongo -- <backup folder>` chalayein.
 - Atlas ka apna backup bhi hai (paid plan mein); free plan par roz ka `npm run backup` hi asli backup hai.

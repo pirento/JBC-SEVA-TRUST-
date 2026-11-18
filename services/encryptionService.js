@@ -57,7 +57,8 @@ function decrypt(encryptedData) {
 
   const authTag = Buffer.from(payload.authTag, "base64");
 
-  const decipher = crypto.createDecipheriv(ALGORITHM, KEY, iv);
+  // A short tag would weaken the integrity check; ours are always 16 bytes
+  const decipher = crypto.createDecipheriv(ALGORITHM, KEY, iv, { authTagLength: 16 });
 
   decipher.setAuthTag(authTag);
 

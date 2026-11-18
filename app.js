@@ -390,14 +390,17 @@ if (require.main === module) {
     verifyEmailConnection();
   });
 
-  // pm2 / the host sends SIGTERM on restart: finish open requests first,
-  // then close the database connection
-  process.on("SIGTERM", () =>
+  // On restart (pm2 sends SIGINT, most hosts SIGTERM): finish open requests
+  // first, then close the database; give up after 10 seconds
+  const shutdown = () => {
+    setTimeout(() => process.exit(1), 10000).unref();
     server.close(async () => {
       if (process.env.MONGODB_URI) await require("./models/mongoStore").closeDatabase();
       process.exit(0);
-    }),
-  );
+    });
+  };
+  process.once("SIGINT", shutdown);
+  process.once("SIGTERM", shutdown);
 }
 
 // ========================================

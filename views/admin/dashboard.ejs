@@ -94,7 +94,7 @@
     <section class="panel">
       <nav class="tabs" aria-label="Records">
         <% views.forEach((name) => { %>
-          <a href="<%= link({ view: name, q: '' }) %>" class="<%= name === view ? 'active' : '' %>" <% if (name === view) { %>aria-current="page"<% } %>><%= tabLabels[name] %></a>
+          <a href="<%= link({ view: name, q: '' }) %>" class="<%= name === view ? 'active' : '' %>" <% if (name === view) { %>aria-current="page"<% } %>><%= tabLabels[name] %><% if (name === 'unfinished' && stats.unfinishedCount) { %> (<%= stats.unfinishedCount %>)<% } %></a>
         <% }) %>
       </nav>
 

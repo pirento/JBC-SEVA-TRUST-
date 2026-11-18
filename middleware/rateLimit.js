@@ -12,13 +12,27 @@
 // ever run on more than one instance.
 // ========================================
 
-// key: what is counted (default the IP). resettable: whether a success
+// The client to count: the IP, but for IPv6 its /64 network, since one
+// home connection gets a whole /64 and could take a new address per try
+function clientKey(req) {
+  const ip = String(req.ip || "");
+  if (!ip.includes(":") || ip.startsWith("::ffff:")) return ip;
+  const [head, tail = ""] = ip.split("::");
+  const left = head ? head.split(":") : [];
+  const right = tail ? tail.split(":") : [];
+  const groups = ip.includes("::")
+    ? [...left, ...Array(8 - left.length - right.length).fill("0"), ...right]
+    : left;
+  return groups.slice(0, 4).join(":") + "::/64";
+}
+
+// key: what is counted (default the client, see clientKey). resettable: whether a success
 // (req.rateLimit.reset()) clears the count; a cap that must hold no matter
 // what (e.g. all logins from one IP) is not resettable.
 function createRateLimiter({
   max = 5,
   windowMs = 15 * 60 * 1000,
-  key = (req) => req.ip,
+  key = clientKey,
   resettable = true,
 } = {}) {
   const attempts = new Map();
@@ -30,6 +44,11 @@ function createRateLimiter({
     if (attempts.size > 10000) {
       for (const [key, value] of attempts) {
         if (value.resetAt <= now) attempts.delete(key);
+      }
+      // Still too many (a flood of new or forged IPs): drop the oldest
+      for (const key of attempts.keys()) {
+        if (attempts.size <= 10000) break;
+        attempts.delete(key);
       }
     }
 
@@ -60,9 +79,14 @@ function createRateLimiter({
 
     entry.count += 1;
 
+    // Several limiters on one route: a success resets all of them
     if (resettable) {
+      const resetEarlier = req.rateLimit?.reset;
       req.rateLimit = {
-        reset: () => attempts.delete(id),
+        reset: () => {
+          attempts.delete(id);
+          resetEarlier?.();
+        },
       };
     }
 
@@ -73,3 +97,4 @@ function createRateLimiter({
 }
 
 module.exports = createRateLimiter;
+module.exports.clientKey = clientKey;

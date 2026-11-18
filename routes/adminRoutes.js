@@ -7,6 +7,8 @@ const createRateLimiter = require("../middleware/rateLimit");
 
 const loginLimiter = createRateLimiter();
 
+router.get("/", (req, res) => res.redirect("/admin/dashboard"));
+
 router.get("/login", adminController.showLogin);
 
 router.post("/login", loginLimiter, adminController.login);
