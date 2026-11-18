@@ -11,8 +11,10 @@
   --navy-50: #eef3f9;
   --navy-100: #dbe5f1;
 
-  --orange: #d97706;
-  --orange-600: #b86304;
+  /* Darker than the logo's #dd870d so white button text and saffron text
+     on white pass 4.5:1 (WCAG AA); the logo colour stays in --orange-400 */
+  --orange: #b45309;
+  --orange-600: #92400e;
   --orange-400: #dd870d;
   --orange-50: #fdf5e8;
 
@@ -1178,8 +1180,16 @@ a:hover {
 
 .footer-legal {
   display: flex;
-  gap: 18px;
+  gap: 4px 18px;
   flex-wrap: wrap;
+}
+
+/* Comfortable tap targets on phones */
+.footer-legal a,
+.breadcrumb a,
+.side-link {
+  display: inline-block;
+  padding: 10px 0;
 }
 
 /* =========================================
@@ -1379,6 +1389,7 @@ fieldset.field {
 }
 
 .chip {
+  min-height: 40px;
   padding: 6px 14px;
   border: 1px solid #cdd3db;
   border-radius: 6px;
@@ -2853,4 +2864,19 @@ html[lang="hi"] body {
 .payment-note p {
   margin: 0;
   color: var(--muted, #5b6676);
+}
+
+/* Keep the floating WhatsApp button off the footer's last lines */
+@media (max-width: 600px) {
+  .site-footer {
+    padding-bottom: 80px;
+  }
+}
+
+/* Admin tables on phones: tighter cells so the amount column stays in view */
+@media (max-width: 480px) {
+  .account-page .table-wrap th,
+  .account-page .table-wrap td {
+    padding: 8px 6px;
+  }
 }

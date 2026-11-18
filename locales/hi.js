@@ -178,6 +178,8 @@ module.exports = {
   "Share on WhatsApp": "WhatsApp पर शेयर करें",
   "Add PAN, address or a message": "पैन, पता या संदेश जोड़ें",
   "Your donation": "आपका दान",
+  "Dedication, seva date and gotra": "समर्पण, सेवा की तारीख और गोत्र",
+  "Dedication and seva date": "समर्पण और सेवा की तारीख",
   "Your membership": "आपकी सदस्यता",
   Payment: "भुगतान",
   "Pay securely on PayU by UPI, card or net banking.":
