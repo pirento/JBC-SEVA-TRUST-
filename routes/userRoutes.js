@@ -10,7 +10,7 @@ const honeypot = require("../middleware/honeypot");
 // for all logins from one IP that a success does not clear
 const loginAccountLimiter = createRateLimiter({
   key: (req) =>
-    `${req.ip}|${String((req.body || {}).email || "")
+    `${createRateLimiter.clientKey(req)}|${String((req.body || {}).email || "")
       .trim()
       .toLowerCase()}`,
 });
@@ -43,8 +43,18 @@ router.post("/login", loginIpLimiter, loginAccountLimiter, controller.login);
 router.post("/logout", controller.logout);
 
 const forgotLimiter = createRateLimiter({ max: 5, windowMs: 60 * 60 * 1000 });
+// Per address too, so nobody can flood one inbox with reset emails
+const forgotEmailLimiter = createRateLimiter({
+  max: 3,
+  windowMs: 60 * 60 * 1000,
+  resettable: false,
+  key: (req) =>
+    String((req.body || {}).email || "")
+      .trim()
+      .toLowerCase(),
+});
 router.get("/forgot-password", controller.showForgot);
-router.post("/forgot-password", forgotLimiter, controller.forgot);
+router.post("/forgot-password", forgotLimiter, forgotEmailLimiter, controller.forgot);
 router.get("/reset-password/:token", controller.showReset);
 router.post("/reset-password/:token", passwordLimiter, controller.reset);
 

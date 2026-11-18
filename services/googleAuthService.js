@@ -45,6 +45,7 @@ async function finish(code) {
       redirect_uri: googleRedirectUri(),
       grant_type: "authorization_code",
     }),
+    signal: AbortSignal.timeout(10000),
   });
   const token = await tokenRes.json().catch(() => ({}));
   if (!tokenRes.ok || !token.access_token) {
@@ -53,6 +54,7 @@ async function finish(code) {
 
   const profileRes = await fetch(USERINFO_URL, {
     headers: { authorization: `Bearer ${token.access_token}` },
+    signal: AbortSignal.timeout(10000),
   });
   const profile = await profileRes.json().catch(() => ({}));
   if (!profileRes.ok || !profile.sub || !profile.email) {

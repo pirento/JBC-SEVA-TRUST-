@@ -115,7 +115,7 @@ Har line par ✔ aana chahiye. Dobara chalane par kuch bhi do baar copy nahi hot
 
 ```bash
 cd /var/www/jbc
-pm2 start app.js --name jbc   # ek hi process; cluster mode (-i) na lagayein
+pm2 start app.js --name jbc --kill-timeout 10000   # ek hi process; cluster mode (-i) na lagayein
 pm2 save
 pm2 startup        # ye ek command dikhayega, use copy karke chalayein
 pm2 logs jbc       # dekhein: "Go-live checklist" mein kuch bacha to wahi likha aayega
